@@ -1,0 +1,15 @@
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\bin\Debug\netcoreapp3.1\VisualCalculator.exe
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\bin\Debug\netcoreapp3.1\VisualCalculator.deps.json
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\bin\Debug\netcoreapp3.1\VisualCalculator.runtimeconfig.json
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\bin\Debug\netcoreapp3.1\VisualCalculator.runtimeconfig.dev.json
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\bin\Debug\netcoreapp3.1\VisualCalculator.dll
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\bin\Debug\netcoreapp3.1\VisualCalculator.pdb
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\obj\Debug\netcoreapp3.1\VisualCalculator.csprojAssemblyReference.cache
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\obj\Debug\netcoreapp3.1\VisualCalculator.Form1.resources
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\obj\Debug\netcoreapp3.1\VisualCalculator.csproj.GenerateResource.cache
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\obj\Debug\netcoreapp3.1\VisualCalculator.AssemblyInfoInputs.cache
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\obj\Debug\netcoreapp3.1\VisualCalculator.AssemblyInfo.cs
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\obj\Debug\netcoreapp3.1\VisualCalculator.csproj.CoreCompileInputs.cache
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\obj\Debug\netcoreapp3.1\VisualCalculator.dll
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\obj\Debug\netcoreapp3.1\VisualCalculator.pdb
+D:\Programming\CSharp\VisualCalculator\VisualCalculator\obj\Debug\netcoreapp3.1\VisualCalculator.genruntimeconfig.cache
