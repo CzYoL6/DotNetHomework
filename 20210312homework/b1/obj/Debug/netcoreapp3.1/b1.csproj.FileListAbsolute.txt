@@ -1,0 +1,13 @@
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\bin\Debug\netcoreapp3.1\b1.exe
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\bin\Debug\netcoreapp3.1\b1.deps.json
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\bin\Debug\netcoreapp3.1\b1.runtimeconfig.json
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\bin\Debug\netcoreapp3.1\b1.runtimeconfig.dev.json
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\bin\Debug\netcoreapp3.1\b1.dll
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\bin\Debug\netcoreapp3.1\b1.pdb
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\obj\Debug\netcoreapp3.1\b1.csprojAssemblyReference.cache
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\obj\Debug\netcoreapp3.1\b1.AssemblyInfoInputs.cache
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\obj\Debug\netcoreapp3.1\b1.AssemblyInfo.cs
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\obj\Debug\netcoreapp3.1\b1.csproj.CoreCompileInputs.cache
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\obj\Debug\netcoreapp3.1\b1.dll
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\obj\Debug\netcoreapp3.1\b1.pdb
+D:\Programming\CSharp\DotNetHomework\20210312homework\b1\obj\Debug\netcoreapp3.1\b1.genruntimeconfig.cache

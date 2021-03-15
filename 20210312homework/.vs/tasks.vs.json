@@ -1,0 +1,10 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskLabel": "任务-b5",
+      "appliesTo": "b5/b5.csproj",
+      "type": "msbuild"
+    }
+  ]
+}

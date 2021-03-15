@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="b4">
+      <HintPath>..\..\b4\bin\Debug\netcoreapp3.1\b4.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
