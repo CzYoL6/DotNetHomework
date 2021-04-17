@@ -1,0 +1,13 @@
+F:\大学\C#\20210329homework\20210329homework\obj\Debug\netcoreapp3.1\20210329homework.csprojAssemblyReference.cache
+F:\大学\C#\20210329homework\20210329homework\obj\Debug\netcoreapp3.1\20210329homework.AssemblyInfoInputs.cache
+F:\大学\C#\20210329homework\20210329homework\obj\Debug\netcoreapp3.1\20210329homework.AssemblyInfo.cs
+F:\大学\C#\20210329homework\20210329homework\obj\Debug\netcoreapp3.1\20210329homework.csproj.CoreCompileInputs.cache
+F:\大学\C#\20210329homework\20210329homework\bin\Debug\netcoreapp3.1\20210329homework.exe
+F:\大学\C#\20210329homework\20210329homework\bin\Debug\netcoreapp3.1\20210329homework.deps.json
+F:\大学\C#\20210329homework\20210329homework\bin\Debug\netcoreapp3.1\20210329homework.runtimeconfig.json
+F:\大学\C#\20210329homework\20210329homework\bin\Debug\netcoreapp3.1\20210329homework.runtimeconfig.dev.json
+F:\大学\C#\20210329homework\20210329homework\bin\Debug\netcoreapp3.1\20210329homework.dll
+F:\大学\C#\20210329homework\20210329homework\bin\Debug\netcoreapp3.1\20210329homework.pdb
+F:\大学\C#\20210329homework\20210329homework\obj\Debug\netcoreapp3.1\20210329homework.dll
+F:\大学\C#\20210329homework\20210329homework\obj\Debug\netcoreapp3.1\20210329homework.pdb
+F:\大学\C#\20210329homework\20210329homework\obj\Debug\netcoreapp3.1\20210329homework.genruntimeconfig.cache

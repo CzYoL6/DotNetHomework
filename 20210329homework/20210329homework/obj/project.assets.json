@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Programming\\CSharp\\DotNetHomework\\20210319homework\\C1\\C1.csproj",
-      "projectName": "C1",
-      "projectPath": "D:\\Programming\\CSharp\\DotNetHomework\\20210319homework\\C1\\C1.csproj",
+      "projectUniqueName": "F:\\大学\\C#\\20210329homework\\20210329homework\\20210329homework.csproj",
+      "projectName": "20210329homework",
+      "projectPath": "F:\\大学\\C#\\20210329homework\\20210329homework\\20210329homework.csproj",
       "packagesPath": "C:\\Users\\zaiyi\\.nuget\\packages\\",
-      "outputPath": "D:\\Programming\\CSharp\\DotNetHomework\\20210319homework\\C1\\obj\\",
+      "outputPath": "F:\\大学\\C#\\20210329homework\\20210329homework\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\zaiyi\\AppData\\Roaming\\NuGet\\NuGet.Config",
