@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\大学\\C#\\20210329homework\\20210329homework\\20210329homework.csproj": {}
+    "D:\\Programming\\CSharp\\DotNetHomework\\20210329homework\\20210329homework\\20210329homework.csproj": {}
   },
   "projects": {
-    "F:\\大学\\C#\\20210329homework\\20210329homework\\20210329homework.csproj": {
+    "D:\\Programming\\CSharp\\DotNetHomework\\20210329homework\\20210329homework\\20210329homework.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\大学\\C#\\20210329homework\\20210329homework\\20210329homework.csproj",
+        "projectUniqueName": "D:\\Programming\\CSharp\\DotNetHomework\\20210329homework\\20210329homework\\20210329homework.csproj",
         "projectName": "20210329homework",
-        "projectPath": "F:\\大学\\C#\\20210329homework\\20210329homework\\20210329homework.csproj",
+        "projectPath": "D:\\Programming\\CSharp\\DotNetHomework\\20210329homework\\20210329homework\\20210329homework.csproj",
         "packagesPath": "C:\\Users\\zaiyi\\.nuget\\packages\\",
-        "outputPath": "F:\\大学\\C#\\20210329homework\\20210329homework\\obj\\",
+        "outputPath": "D:\\Programming\\CSharp\\DotNetHomework\\20210329homework\\20210329homework\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\zaiyi\\AppData\\Roaming\\NuGet\\NuGet.Config",
