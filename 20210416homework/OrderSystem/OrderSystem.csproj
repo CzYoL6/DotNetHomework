@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\20210402homeworkTests\20210402homeworkTests.csproj" />
+    <ProjectReference Include="..\20210402homework\20210402homework.csproj" />
+  </ItemGroup>
+
+</Project>
