@@ -1,0 +1,1578 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="深入解析DC/OS 1.8 – 高可靠的微服务及大数据管理平台 大家好，欢迎大家参加这次DC/OS的技术分享。 先做个自我介绍，刘超，Linker Networks首席架构师，Open DC/OS社区" />
+    <meta property="og:description" content="深入解析DC/OS 1.8 – 高可靠的微服务及大数据管理平台 大家好，欢迎大家参加这次DC/OS的技术分享。 先做个自我介绍，刘超，Linker Networks首席架构师，Open DC/OS社区" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入解析DC/OS 1.8 – 高可靠的微服务及大数据管理平台 - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2016-10-04 05:49';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class = "postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5930827.html">
+    <span>深入解析DC/OS 1.8 – 高可靠的微服务及大数据管理平台</span>
+    
+
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<p style="text-align: center"><span style="font-size: 20pt"><strong>深入解析DC/OS 1.8 </strong></span></p>
+<p style="text-align: center"><span style="font-size: 20pt"><strong> – 高可靠的微服务及大数据管理平台 </strong></span></p>
+<p>&nbsp;</p>
+<p>大家好，欢迎大家参加这次DC/OS的技术分享。</p>
+<p>先做个自我介绍，刘超，Linker Networks首席架构师，Open DC/OS社区贡献者，长期专注于OpenStack, Docker, Mesos等开源软件的企业级应用与产品化。</p>
+<p>从事容器方面工作的朋友可能已经听说过DC/OS，往往大家误解DC/OS就是marathon + mesos，其实DC/OS包含很多的组件，DC/OS 1.8九月份发布了，此次分享给大家做一个介绍。</p>
+<div style="text-align: justify">
+<h2>一、DC/OS的基本思想</h2>
+</div>
+<p>所谓的DC/OS，全称为数据中心操作系统，其基本的思想就是使得运维人员操作整个数据中如操作一台电脑一样。</p>
+<p>DC/OS使用了哪些技术可以做到这一点呢？</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174841067-445325082.png" alt=""></p>
+<p>如图，左面是普通的Linux操作系统，右面是DC/OS，在这里做了一个对比。</p>
+<p>无论是哪种操作系统，都需要管理外部的硬件设备，最重要的四种硬件资源即CPU，内存，存储，网络。</p>
+<p>最初使用汇编语言写程序的前辈，还是需要指定使用那些硬件资源的，例如指定使用哪个寄存器，放在内存的哪个位置，写入或者读取那个串口等，对于这些资源的使用，需要程序员自己心里非常的清楚，要不然一旦JUMP错了位置，程序就无法运行。这就像运维数据中心的一台台物理机的前辈一样，那个程序放在了哪台机器上，使用多少内存，多少硬盘，都需要心里非常的清楚。</p>
+<p>为了将程序员从对硬件的直接操作中解放出来，提升程序设计的效率，从而有了操作系统这一层，实现对于硬件资源的统一管理。某个程序使用哪个CPU，哪部分内存，哪部分硬盘，程序只需要调用API就可以了，由操作系统自行分配和管理，其实操作系统只做了一件事情，就是调度。对应到数据中心，也需要一个调度器，将运维人员从指定物理机或者虚拟机的痛苦中解放出来，这就是Mesos。Mesos即使数据中心操作系统的内核。</p>
+<p>在使用操作系统的时候，我们可以开发驱动程序来识别新的硬件资源，可以开发内核模块(例如openvswitch.ko)来干预对于硬件资源的使用，对于Mesos，同样可以开发isolator来识别新的硬件资源例如GPU，也可以开发Executor来干预资源的使用。</p>
+<p>在内核之上，就是系统服务，例如systemd，是用来维护进程运行的，如果systemctl enable xxx，则保证服务挂掉后自动重启。对于DC/OS，保持服务long run的是marathon，但是仅仅只有marathon还不够，因为服务是启动在多台机器上的，而且服务之间是有依赖关系的，一个服务挂掉了，在另外一台机器启动起来，如何保持服务之间的调用不需要人工干预呢？这需要另外的技术，称为服务发现，多是通过DNS，负载均衡，虚拟机IP等技术实现的。</p>
+<p>使用操作系统，需要安装一些软件，于是需要yum之类的包管理系统，使得软件的使用者和软件的编译者分隔开来，软件的编译者需要知道这个软件需要安装哪些包，包之间的依赖关系是什么，软件安装到什么地方，而软件的使用者仅仅需要yum install就可以了。DC/OS就有这样一套包管理软件，和其他的容器管理平台需要自己编译Docker镜像，自己写yml，自己管理依赖不同，DC/OS的软件使用者只需要dcos package install就可以安装好软件了，软件的配置，节点数目，依赖关系都是有软件编译者设置。</p>
+<p>在最外层，DC/OS像普通的操作系统一样，有统一的界面和命令行。通过它们，可以管理安装包，管理节点，运行任务等。DC/OS不仅仅是运行容器的平台，如果仅仅运行容器，就是容器管理平台，而非数据中心操作系统。通过DC/OS，你可以在每台机器上运行一个命令来进行统一的配置，而无需登录到每台机器上去。你可以运行容器应用和大数据分析应用并共享资源，并且可以相互发现，这更加符合现代互联网应用，微服务和大数据不可分割。而且Mesos的架构非常开放，你可以通过开发Framework, Executor, Modules, Hooks等，轻松干预微服务或者大数据任务的执行过程，来定制化你的应用。这也符合操作系统微内核的概念。</p>
+<div style="text-align: justify">
+<h2>二、DC/OS的内核模块Mesos</h2>
+</div>
+<p>Mesos架构如下</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174841817-756103724.png" alt=""></p>
+<p>这个图比较的著名了，也有很多文章介绍这个图，详情可以看文章<a href="http://mesos.apache.org/documentation/latest/architecture/">http://mesos.apache.org/documentation/latest/architecture/</a>，这里不做过多的介绍。</p>
+<p>从图中可以看到，Mesos有Framework(Framework里面有Scheduler), Master(Master里面有allocator), Agent, Executor, Task几部分组成。这里面有两层的Scheduler，一层在Master里面，allocator会将资源公平的分给每一个Framework，二层在Framework里面，Framework的scheduler将资源按规则分配给Task。</p>
+<p>&nbsp;</p>
+<p>Mesos的这几个角色在一个任务运行的生命周期中，相互关系如下：</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174842567-1059543870.png" alt=""></p>
+<p>&nbsp;</p>
+<p>Agent会将资源汇报给Master，Master会根据allocator的策略将资源offer给framework的scheduler。Scheduler 可以accept这个资源，运行一个Task，Master将Task交给Agent，Agent交给Executor去真正的运行这个Task。</p>
+<p>&nbsp;</p>
+<p>这个图相对比较的简略，真正详细的过程比这个复杂很多，大家可以参考这篇博客<a href="http://www.cnblogs.com/popsuper1982/p/5926724.html">http://www.cnblogs.com/popsuper1982/p/5926724.html</a>，在代码级别分析了整个任务运行的过程，还画了一个泳道图<a href="http://images2015.cnblogs.com/blog/635909/201608/635909-20160806163718778-1628977219.png">http://images2015.cnblogs.com/blog/635909/201608/635909-20160806163718778-1628977219.png</a>。</p>
+<p>&nbsp;</p>
+<p>要研究Mesos，熟悉整个过程非常重要，这样一个任务运行出现问题的时候，才能比较好的定位问题在哪里，如果解决。Mesos将一个简单的任务的运行过程，分成如此多的层次，如此多的角色来做，是为了双层调度和灵活配置，这是一个内核应该做的事情。</p>
+<p>&nbsp;</p>
+<p>我们如何干预一个Task的运行过程呢？</p>
+<div style="text-align: justify">
+<h4>第一、写一个Framework</h4>
+</div>
+<p>如果你想完全自己控制Task的运行，而非让Marathon来运行并保持一个无状态的Task长运行，就需要自己写一个Framework，在你的Framework里面，三个Task之间的关系你可以自己定义，而非像Marathon一样，Task * 3，3个任务不分彼此，你的Framework可以控制这三个Task一主两备，可以控制三个Task的启动顺序，可以将一个先启动的Task的IP，位置等通过环境变量告知另外两个Task。</p>
+<p>写一个Framework需要写一个Scheduler，实现一些接口，如文档<a href="http://mesos.apache.org/documentation/latest/app-framework-development-guide/">http://mesos.apache.org/documentation/latest/app-framework-development-guide/</a>中所述。</p>
+<p>然后使用使用MesosSchedulerDriver来运行这个Scheduler。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174842926-252494262.png" alt=""></p>
+<p>其实Mesos这些模块之间的通信都是通过Protocol Buffer定义消息来交互的，然而如果让Framework的开发人员还要学会如何使用Protocol Buffer消息和Mesos Master通信，是很痛苦的事情，所以MesosSchedulerDriver帮助你做了这个事情，你只需要实现Scheduler定义的接口就可以了，不需要了解这些接口是谁调用的，调用了接口之后，消息如何传给Mesos Master。</p>
+<p>所有的接口里面，最重要的是resourceOffers函数，根据得到的offers(每个slave都有多少资源)，创建一系列tasks，然后调用MesosSchedulerDriver的launchTasks函数，MesosSchedulerDriver会将这些tasks封装为LaunchTasksMessage发送给Mesos Master。</p>
+<p>&nbsp;</p>
+<h4>第二、写一个Allocator</h4>
+<p>通过上面的描述，Mesos有两层调度，第一层就是Allocator，将资源分配给Framework。</p>
+<p>Mesos允许用户通过自己写Module的方式，写一个so，然后启动的时候加载进去，然后在命令行里面指定使用so中的哪个Module。</p>
+<p>当然写Allocator的不多，因为Mesos的DRF算法是Mesos的核心，如果不用这个算法，还不如不用mesos。</p>
+<p>Mesos源码中默认的Allocator，即HierarchicalDRFAllocator的位置在$MESOS_HOME/src/master/allocator/mesos/hierarchical.hpp，而DRF中对每个Framework排序的Sorter位于$MESOS_HOME/src/master/allocator/sorter/drf/sorter.cpp，可以查看其源码了解它的工作原理。</p>
+<p>HierarchicalDRF的基本原理</p>
+<p>如何作出offer分配的决定是由资源分配模块Allocator实现的，该模块存在于Master之中。资源分配模块确定Framework接受offer的顺序，与此同时，确保在资源利用最大化的条件下公平地共享资源。</p>
+<p>由于Mesos为跨数据中心调度资源并且是异构的资源需求时，资源分配相比普通调度将会更加困难。因此Mesos采用了DRF（主导资源公平算法 Dominant Resource Fairness）</p>
+<p>Framework拥有的全部资源类型份额中占最高百分比的就是Framework的主导份额。DRF算法会使用所有已注册的Framework来计算主导份额，以确保每个Framework能接收到其主导资源的公平份额。</p>
+<p>&nbsp;</p>
+<p>举个例子</p>
+<p>考虑一个9CPU，18GBRAM的系统，拥有两个用户，其中用户A运行的任务的需求向量为{1CPU, 4GB}，用户B运行的任务的需求向量为{3CPU，1GB}，用户可以执行尽量多的任务来使用系统的资源。</p>
+<p>&nbsp;</p>
+<p>在上述方案中，A的每个任务消耗总cpu的1/9和总内存的2/9，所以A的dominant resource是内存；B的每个任务消耗总cpu的1/3和总内存的1/18，所以B的dominant resource为CPU。DRF会均衡用户的dominant shares，执行3个用户A的任务，执行2个用户B的任务。三个用户A的任务总共消耗了{3CPU，12GB}，两个用户B的任务总共消耗了{6CPU，2GB}；在这个分配中，每一个用户的dominant share是相等的，用户A获得了2/3的RAM，而用户B获得了2/3的CPU。</p>
+<p>&nbsp;</p>
+<p>以上的这个分配可以用如下方式计算出来：x和y分别是用户A和用户B的分配任务的数目，那么用户A消耗了{xCPU，4xGB}，用户B消耗了{3yCPU，yGB}，在图三中用户A和用户B消耗了同等dominant resource；用户A的dominant share为4x/18，用户B的dominant share为3y/9。所以DRF分配可以通过求解以下的优化问题来得到：</p>
+<p>max(x,y) #(Maximize allocations)</p>
+<p>subject to</p>
+<p>x + 3y &lt;= 9 #(CPU constraint)</p>
+<p>4x + y &lt;= 18 #(Memory Constraint)</p>
+<p>2x/9 = y/3 #(Equalize dominant shares)</p>
+<p>最后解出x=3以及y=2，因而用户A获得{3CPU，12GB}，B得到{6CPU， 2GB}。</p>
+<p>&nbsp;</p>
+<p>HierarchicalDRF核心算法实现在Src/main/allocator/mesos/hierarchical.cpp中HierarchicalAllocatorProcess::allocate函数中。</p>
+<p>&nbsp;</p>
+<p>概况来说调用了三个Sorter(quotaRoleSorter, roleSorter, frameworkSorter)，对所有的Framework进行排序，哪个先得到资源，哪个后得到资源。</p>
+<p>&nbsp;</p>
+<p>总的来说分两大步：先保证有quota的role，调用quotaRoleSorter，然后其他的资源没有quota的再分，调用roleSorter。</p>
+<p>&nbsp;</p>
+<p>对于每一个大步分两个层次排序：一层是按照role排序，第二层是相同的role的不同Framework排序，调用frameworkSorter。</p>
+<p>&nbsp;</p>
+<p>每一层的排序都是按照计算的share进行排序来先给谁，再给谁。</p>
+<p>&nbsp;</p>
+<p>这里有几个概念容易混淆：Quota, Reservation, Role, Weight</p>
+<ul>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">每个Framework可以有Role，既用于权限，也用于资源分配 </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">可以给某个role在offerResources的时候回复Offer::Operation::RESERVE,来预订某台slave上面的资源。Reservation是很具体的，具体到哪台机器的多少资源属于哪个Role </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">Quota是每个Role的最小保证量，但是不具体到某个节点，而是在整个集群中保证有这么多就行了。 </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">Reserved资源也算在Quota里面。 </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">不同的Role之间可以有Weight </span></div>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p>在allocator算法结束之后，便调用Master::Offer，最终调用Framework的Scheduler的resourceOffers，让Framework进行二次调度。同上面的逻辑就串联起来。</p>
+<p>&nbsp;</p>
+<h4>第三、写一个Hook</h4>
+<p>你可以写hook模块，讲代码插在很多关键的步骤，从而改写整个Executor或者Docker或者Task的启动的整个过程。</p>
+<p>&nbsp;</p>
+<p>可以干预的hook的地方定义在mesos/hook.hpp中。</p>
+<p>&nbsp;</p>
+<p>Class hook定义如下：</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174843442-1260372372.png" alt=""></p>
+<p>其中比较常用的是slavePrelaunchDockerHook，可以在Docker启动之前做一些事情，比如准备工作。</p>
+<p>还有slaveRemoveExecutorHook，这个可以在executor结束的时候，做一些事情，比如清理工作。</p>
+<p>&nbsp;</p>
+<h4>第四、创建Isolator</h4>
+<p>当你有一种新的资源需要管理，并且每个Task需要针对这个资源进行隔离的时候，写一个Isolator就是有必要的了。</p>
+<p>例如默认的容器并不能动态指定并限制任务硬盘使用的大小，所以mesos-containerizer就有了"disk/du"来定时查看任务使用的硬盘大小，当超出限制的时候采取操作。</p>
+<p>Src/slave/containerizer/mesos/containerizer.cpp里面列出了当前支持的isolator，你也可以实现自己的isolator，并且通过modules参数load进去。</p>
+<p>&nbsp;</p>
+<p>Isolator定义了以下函数</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174844285-1578175067.png" alt=""></p>
+<p>&nbsp;</p>
+<p>在运行一个容器的最后，会调用每一个isolator的isolate函数，通过这个函数，可以对资源进行一定的限制，例如写入cgroup文件等，但是对于硬盘使用量，其实没有cgroup可以设置，需要过一段时间du一些，这就需要实现watch函数，过一段时间查看一下硬盘使用量，超过后做一定的操作。</p>
+<p>&nbsp;</p>
+<h4>第五、写一个Executor</h4>
+<p>如果运行一个普通的容器，或者命令行，则不需要实现Executor，仅仅Mesos默认的Executor就能够实现这个功能。如果你需要在Executor里面做很多自己定制化的工作，则需要自己写Executor。</p>
+<p>&nbsp;</p>
+<p>写一个Executor需要实现一些接口，最重要的就是launchTask接口，然后MesosExecutorDriver将这个Executor运行起来。</p>
+<p>&nbsp;</p>
+<p>就像Framework一样，Executor也是通过protocol buffer协议和Mesos-Agent进行沟通，通过MesosExecutorDriver，你不需要关心协议的事情，仅仅需要实现接口即可。</p>
+<p>&nbsp;</p>
+<div style="text-align: justify">
+<h2>三、DC/OS的核心模块</h2>
+</div>
+<p>下面的图描述了DC/OS的部署架构图：</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174845301-1476069906.jpg" alt=""></p>
+<p>在DC/OS看来，所有的节点分为三个区域，一个是管理区域，主要处理对于服务的管理方面的操作，如增删查改，启停扩缩等。为了高可用，Master节点可以是多个，在多个Master节点之前，需要有一个负载均衡器。第二个是对外服务区域，也即外界能够访问DC/OS内部的服务的区域，这个区域里面的服务多为对外的Nginx之类的，也会有marathon-lb来做外部的负载均衡器，所有对外服务区域的节点之外还需要一个负载均衡器。第三个区域是内部服务区域，用于部署内部服务，如数据库，消息总线等，这些内部节点不能对外访问。</p>
+<p>&nbsp;</p>
+<h4>第一、Admin Router</h4>
+<p>AdminRouter是一个反向代理，正是它将对外的区域和对内的区域完全隔离开来，在admin router之外，可以通过公网访问，在admin router之内全部是私网地址，这样提供了安全的统一访问机制。</p>
+<p>&nbsp;</p>
+<p>安装完毕Open DC/OS之后，安装一个dcos的命令行工具，通过这个工具可以ssh到master的节点上。</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">eval `ssh-agent -s` </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ssh-add .ssh/aws01.pem </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">dcos node ssh --master-proxy --leader </span></div>
+</li>
+</ol>
+<p>在这个节点上/etc/systemd/system路径下面有三个systemd的service，Open DC/OS的所有组件都是用systemd进行管理的。</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ip-10-0-7-1 system # ls -l | grep adminrouter </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">lrwxrwxrwx. 1 root root 135 Oct 3 08:00 dcos-adminrouter-reload.service -&gt; /opt/mesosphere/packages/adminrouter--cee9a2abb16c28d1ca6c74af1aff6bc4aac3f134/dcos.target.wants_master/dcos-adminrouter-reload.service </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">lrwxrwxrwx. 1 root root 133 Oct 3 08:00 dcos-adminrouter-reload.timer -&gt; /opt/mesosphere/packages/adminrouter--cee9a2abb16c28d1ca6c74af1aff6bc4aac3f134/dcos.target.wants_master/dcos-adminrouter-reload.timer </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">lrwxrwxrwx. 1 root root 128 Oct 3 08:00 dcos-adminrouter.service -&gt; /opt/mesosphere/packages/adminrouter--cee9a2abb16c28d1ca6c74af1aff6bc4aac3f134/dcos.target.wants_master/dcos-adminrouter.service </span></div>
+</li>
+</ol>
+<p>可以看到dcos-adminrouter.service是指向/opt/mesosphere/packages下面的一个路径，Open DC/OS的所有组件都是安装在这个路径下面的。</p>
+<p>&nbsp;</p>
+<p>在/opt/mesosphere/packages/adminrouter--cee9a2abb16c28d1ca6c74af1aff6bc4aac3f134/nginx/conf这个路径下面，有一个文件nginx.master.conf，打开这个文件，就能看到熟悉的对于nginx的配置。</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">upstream mesos { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;server leader.mesos:5050; </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)">&nbsp;</div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">upstream marathon { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;server master.mesos:8080; </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)">&nbsp;</div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">location /mesos/ { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;access_by_lua 'auth.validate_jwt_or_exit()'; </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;proxy_set_header Host $http_host; </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;proxy_pass http:<span style="color: rgba(0, 128, 0, 1)">//mesos/;</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)">&nbsp;</div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">location /marathon/ { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;# Enforce access restriction. Auth-wise, treat /marathon* </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;# equivalently to /service/marathon*. </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;access_by_lua 'auth.validate_jwt_or_exit()'; </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;proxy_set_header Host $http_host; </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;proxy_pass http:<span style="color: rgba(0, 128, 0, 1)">//marathon/;</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">} </span></div>
+</li>
+</ol>
+<p>从这个配置文件可以看出，所有对内的访问marathon的页面，访问mesos的页面，都是通过leader.mesos进行，这个域名是mesos-dns给出的，对应的是内部的IP地址，如果从外部访问marathon或者mesos的页面，则必须通过admin router，通过<a href="http://admin-router-external-ip/marathon">http://admin-router-external-ip/marathon</a>或者<a href="http://admin-router-external-ip/mesos">http://admin-router-external-ip/mesos</a>来访问。</p>
+<p>&nbsp;</p>
+<h4>第二、Mesos-DNS</h4>
+<p>对于数据中心操作系统来讲，服务发现和负载均衡是最最核心的功能，只有有了这些功能，才能使得服务的物理布局，服务之间的依赖关系，服务挂掉之后的自动修复不需要用户关心，才能使得用户像用一台电脑一样使用整个数据中心。</p>
+<p>如果服务之间的相互调用不使用IP地址，而使用域名的话，问题会简单很多。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174845692-559856954.png" alt=""></p>
+<p>如图所示，对于Mesos上运行的每一个Task，Mesos-DNS都可以通过调用Mesos-Master的API得到，并且为每个Task分配一个域名和IP的对应项。如果一个Task需要访问另一个Task，则需要配置域名即可，无论Task如何挂掉，如何分配到其他的节点上运行，域名都不会变，当然Task的IP可能会变，但是不用担心，Mesos-DNS会更新它。每个Mesos-Agent只需要配置/etc/resolv.conf指向mesos-dns就可以了。</p>
+<p>&nbsp;</p>
+<p>当一个Task运行的时候，Mesos-DNS会创建一个域名&lt;task&gt;.&lt;service&gt;.mesos对应：</p>
+<ul>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">Mesos-Agent的IP地址 </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">如果是Mesos Containerizer的话，返回的是Task内部容器的IP </span></div>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p>另外&lt;task&gt;.&lt;service&gt;.slave.mesos还会提供所在的物理机的IP地址。这样通过hostport和Mesos-DNS所给的域名，可以实现服务的发现。</p>
+<p>&nbsp;</p>
+<h4>第三：marathon-lb</h4>
+<p>&nbsp;</p>
+<p>使用DNS虽然可以实现服务的自发现，但是不容易实现服务的负载均衡和弹性伸缩，而marathon-lb实现了这些功能。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174846254-456113525.png" alt=""></p>
+<p>Marathon-lb是一个基于haproxy的负载均衡器，但是它会监听marathon event bus，每当注册到marathon-lb上的服务数目变化的时候，marathon-lb也会自动更新haproxy的配置文件，从而实现负载均衡。Marathon-lb可以如图中实现对外的负载均衡，也可以实现对内的服务之间相互调用的负载均衡。</p>
+<p>&nbsp;</p>
+<p>Marathon的安装可以在界面中universe里面搜索marathon-lb安装，也可以通过命令行执行dcos package install Marathon-LB进行安装，默认安装的对外的负载均衡器。</p>
+<p>&nbsp;</p>
+<p>我们在服务里面创建如下的应用：</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">id</span>": "<span style="color: rgba(139, 0, 0, 1)">nginx</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">container</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">type</span>": "<span style="color: rgba(139, 0, 0, 1)">DOCKER</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">docker</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">image</span>": "<span style="color: rgba(139, 0, 0, 1)">nginx:1.7.7</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">network</span>": "<span style="color: rgba(139, 0, 0, 1)">BRIDGE</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">portMappings</span>": [ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ "<span style="color: rgba(139, 0, 0, 1)">hostPort</span>": 0, "<span style="color: rgba(139, 0, 0, 1)">containerPort</span>": 80, "<span style="color: rgba(139, 0, 0, 1)">servicePort</span>": 10000 } </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;], </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">forcePullImage</span>":<span style="color: rgba(0, 0, 255, 1)">true</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;}, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">instances</span>": 1, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">cpus</span>": 0.1, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">mem</span>": 65, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">healthChecks</span>": [{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">protocol</span>": "<span style="color: rgba(139, 0, 0, 1)">HTTP</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">path</span>": "<span style="color: rgba(139, 0, 0, 1)">/</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">portIndex</span>": 0, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">timeoutSeconds</span>": 10, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">gracePeriodSeconds</span>": 10, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">intervalSeconds</span>": 2, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">maxConsecutiveFailures</span>": 10 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;}], </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">labels</span>":{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">HAPROXY_GROUP</span>":"<span style="color: rgba(139, 0, 0, 1)">external</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">} </span></div>
+</li>
+</ol>
+<p>在这个应用里面，servicePort为10000则说明我们注册到marathon-lb上的外部端口为10000, labels里面写的是external，也即注册到外部的负载均衡器上。</p>
+<p>&nbsp;</p>
+<p>这个时候，我们访问public slave上的10000端口，就能看到启动的nginx的页面<a href="http://54.254.148.129:10000/">http://54.254.148.129:10000/</a>，内部其他的应用可以通过<a href="http://marathon-lb.marathon.mesos:10000">http://marathon-lb.marathon.mesos:10000</a>来访问这个nginx</p>
+<p>如果我们访问public slave上的haproxy的配置页面<a href="http://54.254.148.129:9090/haproxy?stats">http://54.254.148.129:9090/haproxy?stats</a>，可以看到如下的映射关系。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174847067-1518898640.png" alt=""></p>
+<p>对外marathon-lb监听10000端口，对内映射为10.0.1.78上的20215端口，如果我们从服务页面上查看，的确启动的nginx是监听20215端口的。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174847535-1549349162.png" alt=""></p>
+<p>&nbsp;</p>
+<p>接下来我们部署marathon-lb-autoscale，它监控haproxy，发现RPS(request per seconds)超过一定的数目，就对应用进行弹性扩展。</p>
+<p>&nbsp;</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">id</span>": "<span style="color: rgba(139, 0, 0, 1)">marathon-lb-autoscale</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">args</span>":[ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">--marathon</span>", "<span style="color: rgba(139, 0, 0, 1)">http://leader.mesos:8080</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">--haproxy</span>", "<span style="color: rgba(139, 0, 0, 1)">http://marathon-lb.marathon.mesos:9090</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">--target-rps</span>", "<span style="color: rgba(139, 0, 0, 1)">100</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">--apps</span>", "<span style="color: rgba(139, 0, 0, 1)">nginx_10000</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;], </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">cpus</span>": 0.1, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">mem</span>": 16.0, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">instances</span>": 1, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">container</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">type</span>": "<span style="color: rgba(139, 0, 0, 1)">DOCKER</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">docker</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">image</span>": "<span style="color: rgba(139, 0, 0, 1)">brndnmtthws/marathon-lb-autoscale</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">network</span>": "<span style="color: rgba(139, 0, 0, 1)">HOST</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">forcePullImage</span>": <span style="color: rgba(0, 0, 255, 1)">true</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">} </span></div>
+</li>
+</ol>
+<p>&nbsp;</p>
+<p>接下来，我们部署应用siege向nginx发送请求</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">id</span>": "<span style="color: rgba(139, 0, 0, 1)">siege</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">args</span>":[ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">-d1</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">-r1000</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">-c100</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">http://marathon-lb.marathon.mesos:10000/</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;], </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">cpus</span>": 0.5, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">mem</span>": 16.0, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">instances</span>": 1, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">container</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">type</span>": "<span style="color: rgba(139, 0, 0, 1)">DOCKER</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">volumes</span>": [], </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">docker</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">image</span>": "<span style="color: rgba(139, 0, 0, 1)">yokogawa/siege</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">network</span>": "<span style="color: rgba(139, 0, 0, 1)">HOST</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">privileged</span>": <span style="color: rgba(0, 0, 255, 1)">false</span>, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">parameters</span>": [], </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">forcePullImage</span>": <span style="color: rgba(0, 0, 255, 1)">false</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">} </span></div>
+</li>
+</ol>
+<p>&nbsp;</p>
+<p>如果我们看haproxy的stats页面，发现已经有请求发过来了。这个时候我们增加<span style="color: rgba(139, 0, 0, 1); font-size: 9pt">siege到10，给nginx加压。 </span></p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174848395-1863987891.png" alt=""></p>
+<p>过一段时间就会发现marathon-lb-autoscale已经有动作了。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174849348-1423620450.png" alt=""></p>
+<p>将一个nginx变成8个nginx</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174849801-1047019434.png" alt=""></p>
+<p>&nbsp;</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174850207-1239406298.png" alt=""></p>
+<p>当我们将siege从10个变回0个的时候。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174851145-1292765734.png" alt=""></p>
+<p>&nbsp;</p>
+<h4>第四、Minuteman</h4>
+<p>Minuteman是一个内部的东西向的负载均衡器，可用于设置VIP，多个实例使用同一个VIP来进行负载均衡。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174852317-1006226584.png" alt=""></p>
+<p>在创建服务的时候，选择Load Balanced，则下面会出现一行地址：nginxdocker.marathon.l4lb.thisdcos.directory:80，这个就是minuteman分配的VIP。</p>
+<p>&nbsp;</p>
+<p>当服务创建好了之后，通过curl <a href="http://nginxdocker.marathon.l4lb.thisdcos.directory:80">http://nginxdocker.marathon.l4lb.thisdcos.directory:80</a>就可以访问这个服务，但是我们如果ping这个域名却是不通的，而且对于的IP地址也是很奇怪的IP地址，这个IP就是VIP.</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174852817-870340377.png" alt=""></p>
+<p>&nbsp;</p>
+<p>这是怎么做到的呢？minuteman的load balancer是基于Netfilter的，在dcos的slave节点上，我们能看到多出来了四个iptables规则。其中前两个规则是在raw表里面的，后两个规则是在filter表里面的。</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">-A PREROUTING -p tcp -m <span style="color: rgba(0, 0, 255, 1)">set</span> --match-<span style="color: rgba(0, 0, 255, 1)">set</span> minuteman dst,dst -m tcp --tcp-flags FIN,SYN,RST,ACK SYN -j NFQUEUE --queue-balance 50:58 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">-A OUTPUT -p tcp -m <span style="color: rgba(0, 0, 255, 1)">set</span> --match-<span style="color: rgba(0, 0, 255, 1)">set</span> minuteman dst,dst -m tcp --tcp-flags FIN,SYN,RST,ACK SYN -j NFQUEUE --queue-balance 50:58 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">-A FORWARD -p tcp -m <span style="color: rgba(0, 0, 255, 1)">set</span> --match-<span style="color: rgba(0, 0, 255, 1)">set</span> minuteman dst,dst -m tcp --tcp-flags FIN,SYN,RST,ACK SYN -j REJECT --reject-with icmp-port-unreachable </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">-A OUTPUT -p tcp -m <span style="color: rgba(0, 0, 255, 1)">set</span> --match-<span style="color: rgba(0, 0, 255, 1)">set</span> minuteman dst,dst -m tcp --tcp-flags FIN,SYN,RST,ACK SYN -j REJECT --reject-with icmp-port-unreachable </span></div>
+</li>
+</ol>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174853207-2117624628.png" alt=""></p>
+<p>根据iptbles的规则raw表中的规则会被先执行，一旦到达了filter表的minuteman的包就都过滤掉了。</p>
+<p>NFQUEUE的规则表示将对于包的处理权交给用户态的一个进程。--queue-balance表示会将包发给几个queue，然后用户态进程会使用libnetfilter_queue连接到这些queue中，将包读出来，根据包的内容做决策后放回内核进行发送。</p>
+<p>&nbsp;</p>
+<p>在每一个Mesos-Agent节点上都运行这一个minuteman的进程，监听这些queue，我们可以通过访问API查看VIP的映射关系，curl http://localhost:61421/vips。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174853926-922916177.png" alt=""></p>
+<p>&nbsp;</p>
+<p>我们可以看到VIP的11.112.175.214后面跟着两个节点10.0.1.78:27003和10.0.1.78:4989，正好对应nginx的两个实例。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174854410-1526926322.png" alt=""></p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174854785-1558689614.png" alt=""></p>
+<p>&nbsp;</p>
+<div style="text-align: justify">
+<h2>四、DC/OS的微服务及大数据的管理机制</h2>
+</div>
+<p>DC/OS是基于Mesos的，Mesos的灵活框架机制可以使得DC/OS既能够部署容器，也能够部署大数据框架，大数据框架在不运行任务的时候，几乎不占用资源，从而真正实现微服务和大数据框架的资源共享。</p>
+<p>前面我们部署容器的时候，都是自己准备marathon的json进行部署的，这就需要使用服务的人和设计服务的人同样的专业。</p>
+<p>DC/OS采用了一种package管理机制，将运行一个微服务或者框架所需要的各种配置制作成模板，模板由专业人士制作好上传到package repository，使用者就不需要那么专业，只要运行dcos package install安装即可。</p>
+<p>&nbsp;</p>
+<p>Mesosphere提供了官方的package repository，名为universe，地址为https://universe.mesosphere.com/repo，在github上可以找到对应的代码<a href="https://github.com/mesosphere/universe">https://github.com/mesosphere/universe</a>。</p>
+<p>&nbsp;</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174855332-503078362.png" alt=""></p>
+<p>&nbsp;</p>
+<p>对于一个package，往往包含下面的部分：</p>
+<ul>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">package.json：这里面保存了一些metadata的数据，例如对于spark </span></div>
+</li>
+</ul>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">name</span>": "<span style="color: rgba(139, 0, 0, 1)">spark</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">description</span>": "<span style="color: rgba(139, 0, 0, 1)">Spark is a fast and general cluster computing system for Big Data. Documentation: https://docs.mesosphere.com/current/usage/service-guides/spark/</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">licenses</span>": [ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">name</span>": "<span style="color: rgba(139, 0, 0, 1)">Apache License Version 2.0</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">url</span>": "<span style="color: rgba(139, 0, 0, 1)">https://raw.githubusercontent.com/apache/spark/master/LICENSE</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">], </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">tags</span>": [ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">bigdata</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">mapreduce</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">batch</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">analytics</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">], </span></div>
+</li>
+</ol>
+<ul>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">config.json：保存一些配置项，例如对于spark </span></div>
+</li>
+</ul>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">name</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">default</span>": "<span style="color: rgba(139, 0, 0, 1)">spark</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">description</span>": "<span style="color: rgba(139, 0, 0, 1)">The Spark Dispatcher will register with Mesos with this as a framework name. This service will be available at http://&lt;dcos_url&gt;/service/&lt;name&gt;/</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">type</span>": "<span style="color: rgba(139, 0, 0, 1)">string</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">cpus</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">default</span>": 1, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">description</span>": "<span style="color: rgba(139, 0, 0, 1)">CPU shares</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">minimum</span>": 0.0, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">type</span>": "<span style="color: rgba(139, 0, 0, 1)">number</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">mem</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">default</span>": 1024.0, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">description</span>": "<span style="color: rgba(139, 0, 0, 1)">Memory (MB)</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">minimum</span>": 1024.0, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">type</span>": "<span style="color: rgba(139, 0, 0, 1)">number</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">role</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">description</span>": "<span style="color: rgba(139, 0, 0, 1)">The Spark Dispatcher will register with Mesos with this role.</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">type</span>": "<span style="color: rgba(139, 0, 0, 1)">string</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">default</span>": "<span style="color: rgba(139, 0, 0, 1)">*</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}, </span></div>
+</li>
+</ol>
+<ul>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">marathon.json.mustache：是一个模板，里面的一些变量会替换为config.json里面的内容，最终变成可以直接发送给marathon的请求。以spark为例 </span></div>
+</li>
+</ul>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">id</span>": "<span style="color: rgba(139, 0, 0, 1)">{{service.name}}</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">cpus</span>": {{service.cpus}}, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">mem</span>": {{service.mem}}, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">container</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">type</span>": "<span style="color: rgba(139, 0, 0, 1)">DOCKER</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">docker</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">image</span>": "<span style="color: rgba(139, 0, 0, 1)">{{resource.assets.container.docker.spark_docker}}</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">network</span>": "<span style="color: rgba(139, 0, 0, 1)">HOST</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">forcePullImage</span>": <span style="color: rgba(0, 0, 255, 1)">true</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}, </span></div>
+</li>
+</ol>
+<ul>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">resource.json：是一些资源，如image，tar.gz文件等 </span></div>
+</li>
+</ul>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">"<span style="color: rgba(139, 0, 0, 1)">assets</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">container</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">docker</span>": { </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">spark_docker</span>": "<span style="color: rgba(139, 0, 0, 1)">mesosphere/spark:1.0.2-2.0.0</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}, </span></div>
+</li>
+</ol>
+<p>所有的这些配置都像模板一样已经预先写好，安装的时候界面上一点，或者一行命令就安装好了。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174855723-618050418.png" alt=""></p>
+<p>当然你如果点击Advanced Installation，则所有的配置都可以定制化</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174856207-644238466.png" alt=""></p>
+<p>&nbsp;</p>
+<p>就像yum里面一样，将mysql-server的yum包的制作者和mysql的使用者分开，普通用户作为使用者，不需要了解太多的细节，用就是了。</p>
+<p>&nbsp;</p>
+<p>如果想在数据中心里面使用package管理，可以生成自己的local universe，里面放入自己的应用，只要专业人士设计一次，便可以多次使用。也可以一次安装多个软件形成一个group，里面包含微服务的，也包含大数据的，两者可以通过服务发现相互访问。</p>
+<p>&nbsp;</p>
+<p>我们在这里先安装一个spark的软件</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174856785-771437633.png" alt=""></p>
+<p>&nbsp;</p>
+<p>最初安装完毕spark，却发现只有一个docker</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174857098-591613938.png" alt=""></p>
+<p>Spark不是一个集群计算框架吗，怎么会只有一个Docker呢？这就是mesos对大数据框架管理的特殊之处。在spark不运行任务的时候，就仅仅占用这一个docker，其实是一个框架。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174857457-425667975.png" alt=""></p>
+<p>安装过程如图所示：</p>
+<ol>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">dcos package install spark会将请求提交给admin router </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">admin router会将请求提交给cosmos，也即package管理的服务 </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">cosmos将config.json, resource.json, marathon.json组合成为一个marathon请求提交给marathon </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">marathon将请求交给mesos-master，然后交给mesos-agent </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">mesos-agent启动一个容器运行spark </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">启动的spark容器会注册到mesos里面成为一个新的framework </span></div>
+</li>
+</ol>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174857910-1495767551.png" alt=""></p>
+<p>&nbsp;</p>
+<p>真正运行spark任务的时候，才会有其他占用资源的任务被创建出来。</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">dcos spark run --submit-args='-Dspark.mesos.coarse=<span style="color: rgba(0, 0, 255, 1)">true</span> --driver-cores 1 --driver-memory 1024M --<span style="color: rgba(0, 0, 255, 1)">class</span> org.apache.spark.examples.SparkPi https:<span style="color: rgba(0, 128, 0, 1)">//downloads.mesosphere.com/spark/assets/spark-examples_2.10-1.4.0-SNAPSHOT.jar 30'</span> </span></div>
+</li>
+</ol>
+<p>&nbsp;</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174858426-1015709754.png" alt=""></p>
+<p>&nbsp;</p>
+<p>Spark运行过程如图：</p>
+<ol>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">dcos spark run将任务提交给admin router </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">admin router将任务提交给spark framework </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">spark framework将任务提交给mesos-master </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">mesos-master将任务分发给mesos-agent进行分别处理 </span></div>
+</li>
+<li>
+<div style="text-align: justify"><span style="font-size: 10pt">任务运行完毕后，所有mesos-agent上占用的资源又都释放了。 </span></div>
+</li>
+</ol>
+<p>&nbsp;</p>
+<p>正是这种模式，才实现微服务和大数据框架的共享资源，与此相对应的是使用Docker来部署spark集群，然后集群自管理，不归mesos管理。这样在创建spark集群的时候，就需要指定spark worker占用的资源，比如16G，然而这16G资源则无论spark是否在计算，都会被占用，都不会被其他的框架使用。</p>
+<p>&nbsp;</p>
+<div style="text-align: justify">
+<h2>五、DC/OS 1.8的新功能</h2>
+</div>
+<p>对于最新的DC/OS 1.8，有一个博客<a href="https://dcos.io/blog/2016/introducing-dc-os-1-8-ga/index.html">https://dcos.io/blog/2016/introducing-dc-os-1-8-ga/index.html</a>描述了最新的功能。</p>
+<p>&nbsp;</p>
+<p>其中第一个重要的功能为Mesos 1.0 and the Universal Container Runtime，也即可以使用mesos-containerizer来运行Docker的镜像了。这也是DC/OS对于容器的管理越来越独立的体现。</p>
+<p>&nbsp;</p>
+<p>我们在mesos-agent所在的机器上可以查看</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ip-10-0-1-78 dcos.target.wants_slave # ps aux | grep mesos-agent </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">root 1824 0.6 0.3 1069204 46948 ? Ssl Oct03 9:57 /opt/mesosphere/packages/mesos--19a545facb66e57dfe2bb905a001a58b7eaf6004/bin/mesos-agent </span></div>
+</li>
+</ol>
+<p>mesos-agent的配置在路径<span style="font-size: 9pt">/opt/mesosphere/packages/mesos--19a545facb66e57dfe2bb905a001a58b7eaf6004下面，在/opt/mesosphere/packages/mesos--19a545facb66e57dfe2bb905a001a58b7eaf6004/dcos.target.wants_slave/dcos-mesos-slave.service里面是mesos-slave的启动参数的设置，通过mesos的文档，我们知道对于mesos的参数可以使用环境变量进行设置。 </span></p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ip-10-0-1-78 dcos.target.wants_slave # cat dcos-mesos-slave.service </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">[Unit] </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">Description=Mesos Agent: DC/OS Mesos Agent Service </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)">&nbsp;</div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">[Service] </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">Restart=always </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">StartLimitInterval=0 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">RestartSec=5 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">KillMode=control-group </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">Delegate=<span style="color: rgba(0, 0, 255, 1)">true</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">LimitNOFILE=infinity </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">TasksMax=infinity </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">EnvironmentFile=/opt/mesosphere/environment </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">EnvironmentFile=/opt/mesosphere/etc/mesos-slave-common </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">EnvironmentFile=/opt/mesosphere/etc/mesos-slave </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">EnvironmentFile=/opt/mesosphere/etc/proxy.env </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">EnvironmentFile=-/opt/mesosphere/etc/mesos-slave-common-extras </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">EnvironmentFile=-/var/lib/dcos/mesos-slave-common </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">EnvironmentFile=-/var/lib/dcos/mesos-resources </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">EnvironmentFile=-/run/dcos/etc/mesos-slave </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ExecStartPre=/bin/ping -c1 ready.spartan </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ExecStartPre=/bin/ping -c1 leader.mesos </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ExecStartPre=/opt/mesosphere/bin/bootstrap dcos-mesos-slave </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ExecStartPre=/opt/mesosphere/bin/make_disk_resources.py /var/lib/dcos/mesos-resources </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ExecStartPre=/bin/bash -c '<span style="color: rgba(0, 0, 255, 1)">for</span> i <span style="color: rgba(0, 0, 255, 1)">in</span> /proc/sys/net/ipv4/conf<span style="color: rgba(0, 128, 0, 1)">/*/</span>rp_filter; <span style="color: rgba(0, 0, 255, 1)">do</span> echo 2 &gt; $i; echo -n "<span style="color: rgba(139, 0, 0, 1)">$i: </span>"; cat $i; done' </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ExecStart=/opt/mesosphere/packages/mesos--19a545facb66e57dfe2bb905a001a58b7eaf6004/bin/mesos-agent </span></div>
+</li>
+</ol>
+<p>&nbsp;</p>
+<p><span style="font-size: 9pt">在文件/opt/mesosphere/etc/mesos-slave-common中配置了大量的mesos-agent的参数 </span></p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_MASTER=zk:<span style="color: rgba(0, 128, 0, 1)">//zk-1.zk:2181,zk-2.zk:2181,zk-3.zk:2181,zk-4.zk:2181,zk-5.zk:2181/mesos</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_CONTAINERIZERS=docker,mesos </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_LOG_DIR=/var/log/mesos </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_MODULES_DIR=/opt/mesosphere/etc/mesos-slave-modules </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_CONTAINER_LOGGER=org_apache_mesos_LogrotateContainerLogger </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_ISOLATION=cgroups/cpu,cgroups/mem,disk/du,network/cni,filesystem/linux,docker/runtime,docker/volume </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_DOCKER_VOLUME_CHECKPOINT_DIR=/var/lib/mesos/isolators/docker/volume </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_IMAGE_PROVIDERS=docker </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_NETWORK_CNI_CONFIG_DIR=/opt/mesosphere/etc/dcos/network/cni </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_NETWORK_CNI_PLUGINS_DIR=/opt/mesosphere/active/cni/ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_WORK_DIR=/var/lib/mesos/slave </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_SLAVE_SUBSYSTEMS=cpu,memory </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_EXECUTOR_ENVIRONMENT_VARIABLES=file:<span style="color: rgba(128, 128, 128, 1)">///opt/mesosphere/etc/mesos-executor-environment.json</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_EXECUTOR_REGISTRATION_TIMEOUT=10mins </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_CGROUPS_ENABLE_CFS=<span style="color: rgba(0, 0, 255, 1)">true</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_CGROUPS_LIMIT_SWAP=<span style="color: rgba(0, 0, 255, 1)">false</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_DOCKER_REMOVE_DELAY=1hrs </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_DOCKER_STOP_TIMEOUT=20secs </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_DOCKER_STORE_DIR=/var/lib/mesos/slave/store/docker </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_GC_DELAY=2days </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">MESOS_HOSTNAME_LOOKUP=<span style="color: rgba(0, 0, 255, 1)">false</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">GLOG_drop_log_memory=<span style="color: rgba(0, 0, 255, 1)">false</span> </span></div>
+</li>
+</ol>
+<p>默认的mesos-containerizer的隔离只包括cpu和memory，然而在最新的mesos版本里面，多了provisioner这一层，在上面的配置里面隔离了MESOS_ISOLATION=cgroups/cpu,cgroups/mem,disk/du,network/cni,filesystem/linux,docker/runtime,docker/volume，从而可以启动docker的镜像了。</p>
+<p>&nbsp;</p>
+<p>第二个最重要的功能是CNI, container network interface。</p>
+<p>&nbsp;</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174858895-1280145534.png" alt=""></p>
+<p>&nbsp;</p>
+<p>CNI要工作需要三部分：</p>
+<p>首先DC/OS不需要外置的IPAM，而是由mesos-master的replicated_log负责管理分配IP地址，Mesos需要启动的时候，载入overlay network的modules。</p>
+<p>在路径/opt/mesosphere/etc/mesos-slave-modules下面有文件overlay_slave_modules.json</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ip-10-0-1-78 mesos-slave-modules # cat overlay_slave_modules.json </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">libraries</span>": </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;[ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">file</span>": "<span style="color: rgba(139, 0, 0, 1)">/opt/mesosphere/active/mesos-overlay-modules/lib/mesos/libmesos_network_overlay.so</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">modules</span>": </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">name</span>": "<span style="color: rgba(139, 0, 0, 1)">com_mesosphere_mesos_OverlayAgentManager</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">parameters</span>" : </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">key</span>": "<span style="color: rgba(139, 0, 0, 1)">agent_config</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">value</span>" : "<span style="color: rgba(139, 0, 0, 1)">/opt/mesosphere/etc/overlay/config/agent.json</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;] </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;] </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;] </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">} </span></div>
+</li>
+</ol>
+<p>其次需要载入CNI isolator，这个在MESOS_ISOLATION这个环境变量里面已经配置了。</p>
+<p>最后还需要navstar服务来实现跨节点之间的IP互访问</p>
+<p>每个mesos-agent的机器上都有opt/mesosphere/packages/navstar--589afdaef03114a17576ee648ae433a052f7a4b9/，都会运行一个navstar进程。</p>
+<p>每个机器上都会创建网卡d-dcos，如果Docker容器使用CNI获取IP的容器都Attach到这个网卡上，而非docker0上。</p>
+<p>每个机器上都会创建网卡m-dcos，如果mesos容器使用CNI获取IP的容器都Attach到这个网卡上。</p>
+<p>每台机器的d-dcos和m-dcos的网段都不同。</p>
+<p>每台机器都会创建一个vtep1024的网卡，作为VTEP，背后是vxlan。</p>
+<p>每台机器都会创建默认的路由表，从本节点连接到其他的节点默认走vtep1024这个网卡。</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">9.0.0.0/24 via 44.128.0.1 dev vtep1024 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">9.0.1.0/24 via 44.128.0.2 dev vtep1024 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">9.0.3.0/24 via 44.128.0.4 dev vtep1024 </span></div>
+</li>
+</ol>
+<p>对DC/OS的网络的配置在/opt/mesosphere/etc/dcos/network/cni路径下</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174859395-1957425831.png" alt=""></p>
+<p>&nbsp;</p>
+<p>为了试验这两个新的功能，我们首先创建一个使用CNI的Mesos容器，但是启动的是Docker的Image nginx</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">id</span>":"<span style="color: rgba(139, 0, 0, 1)">nginxmesos</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">cmd</span>":"<span style="color: rgba(139, 0, 0, 1)">env; ip -o addr; sleep 3600</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">cpus</span>":0.10, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">mem</span>":512, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">instances</span>":1, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">ipAddress</span>":{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">networkName</span>":"<span style="color: rgba(139, 0, 0, 1)">dcos</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;}, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">container</span>":{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">type</span>":"<span style="color: rgba(139, 0, 0, 1)">MESOS</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">docker</span>":{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">network</span>":"<span style="color: rgba(139, 0, 0, 1)">USER</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">image</span>":"<span style="color: rgba(139, 0, 0, 1)">nginx</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">portMappings</span>":[ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">host_port</span>": 0, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">container_port</span>": 80, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">protocol</span>": "<span style="color: rgba(139, 0, 0, 1)">tcp</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;] </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">} </span></div>
+</li>
+</ol>
+<p>在日志里面，打印出来容器的IP地址是m-dcos网段的。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174859879-656815849.png" alt=""></p>
+<p>&nbsp;</p>
+<p>然后我们再启动一个使用CNI的Docker容器</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">id</span>":"<span style="color: rgba(139, 0, 0, 1)">nginxmesos1</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">cmd</span>":"<span style="color: rgba(139, 0, 0, 1)">env; ip -o addr; sleep 3600</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">cpus</span>":0.10, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">mem</span>":512, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">instances</span>":1, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">ipAddress</span>":{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">networkName</span>":"<span style="color: rgba(139, 0, 0, 1)">dcos</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;}, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">container</span>":{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">type</span>":"<span style="color: rgba(139, 0, 0, 1)">DOCKER</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">docker</span>":{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">network</span>":"<span style="color: rgba(139, 0, 0, 1)">USER</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">image</span>":"<span style="color: rgba(139, 0, 0, 1)">nginx</span>", </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">portMappings</span>":[ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">host_port</span>": 0, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">container_port</span>": 80, </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">protocol</span>": "<span style="color: rgba(139, 0, 0, 1)">tcp</span>" </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;] </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;} </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">} </span></div>
+</li>
+</ol>
+<p>从日志我们看出，配置的IP是d-dcos网段的，而非docker0网段的。</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174900567-1450772118.png" alt=""></p>
+<p>&nbsp;</p>
+<p>从Mesos上我们看出这两个容器是在两个节点上的</p>
+<p><img src="https://images2015.cnblogs.com/blog/635909/201610/635909-20161004174900973-1515817933.png" alt=""></p>
+<p>&nbsp;</p>
+<p>登入Docker的容器，ping另外一个CNI的mesos的IP是没有问题的。</p>
+<ol>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ip-10-0-1-78 cni # docker ps </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">CONTAINER ID IMAGE COMMAND CREATED STATUS PORTS NAMES </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">e7908deb3017 nginx "<span style="color: rgba(139, 0, 0, 1)">/bin/sh -c 'env; ip </span>" 28 minutes ago Up 28 minutes 80/tcp, 443/tcp mesos-b3fbe6d9-236a-4856-a986-9babbba9c02c-S2.e3c96fa7-b5ff-4af6-9099-bbed399c7c37 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">a992929fb0d1 nginx "<span style="color: rgba(139, 0, 0, 1)">nginx -g 'daemon off</span>" 6 hours ago Up 6 hours 443/tcp, 0.0.0.0:4989-&gt;80/tcp mesos-b3fbe6d9-236a-4856-a986-9babbba9c02c-S2.fca41f8d-816c-49cd-9b19-ba059b95e885 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">8032756dd66e nginx "<span style="color: rgba(139, 0, 0, 1)">nginx -g 'daemon off</span>" 6 hours ago Up 6 hours 443/tcp, 0.0.0.0:27003-&gt;80/tcp mesos-b3fbe6d9-236a-4856-a986-9babbba9c02c-S2.c0fdd3db-6f17-41d3-ab05-6f2d4d0bfa13 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">ip-10-0-1-78 cni # docker exec -it e7908deb3017 bash </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">root@e7908deb3017:/# ip addr </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group <span style="color: rgba(0, 0, 255, 1)">default</span> qlen 1 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;inet 127.0.0.1/8 scope host lo </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;valid_lft forever preferred_lft forever </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;inet6 ::1/128 scope host </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;valid_lft forever preferred_lft forever </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">51: eth0@<span style="color: rgba(0, 0, 255, 1)">if</span>52: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1420 qdisc noqueue state UP group <span style="color: rgba(0, 0, 255, 1)">default</span> </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;link/ether 02:42:09:00:03:82 brd ff:ff:ff:ff:ff:ff </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;inet 9.0.3.130/25 scope global eth0 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;valid_lft forever preferred_lft forever </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;inet6 fe80::42:9ff:fe00:382/64 scope link </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;valid_lft forever preferred_lft forever </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">root@e7908deb3017:/# ping 9.0.2.13 </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">PING 9.0.2.13 (9.0.2.13): 56 data bytes </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">64 bytes from 9.0.2.13: icmp_seq=0 ttl=62 time=0.709 ms </span></div>
+</li>
+<li>
+<div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">64 bytes from 9.0.2.13: icmp_seq=1 ttl=62 time=0.535 ms </span></div>
+</li>
+</ol>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2016-10-04 17:49</span>&nbsp;
+<a href="https://www.cnblogs.com/popsuper1982/">popsuper1982</a>&nbsp;
+阅读(<span id="post_view_count">3426</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5930827" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(5930827);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 186637, cb_blogApp = 'popsuper1982', cb_blogUserGuid = 'cf2394f1-d0e0-e311-8d02-90b11c0b17d6';
+    var cb_entryId = 5930827, cb_entryCreatedDate = '2016-10-04 17:49', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjtSabf24A6v-wy7H-UsCivcfVWS3RnrS21ukOzQu5t4cAANYVnyZvDl6Sns8SzGDLIxV7DtfEo5hFjwKsV5pYxDVGQuRMk2C7rsKH2Ono5vSkJ79TEsPep4tCTAynvDjEI" />
+</body>
+</html>

@@ -1,0 +1,670 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="我们知道，Openvwitch可以创建虚拟交换机，而网络包可以通过虚拟交换机进行转发，并通过流表进行处理，具体的过程如何呢？ 一、内核模块Openvswitch.ko的加载 OVS是内核态和用户态配合" />
+    <meta property="og:description" content="我们知道，Openvwitch可以创建虚拟交换机，而网络包可以通过虚拟交换机进行转发，并通过流表进行处理，具体的过程如何呢？ 一、内核模块Openvswitch.ko的加载 OVS是内核态和用户态配合" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>从Openvswitch代码看网络包的旅程 - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2018-04-25 11:01';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class = "postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/8948016.html">
+    <span>从Openvswitch代码看网络包的旅程</span>
+    
+
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<p><span style="font-size: 16px">我们知道，Openvwitch可以创建虚拟交换机，而网络包可以通过虚拟交换机进行转发，并通过流表进行处理，具体的过程如何呢？</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 18px"><strong>一、内核模块Openvswitch.ko的加载</strong></span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">OVS是内核态和用户态配合工作的，所以首先要加载内核态模块Openvswitch.ko。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">在datapath/datapath.c中会调用module_init(dp_init);来初始化内核模块。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">其中比较重要的是调用了dp_register_genl()，这个就是注册netlink函数，从而用户态进程ovs-vswitchd可以通过netlink调用内核。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">这里dp_genl_families由四个netlink的family组成</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<ol class="list-paddingleft-2" style="padding-left: 40px">
+<li>
+<p><span style="font-size: 16px">static&nbsp;struct&nbsp;genl_family *dp_genl_families[] = {</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&amp;dp_datapath_genl_family,</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&amp;dp_vport_genl_family,</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&amp;dp_flow_genl_family,</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&amp;dp_packet_genl_family,</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">};</span></p>
+</li>
+</ol>
+<p><span style="font-size: 16px">可以看出，在内核中，包含对datapath的操作，例如OVS_DP_CMD_NEW，对虚拟端口vport的操作，例如OVS_VPORT_CMD_NEW，对flow流表的操作，例如OVS_FLOW_CMD_NEW<span style="font-family: Verdana, Arial, Helvetica, sans-serif">，对packet包的操作，例如OVS_PACKET_CMD_EXECUTE。<br></span></span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 18px"><strong>二、用户态进程ovs-vswitchd的启动</strong></span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">ovs-vswitchd.c的main函数最终会进入一个while循环，在这个无限循环中，里面最重要的两个函数是bridge_run()和netdev_run()。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">Openvswitch主要管理两种类型的设备，一个是创建的虚拟网桥，一个是连接到虚拟网桥上的设备。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">其中bridge_run就是初始化数据库中已经创建的虚拟网桥。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<h1><span style="font-size: 16px">虚拟网卡的初始化则靠netdev_run()。</span></h1>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">bridge_run会调用static void bridge_reconfigure(const struct ovsrec_open_vswitch *ovs_cfg)，其中ovs_cfg是从ovsdb-server里面读取出来的配置。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">在这个函数里面，对于每一个网桥，将网卡添加进去。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<ol class="list-paddingleft-2" style="padding-left: 40px; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal">
+<li>
+<p><span style="font-size: 16px">HMAP_FOR_EACH (br, node, &amp;all_bridges) {</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;bridge_add_ports(br, &amp;br-&gt;wanted_ports);</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;shash_destroy(&amp;br-&gt;wanted_ports);</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">}</span></p>
+
+</li>
+
+</ol>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">最终会调用dpif_netlink_port_add__在这个函数里面，会调用netlink的API，命令为OVS_VPORT_CMD_NEW。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 18px"><strong>三、内核模块监听网卡</strong></span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">ovs-vswitchd启动的时候，将虚拟网卡添加到虚拟交换机上的时候，会调用netlink的OVS_VPORT_CMD_NEW命令，因而会调用函数ovs_vport_cmd_new。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">它最终会调用ovs_netdev_link，其中有下面的代码：</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<ol class="list-paddingleft-2" style="padding-left: 40px">
+<li>
+<p><span style="font-size: 16px">err = netdev_rx_handler_register(vport-&gt;dev, netdev_frame_hook,</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vport);</span></p>
+</li>
+</ol>
+<p>&nbsp;</p>
+<p><span style="font-size: 16px">注册一个方法叫做netdev_frame_hook，每当网卡收到包的时候，就调用这个方法。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px"><strong><span style="font-size: 18px">四、内核态网络包处理</span><br></strong></span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">Openvswitch的内核模块openvswitch.ko会在网卡上注册一个函数netdev_frame_hook，每当有网络包到达网卡的时候，这个函数就会被调用。</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal">&nbsp;</p>
+<ol class="list-paddingleft-2" style="padding-left: 40px">
+<li>
+<p><span style="font-size: 16px">static&nbsp;struct&nbsp;sk_buff *netdev_frame_hook(struct&nbsp;sk_buff *skb)</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">{</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;if&nbsp;(unlikely(skb-&gt;pkt_type == PACKET_LOOPBACK))</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;skb;</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;port_receive(skb);</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;return&nbsp;NULL;</span></p>
+</li>
+<li>
+<p><span style="font-size: 16px">}</span></p>
+</li>
+</ol>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">调用port_receive即是调用netdev_port_receive</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">在这个函数里面，首先声明了变量struct sw_flow_key key;</span></p>
+<p><span style="font-size: 16px">如果我们看这个key的定义，可见这个key里面是一个大杂烩，数据包里面的几乎任何部分都可以作为key来查找flow表</span></p>
+<ul class="list-paddingleft-2" style="list-style-type: square">
+<li>
+<p><span style="font-size: 16px">tunnel可以作为key</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">在物理层，in_port即包进入的网口的ID</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">在MAC层，源和目的MAC地址</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">在IP层，源和目的IP地址</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">在传输层，源和目的端口号</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">IPV6</span></p>
+
+</li>
+
+</ul>
+<p><span style="font-size: 16px">所以，要在内核态匹配流表，首先需要调用ovs_flow_key_extract，从包的正文中提取key的值。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">接下来就是要调用ovs_dp_process_packet了。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">这个函数首先在内核里面的流表中查找符合key的flow，也即ovs_flow_tbl_lookup_stats，如果找到了，很好说明用户态的流表已经放入内核，则走fast
+ path就可了。于是直接调用ovs_execute_actions，执行这个key对应的action。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">如果不能找到，则只好调用ovs_dp_upcall，让用户态去查找流表。会调用static
+ int queue_userspace_packet(struct datapath *dp, struct sk_buff *skb, 
+const struct sw_flow_key *key, const struct dp_upcall_info *upcall_info)</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">它会调用err
+ = genlmsg_unicast(ovs_dp_get_net(dp), user_skb, 
+upcall_info-&gt;portid);通过netlink将消息发送给用户态。在用户态，有线程监听消息，一旦有消息，则触发udpif_upcall_handler。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">Slow Path &amp; Fast Path</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal">&nbsp;</p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px"><img src="https://images2018.cnblogs.com/blog/635909/201804/635909-20180425225800050-1293753570.jpg" alt="">&nbsp;</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal">&nbsp;</p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">Slow Path:</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">当Datapath找不到flow rule对packet进行处理时</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">Vswitchd使用flow rule对packet进行处理。</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">&nbsp;</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">Fast Path:</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">将slow path的flow rule放在内核态，对packet进行处理</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">&nbsp;</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">Unknown Packet Processing</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">Datapath使用flow rule对packet进行处理，如果没有，则有vswitchd使用flow rule进行处理</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">&nbsp;</span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px"><img src="https://images2018.cnblogs.com/blog/635909/201804/635909-20180425225821890-1962012445.jpg" alt=""></span></p>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">&nbsp;</span></p>
+<ol class="list-paddingleft-2" style="padding-left: 40px; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal">
+<li>
+<p><span style="font-size: 16px">从Device接收Packet交给事先注册的event handler进行处理</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">接收Packet后识别是否是unknown packet，是则交由upcall处理</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">vswitchd对unknown packet找到flow rule进行处理</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">将Flow rule发送给datapath</span></p>
+
+</li>
+
+</ol>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 18px"><strong>五、用户态处理包</strong></span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">当内核无法查找到流表项的时候，则会通过upcall来调用用户态ovs-vswtichd中的flow table。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">会调用ofproto-dpif-upcall.c中的udpif_upcall_handler函数。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">(1)
+ 首先读取upcall调用static int upcall_receive(struct upcall *upcall, const 
+struct dpif_backer *backer, const struct dp_packet *packet, enum 
+dpif_upcall_type type, const struct nlattr *userdata, const struct flow 
+*flow, const unsigned int mru, const ovs_u128 *ufid, const unsigned 
+pmd_id)</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">(2) 其次提取包头调用void flow_extract(struct dp_packet *packet, struct flow *flow)，提取出的flow如下：</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<ol class="list-paddingleft-2" style="padding-left: 40px; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal">
+<li>
+<p><span style="font-size: 16px">&nbsp; &nbsp;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* L2, Order the same as in the Ethernet header! (64-bit aligned) */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct&nbsp;eth_addr dl_dst;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* Ethernet destination address. */</span></span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct&nbsp;eth_addr dl_src;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* Ethernet source address. */</span></span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;ovs_be16 dl_type;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* Ethernet frame type. */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;ovs_be16 vlan_tci;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* If 802.1Q, TCI | VLAN_CFI; otherwise 0. */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;ovs_be32 mpls_lse[ROUND_UP(FLOW_MAX_MPLS_LABELS, 2)];&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* MPLS label stack</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px"><span style="color: rgba(0, 128, 0, 1)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(with padding). */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* L3 (64-bit aligned) */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;ovs_be32 nw_src;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* IPv4 source address. */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;ovs_be32 nw_dst;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* IPv4 destination address. */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct&nbsp;<span style="color: rgba(0, 0, 255, 1)">in6_addr ipv6_src;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* IPv6 source address. */</span></span></span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct&nbsp;<span style="color: rgba(0, 0, 255, 1)">in6_addr ipv6_dst;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* IPv6 destination address. */</span></span></span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;ovs_be32 ipv6_label;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* IPv6 flow label. */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">uint8_t nw_frag;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* FLOW_FRAG_* flags. */</span></span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">uint8_t nw_tos;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* IP ToS (including DSCP and ECN). */</span></span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">uint8_t nw_ttl;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* IP TTL/Hop Limit. */</span></span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">uint8_t nw_proto;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* IP protocol or low 8 bits of ARP opcode. */</span></span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct&nbsp;<span style="color: rgba(0, 0, 255, 1)">in6_addr nd_target;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* IPv6 neighbor discovery (ND) target. */</span></span></span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct&nbsp;eth_addr arp_sha;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* ARP/ND source hardware address. */</span></span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct&nbsp;eth_addr arp_tha;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* ARP/ND target hardware address. */</span></span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;ovs_be16 tcp_flags;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* TCP flags. With L3 to avoid matching L4. */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;ovs_be16 pad3;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* Pad to 64 bits. */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* L4 (64-bit aligned) */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;ovs_be16 tp_src;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* TCP/UDP/SCTP source port/ICMP type. */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;ovs_be16 tp_dst;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* TCP/UDP/SCTP destination port/ICMP code. */</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;ovs_be32 igmp_group_ip4;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* IGMP group IPv4 address.</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px"><span style="color: rgba(0, 128, 0, 1)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* Keep last for BUILD_ASSERT_DECL below. */</span></span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+
+</li>
+
+</ol>
+<p style="margin: 10px auto; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">(3)
+ 然后调用static int process_upcall(struct udpif *udpif, struct upcall 
+*upcall, struct ofpbuf *odp_actions, struct flow_wildcards 
+*wc)来处理upcall。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">对于MISS_UPCALL，调用static void 
+upcall_xlate(struct udpif *udpif, struct upcall *upcall, struct ofpbuf 
+*odp_actions, struct flow_wildcards *wc)</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">会调用enum xlate_error xlate_actions(struct xlate_in *xin, struct xlate_out *xout)</span></p>
+<p><span style="font-size: 16px">在这个函数里面，会在flow table里面查找rule</span></p>
+<p><span style="font-size: 16px">ctx.rule
+ = rule_dpif_lookup_from_table( ctx.xbridge-&gt;ofproto, 
+ctx.tables_version, flow, xin-&gt;wc, ctx.xin-&gt;resubmit_stats, 
+&amp;ctx.table_id, flow-&gt;in_port.ofp_port, true, true);</span></p>
+<p><span style="font-size: 16px">找到rule之后，调用static
+ void do_xlate_actions(const struct ofpact *ofpacts, size_t ofpacts_len,
+ struct xlate_ctx *ctx)在这个函数里面，根据action的不同，修改flow的内容。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">(4) 最后调用static void handle_upcalls(struct udpif *udpif, struct upcall *upcalls, size_t n_upcalls)将flow rule添加到内核中的datapath</span></p>
+<p><span style="font-size: 16px">他会调用void
+ dpif_operate(struct dpif *dpif, struct dpif_op **ops, size_t 
+n_ops)，他会调用dpif-&gt;dpif_class-&gt;operate(dpif, ops, chunk);</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">会调用dpif_netlink_operate()</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<p><span style="font-size: 16px">会调用netlink修改内核中datapath的规则。</span></p>
+<p><span style="font-size: 16px">&nbsp;</span></p>
+<ol class="list-paddingleft-2" style="padding-left: 40px; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal"><ol class="list-paddingleft-2" style="padding-left: 40px; font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 13.92px; white-space: normal">
+<li>
+<p><span style="font-size: 16px"><span style="color: rgba(0, 0, 255, 1)">case&nbsp;DPIF_OP_FLOW_PUT:</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;put = &amp;op-&gt;u.flow_put;</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;dpif_netlink_init_flow_put(dpif, put, &amp;flow);</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if&nbsp;(put-&gt;stats) {</span></span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;flow.nlmsg_flags |= NLM_F_ECHO;</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;aux-&gt;txn.reply = &amp;aux-&gt;reply;</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;}</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;dpif_netlink_flow_to_ofpbuf(&amp;flow, &amp;aux-&gt;request);</span></p>
+
+</li>
+<li>
+<p><span style="font-size: 16px">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">break;</span></span></p>
+
+</li>
+</ol></ol>
+<p>&nbsp;</p>
+<p><span style="font-size: 16px">欢迎关注个人公众号</span></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 16px"><img src="https://images2018.cnblogs.com/blog/635909/201804/635909-20180425230020718-1408797469.jpg" alt=""></span></p>
+<p>&nbsp;</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2018-04-25 23:01</span>&nbsp;
+<a href="https://www.cnblogs.com/popsuper1982/">popsuper1982</a>&nbsp;
+阅读(<span id="post_view_count">1424</span>)&nbsp;
+评论(<span id="post_comment_count">1</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=8948016" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(8948016);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 186637, cb_blogApp = 'popsuper1982', cb_blogUserGuid = 'cf2394f1-d0e0-e311-8d02-90b11c0b17d6';
+    var cb_entryId = 8948016, cb_entryCreatedDate = '2018-04-25 23:01', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjuYP6XTrk5aqlGbntlzqyjY1J17xLzOu_UlmKWTPWsg5JVP9horyMx5yT_gw4Xz06fdx39Y4doY_Bpkaftiwbx5jFQPMuq8a_syxkR50IHHyXAMcCrZ4IElR0nXQREKTHo" />
+</body>
+</html>

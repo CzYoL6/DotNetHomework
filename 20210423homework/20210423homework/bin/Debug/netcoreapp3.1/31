@@ -1,0 +1,667 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="创建了一个虚拟机，不知道为什么挂了，重启也启动不了，VNC也登不上去，强行关机后再也启动不起来了，开机一大堆错误，可是里面还有很重要的数据啊，怎么办，怎么办，谁能救救我！ 下面分析几个解救的方法。 方" />
+    <meta property="og:description" content="创建了一个虚拟机，不知道为什么挂了，重启也启动不了，VNC也登不上去，强行关机后再也启动不起来了，开机一大堆错误，可是里面还有很重要的数据啊，怎么办，怎么办，谁能救救我！ 下面分析几个解救的方法。 方" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>我的虚拟机挂了！怎么把镜像里面的数据找回来？ - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2018-03-10 12:45';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class = "postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/8537119.html">
+    <span>我的虚拟机挂了！怎么把镜像里面的数据找回来？</span>
+    
+
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<div id="img-content">
+<div id="js_content" class="rich_media_content ">
+<p>创建了一个虚拟机，不知道为什么挂了，重启也启动不了，VNC也登不上去，强行关机后再也启动不起来了，开机一大堆错误，可是里面还有很重要的数据啊，怎么办，怎么办，谁能救救我！</p>
+<p>&nbsp;</p>
+<p>下面分析几个解救的方法。</p>
+<p>&nbsp;</p>
+<p><strong>方法零：谁让你把重要数据放在系统盘里面了，请使用云盘，也即块存储，虚拟机挂了，盘可以轻松的关联到新的机器上，而且块存储系统如Ceph多是三备份，数据丢不了，下次请牢记。</strong></p>
+<p>&nbsp;</p>
+<p>您肯定会骂我，这次咋办，下面分享真正解救的办法。</p>
+<p>&nbsp;</p>
+<p><strong>1. 方法一：使用qemu的工具Network Block Device</strong></p>
+<p>&nbsp;</p>
+<p>网络块设备是通过NBD Server将虚拟块设备通过TCP/IP export出来，可以远程访问。</p>
+<p>&nbsp;</p>
+<p>NBD Server通常是qemu-nbd</p>
+<p>&nbsp;</p>
+<p><strong>1.1 使用方法一：可以提供unix socket</strong></p>
+<p>&nbsp;</p>
+<p>qemu-nbd -t -k /home/openstack/images/ubuntutest-nbd ubuntutest.img</p>
+<p>&nbsp;</p>
+<p>连接这个unix socket</p>
+<p>&nbsp;</p>
+<p>qemu-system-x86_64 -enable-kvm -name ubuntutest -m 2048 -hda nbd:unix:/home/openstack/images/ubuntutest-nbd -vnc :19 -net nic,model=virtio -net tap,ifname=tap0,script=no,downscript=n -monitor stdio</p>
+<p>&nbsp;</p>
+<p><strong>1.2 使用方法二：普通的socket连接</strong></p>
+<p>&nbsp;</p>
+<p>qemu-nbd -t -p 1088 ubuntutest.qcow2</p>
+<p>&nbsp;</p>
+<p>qemu-system-x86_64 -enable-kvm -name ubuntutest &nbsp;-m 2048 -hda nbd:16.158.166.150:1088 -vnc :19 -net nic,model=virtio -net tap,ifname=tap0,script=no,downscript=n -monitor stdio</p>
+<p>&nbsp;</p>
+<p><strong>1.3 使用方法三：将镜像 mount到一个network block device</strong></p>
+<p>&nbsp;</p>
+<p><strong>竟然可以这样做，咱们镜像里面的内容有救了。</strong></p>
+<p>&nbsp;</p>
+<p>查看内核是否编译进去NBD</p>
+<p>&nbsp;</p>
+<p>#grep NBD /boot/config-XXXX-generic&nbsp;</p>
+<p>&nbsp;</p>
+<p>CONFIG_BLK_DEV_NBD=m</p>
+<p>&nbsp;</p>
+<p>查看内核模块信息modinfo nbd</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309234344679-217319654.jpg" alt="">&nbsp;</p>
+<p>&nbsp;</p>
+<p>查看内核模块是否加载lsmod | grep nbd</p>
+<p>&nbsp;</p>
+<p>如果没有加载modprobe nbd，也可以指定最多的partition: modprobe nbd max_part=16</p>
+<p>&nbsp;</p>
+<p>加载后出现16个NBD</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309234453680-1045738669.png" alt="">&nbsp;&nbsp;</p>
+<p>查看哪个nbd device被使用：cat /proc/partitions</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309234613693-1682942924.png" alt="">&nbsp;</p>
+<p>&nbsp;</p>
+<p>将image付给一个network block device</p>
+<p>&nbsp;</p>
+<p>qemu-nbd -c /dev/nbd0 ubuntutest.img</p>
+<p>&nbsp;</p>
+<p>可以看到这个image里面有三个partition</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309234655868-1062570587.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>Mount其中一个partition</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309234739069-587094094.png" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>可以看到里面的文件啦！！！！！</strong></p>
+<p>&nbsp;</p>
+<p>修改结束后</p>
+<p>&nbsp;</p>
+<p>umount ubuntutestnbd0p1</p>
+<p>&nbsp;</p>
+<p>qemu-nbd -d /dev/nbd0</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309234823257-436558033.png" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>2. 方法二：如果镜像里面是LVM</strong></p>
+<p>&nbsp;</p>
+<p>有LVM的情况相对复杂</p>
+<p>&nbsp;</p>
+<p>qemu-nbd -c /dev/nbd0 centos-5.8.new.qcow2</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309234908379-1281654389.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>发现里面有LVM，当然LVM不能作为整体访问，因为里面有Logic volume，都是单独成文件系统的</p>
+<p>&nbsp;</p>
+<p>查看LVM的信息</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309234950622-1095771555.png" alt=""></p>
+<p>&nbsp;</p>
+<p>Import这个volume group</p>
+<p>&nbsp;</p>
+<p>vgimport VolGroup00</p>
+<p>&nbsp;</p>
+<p>将这个volume group设为active</p>
+<p>&nbsp;</p>
+<p>vgchange -ay VolGroup00</p>
+<p>&nbsp;</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235032538-1199230089.png" alt=""></p>
+<p>&nbsp;</p>
+<p>Mount其中一个LV</p>
+<p>&nbsp;</p>
+<p>mount /dev/VolGroup00/LogVol00 ubuntutestnbd0p1/</p>
+<p>&nbsp;</p>
+<p><strong>可以拿到这个Logic Volume里面的文件啦！！！！！</strong></p>
+<p>&nbsp;</p>
+<p>修改结束后</p>
+<p>&nbsp;</p>
+<p>umount ubuntutestnbd0p1/</p>
+<p>vgchange -an VolGroup00</p>
+<p>vgexport VolGroup00</p>
+<p>qemu-nbd -d /dev/nbd0</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235117486-440774826.png" alt=""></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><strong>3. 方法三：使用libguestfs</strong></p>
+<p>&nbsp;</p>
+<p>这个工具十分强大，Libguestfs可以在不启动虚拟机的情况下，编辑Image</p>
+<p>&nbsp;</p>
+<p>安装：apt-get install libguestfs-tools</p>
+<p>&nbsp;</p>
+<p>编辑一个Image：</p>
+<p>&nbsp;</p>
+<p>guestfish -a trusty-server-cloudimg-amd64-disk1.img</p>
+<p>&nbsp;</p>
+<p>接着运行run，则一个虚拟机启动了</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235153360-1438938532.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>查看所有的文件系统</p>
+<p>&nbsp;</p>
+<p>list-filesystems</p>
+<p>&nbsp;</p>
+<p>Mount这个文件系统</p>
+<p>&nbsp;</p>
+<p>mount /dev/sda1 /</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235236055-333593809.png" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>3.1 libguestfs的架构和原理，知其然知其所以然</strong></p>
+<p>&nbsp;</p>
+<ul class="list-paddingleft-2">
+<li>
+<p>guestfish -a trusty-server-cloudimg-amd64-disk1.img启动的进程，也即那个交互命令行是main program</p>
+</li>
+<li>
+<p>运行run的时候，会创建一个child process，在child process中，qemu运行一个称为appliance的小的虚拟机。创建子进程是由guestfs_launch函数完成的</p>
+</li>
+<li>
+<p>在appliance中，运行了linux kernel和一系列用户空间的工具(LVM, ext2等)，以及一个后台进程guestfsd</p>
+</li>
+<li>
+<p>main process中的libguestfs和这个guestfd通过RPC进行交互。</p>
+</li>
+<li>
+<p>由child process的kernel来操作disk image</p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235312911-1233332053.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>libguestfs是一个C的library，你可以写一个C的程序，将这个类库加载进去，调用它的API</p>
+<p>&nbsp;</p>
+<p>文档http://libguestfs.org/guestfs.3.html就描述了这些C的API</p>
+<p>&nbsp;</p>
+<p>而guestfish是一个交互命令行，可以通过执行命令，他来调用C类库的API，帮我们完成操作</p>
+<p>&nbsp;</p>
+<p>文档http://libguestfs.org/guestfish.1.html描述了这些命令，几乎所有的API，都有对应的命令</p>
+<p>&nbsp;</p>
+<p><strong>3.2 Libguestfs appliance的启动过程，更详细的了解它</strong></p>
+<p>&nbsp;</p>
+<p>如果我们想看这个appliance启动的详细过程，则需要export LIBGUESTFS_DEBUG=1</p>
+<p>&nbsp;</p>
+<p>然后运行guestfish -a trusty-server-cloudimg-amd64-disk1.img</p>
+<p>&nbsp;</p>
+<p>然后运行run，打印出很多的东西</p>
+<p>&nbsp;</p>
+<p><strong>(1) 启动guestfish</strong></p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235352882-168208907.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>(2) 运行supermin</strong></p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235431885-614473904.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>(3) 选择kernel</strong></p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235503976-130466506.png" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>(4) 选择initrd, root images, 创建appliance</strong></p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235536546-1204055867.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>(5) 检测qemu</strong></p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235605596-1144556529.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>(6) 启动qemu appliance</strong></p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235634930-1437076021.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>(7)启动initrd</strong></p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235707380-818423800.png" alt="">&nbsp;&nbsp;</p>
+<p><strong>(8) load kernel modules</strong></p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235736527-854688409.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>(9) mount sda, sdb</strong></p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235804298-1254324175.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>(10) 将sdb作为root device</strong></p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235848226-1812572354.png" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>(11) 运行init</strong></p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235916950-390483121.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>(12) 启动guestfsd</strong></p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309235955219-385974185.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><strong>(13) 开通一个端口，C类库会通过RPC连接这个端口</strong></p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310000026321-1981848756.png" alt=""></p>
+<p>&nbsp;</p>
+<p><strong>3.3 Guestfish的有很多的命令</strong></p>
+<p>&nbsp;</p>
+<ul class="list-paddingleft-2">
+<li>
+<p><strong>添加一个drive</strong></p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p>这个命令只有在run之前起作用</p>
+<p>&nbsp;</p>
+<p>对应的API是guestfs_add_drive_opts</p>
+<p>&nbsp;</p>
+<p>add-drive filename [readonly:true|false] [format:..] [iface:..] [name:..] [label:..] [protocol:..] [server:..]</p>
+<p>&nbsp;</p>
+<p>guestfish -a trusty-server-cloudimg-amd64-disk1.img，这个Image是第一个drive</p>
+<p>&nbsp;</p>
+<p>add-drive /home/openstack/images/ubuntutest.img format:qcow2，添加一个drive</p>
+<p>&nbsp;</p>
+<p>运行run</p>
+<p>&nbsp;</p>
+<p>查看所有的device: list-devices</p>
+<p>查看所有的分区: list-partitions</p>
+<p>查看所有的文件系统: list-filesystems</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310000056023-912765809.png" alt=""></p>
+<p>&nbsp;</p>
+<ul class="list-paddingleft-2">
+<li>
+<p><strong>Mount文件系统</strong></p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p>对应的API是guestfs_mount</p>
+<p>&nbsp;</p>
+<p>mount /dev/sda1 /</p>
+<p>&nbsp;</p>
+<p>文件系统操作</p>
+<p>&nbsp;</p>
+<p>ls /</p>
+<p>mkdir /mnt/sdb</p>
+<p>mount /dev/sdb1 /mnt/sdb</p>
+<p>ls /mnt/sdb</p>
+<p>ls /mnt/sdb/home/openstack</p>
+<p>cat /mnt/sdb/home/openstack/.bash_history</p>
+<p>&nbsp;</p>
+<p>更多文件系统命令chown，chmod，cp等都支持</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310000131710-1183733981.png" alt=""></p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310000159155-660191452.png" alt=""></p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310000224828-459176360.png" alt=""></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<ul class="list-paddingleft-2">
+<li>
+<p><strong>对partition的操作</strong></p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p>part-list /dev/sdb</p>
+<p>part-get-bootable /dev/sdb 1</p>
+<p>&nbsp;</p>
+<p>有个partition的命令包括：</p>
+<p>part-add，part-del，part-disk，part-get-bootable，part-get-gpt-type，part-get-mbr-id，part-get-name，part-get-parttype，part-init，part-list，part-set-bootable，part-set-gpt-type，part-set-mbr-id，part-set-name，part-to-dev，part-to-partnum</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310000303976-1603704814.png" alt=""></p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310000318623-350997116.png" alt=""></p>
+<p>&nbsp;&nbsp;</p>
+<ul class="list-paddingleft-2">
+<li>
+<p><strong>对LVM的操作，哈哈不用害怕LVM了，也不用复杂做这么多操作</strong></p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p>guestfish -a trusty-server-cloudimg-amd64-disk1.img</p>
+<p>&nbsp;</p>
+<p>add-drive ./centos-5.8.new.qcow2 format:qcow2</p>
+<p>&nbsp;</p>
+<p>run</p>
+<p>&nbsp;</p>
+<p>查看所有的PV: pvs-full</p>
+<p>&nbsp;</p>
+<p>查看所有的VG: vgs-full</p>
+<p>&nbsp;</p>
+<p>命令包含：lvcreate, lvcreate-free, lvm-canonical-lv-name, lvm-clear-filter, lvm-remove-all, lvm-set-filter, lvremove, lvrename, lvresize, lvresize-free, lvs, lvs-full, lvuuid, pvcreate, pvremove, pvresize, pvresize-size, pvs, pvs-full, pvuuid, vg-activate, vg-activate-all, vgchange-uuid, vgchange-uuid-all, vgcreate, vglvuuids, vgmeta, vgpvuuids, vgremove, vgrename, vgs, vgs-full, vgscan, vguuid</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310000351477-1428485769.png" alt=""></p>
+<p>&nbsp;</p>
+<ul class="list-paddingleft-2">
+<li>
+<p><strong>下载和上传文件，直接文件就能拷贝出来</strong></p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p>guestfish -a ubuntutest.img</p>
+<p>&nbsp;</p>
+<p>run</p>
+<p>&nbsp;</p>
+<p>list-filesystems</p>
+<p>&nbsp;</p>
+<p>mount /dev/sda1 /</p>
+<p>&nbsp;</p>
+<p>download /home/openstack/.bash_history testdownload</p>
+<p>&nbsp;</p>
+<p>upload instance01.xml /home/openstack/testupload</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310000445282-674754696.jpg" alt="">&nbsp;</p>
+<p>&nbsp;</p>
+<p><strong>3.4 在Libvirt里面，Virt也提供了相应命令系列<br></strong></p>
+<p>&nbsp;</p>
+<p>一个命令完成操作，无需启动交互命令行</p>
+<p>&nbsp;</p>
+<ul class="list-paddingleft-2">
+<li>
+<p><strong>Guestmount</strong></p>
+
+</li>
+
+</ul>
+<p>&nbsp;</p>
+<p>创建一个本地文件夹</p>
+<p>&nbsp;</p>
+<p>mkdir testguestmount</p>
+<p>&nbsp;</p>
+<p>将image里面的/dev/sda1 mount到这个文件夹里面</p>
+<p>guestmount -a ubuntutest.img -m /dev/sda1 testguestmount</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310000523774-1559942202.jpg" alt="">&nbsp;</p>
+<p>&nbsp;</p>
+<p>结束编辑后</p>
+<p>guestunmount testguestmount</p>
+<p>&nbsp;</p>
+<ul class="list-paddingleft-2">
+<li>
+<p><strong>virt-builder</strong></p>
+
+</li>
+
+</ul>
+<p>&nbsp;</p>
+<p>可以快速的创建虚拟机镜像</p>
+<p>&nbsp;</p>
+<p>update-guestfs-appliance</p>
+<p>&nbsp;</p>
+<p>查看所有的镜像类型</p>
+<p>&nbsp;</p>
+<p>virt-builder –list</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310000555029-1652617259.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>创建一个Image</p>
+<p>&nbsp;</p>
+<p>virt-builder fedora-20 -o myfedora.img --format qcow2 --size 20G&nbsp;</p>
+<p>&nbsp;</p>
+<p>设置root password, 放在文件里面</p>
+<p>&nbsp;</p>
+<p>virt-builder fedora-20 --root-password file:/tmp/rootpw</p>
+<p>&nbsp;</p>
+<p>设置hostname</p>
+<p>&nbsp;</p>
+<p>virt-builder fedora-20 --hostname virt.example.com</p>
+<p>&nbsp;</p>
+<p>安装软件</p>
+<p>&nbsp;</p>
+<p>virt-builder fedora-20 –install “apache2“</p>
+<p>&nbsp;</p>
+<p>第一次启动运行脚本</p>
+<p>&nbsp;</p>
+<p>virt-builder fedora-20 --firstboot /tmp/yum-update.sh</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310004023096-187562224.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>virt-ls -a myfedora.img /root/</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310004056135-108662709.png" alt=""></p>
+<p>&nbsp;</p>
+<p>virt-cat -a myfedora.img /root/.bash_profile</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310004130148-1182469533.png" alt=""></p>
+<p>&nbsp;</p>
+<p>virt-copy-in -a myfedora.img desktop.xml /root/</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310004202415-1737138910.png" alt=""></p>
+<p>&nbsp;</p>
+<p>virt-copy-out -a myfedora.img /root/.bash_profile ./</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310004233576-952163709.png" alt=""></p>
+<p>&nbsp;</p>
+<p>virt-df -a myfedora.img</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310004305871-378004650.png" alt="">&nbsp;</p>
+<p>&nbsp;</p>
+<p>virt-list-filesystems -a myfedora.img</p>
+<p>&nbsp;</p>
+<p>virt-list-partitions myfedora.img</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310004330076-1100080858.png" alt=""></p>
+<p>&nbsp;</p>
+<p>欢迎关注微信公众号</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180310004426759-2073997287.jpg" alt=""></p>
+<p>&nbsp;</p>
+
+</div>
+
+</div>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2018-03-10 00:45</span>&nbsp;
+<a href="https://www.cnblogs.com/popsuper1982/">popsuper1982</a>&nbsp;
+阅读(<span id="post_view_count">3110</span>)&nbsp;
+评论(<span id="post_comment_count">2</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=8537119" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(8537119);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 186637, cb_blogApp = 'popsuper1982', cb_blogUserGuid = 'cf2394f1-d0e0-e311-8d02-90b11c0b17d6';
+    var cb_entryId = 8537119, cb_entryCreatedDate = '2018-03-10 00:45', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjtju3PRzmqeEP-qBba-CMrr5sIGsvrEalVTO1nOFAiKj3E2nG6CLkddzn7enhGy_VS3ApxDTpIGq37SFWpJ6GQ_r8m7UNniTX7WSGjeIw-ZQvCcDy0UodvjOxmV_iXRErE" />
+</body>
+</html>

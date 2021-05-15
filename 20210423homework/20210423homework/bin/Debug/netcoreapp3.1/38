@@ -1,0 +1,345 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="当你安装了一台Linux，想启动一个KVM虚拟机的时候，你会发现需要安装不同的软件，启动虚拟机的时候，有多种方法： virsh start kvm命令 qemu命令 qemu-kvm命令 qemu-s" />
+    <meta property="og:description" content="当你安装了一台Linux，想启动一个KVM虚拟机的时候，你会发现需要安装不同的软件，启动虚拟机的时候，有多种方法： virsh start kvm命令 qemu命令 qemu-kvm命令 qemu-s" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Qemu，KVM，Virsh傻傻的分不清 - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2018-03-07 03:09';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class = "postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/8522535.html">
+    <span>Qemu，KVM，Virsh傻傻的分不清</span>
+    
+
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<p>当你安装了一台Linux，想启动一个KVM虚拟机的时候，你会发现需要安装不同的软件，启动虚拟机的时候，有多种方法：</p>
+<ul class="list-paddingleft-2" style="list-style-type: disc">
+<li>
+<p>virsh start</p>
+</li>
+<li>
+<p>kvm命令</p>
+</li>
+<li>
+<p>qemu命令</p>
+</li>
+<li>
+<p>qemu-kvm命令</p>
+</li>
+<li>
+<p>qemu-system-x86_64命令</p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p>这些之间是什么关系呢？请先阅读上一篇《<a href="http://mp.weixin.qq.com/s?__biz=MzI1NzYzODk4OQ==&amp;mid=2247483820&amp;idx=1&amp;sn=8a44b992491aea03e55eefb4815a1958&amp;chksm=ea15168edd629f98e622dcb94e64fbb4a75055da98d620e7c83071b5d6d428904fa5c8e9c4ad&amp;scene=21#wechat_redirect" target="_blank">我是虚拟机内核我困惑</a>》</p>
+<p>&nbsp;</p>
+<p>有了上一篇的基础，我们就能说清楚来龙去脉。</p>
+<p>&nbsp;</p>
+<p>首先看qemu，其中关键字emu，全称emulator，模拟器，所以单纯使用qemu是采用的完全虚拟化的模式。</p>
+<p>&nbsp;</p>
+<p>Qemu向Guest OS模拟CPU，也模拟其他的硬件，GuestOS认为自己和硬件直接打交道，其实是同Qemu模拟出来的硬件打交道，Qemu将这些指令转译给真正的硬件。由于所有的指令都要从Qemu里面过一手，因而性能比较差</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180307150620008-108720261.jpg" alt=""></p>
+<p>按照上一次的理论，完全虚拟化是非常慢的，所以要使用硬件辅助虚拟化技术Intel-VT，AMD-V，所以需要CPU硬件开启这个标志位，一般在BIOS里面设置。查看是否开启</p>
+<p>对于Intel CPU 可用命令 grep "vmx" /proc/cpuinfo 判断</p>
+<p>对于AMD CPU 可用命令 grep "svm" /proc/cpuinfo 判断</p>
+<p>&nbsp;</p>
+<p>当确认开始了标志位之后，通过KVM，GuestOS的CPU指令不用经过Qemu转译，直接运行，大大提高了速度。</p>
+<p>&nbsp;</p>
+<p>所以KVM在内核里面需要有一个模块，来设置当前CPU是Guest OS在用，还是Host OS在用。</p>
+<p>&nbsp;</p>
+<p>查看内核模块中是否含有kvm, ubuntu默认加载这些模块</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180307150634298-628102674.png" alt=""></p>
+<p>&nbsp;</p>
+<p>KVM内核模块通过/dev/kvm暴露接口，用户态程序可以通过ioctl来访问这个接口，例如书写下面的程序</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180307150654328-1662633336.png" alt=""></p>
+<p>&nbsp;</p>
+<p>Qemu将KVM整合进来，通过ioctl调用/dev/kvm接口，将有关CPU指令的部分交由内核模块来做，就是qemu-kvm (qemu-system-XXX)</p>
+<p>&nbsp;</p>
+<p>Qemu-kvm对kvm的整合从release_0_5_1开始有branch，在1.3.0正式merge到master</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180307150710177-1591777831.png" alt=""></p>
+<p>&nbsp;</p>
+<p>qemu和kvm整合之后，CPU的性能问题解决了，另外Qemu还会模拟其他的硬件，如Network, Disk，同样全虚拟化的方式也会影响这些设备的性能。</p>
+<p>&nbsp;</p>
+<p>于是qemu采取半虚拟化或者类虚拟化的方式，让Guest OS加载特殊的驱动来做这件事情。</p>
+<p>&nbsp;</p>
+<p>例如网络需要加载virtio_net，存储需要加载virtio_blk，Guest需要安装这些半虚拟化驱动，GuestOS知道自己是虚拟机，所以数据直接发送给半虚拟化设备，经过特殊处理，例如排队，缓存，批量处理等性能优化方式，最终发送给真正的硬件，一定程度上提高了性能。</p>
+<p>&nbsp;</p>
+<p>至此整个关系如下：</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180307150733042-369996016.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>qemu-kvm会创建Guest OS，当需要执行CPU指令的时候，通过/dev/kvm调用kvm内核模块，通过硬件辅助虚拟化方式加速。如果需要进行网络和存储访问，则通过类虚拟化或者直通Pass through的方式，通过加载特殊的驱动，加速访问网络和存储资源。</p>
+<p>&nbsp;</p>
+<p>然而直接用qemu或者qemu-kvm或者qemu-system-xxx的少，大多数还是通过virsh启动，virsh属于libvirt工具，libvirt是目前使用最为广泛的对KVM虚拟机进行管理的工具和API，可不止管理KVM。</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180307150801681-1586679180.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>Libvirt分服务端和客户端，Libvirtd是一个daemon进程，是服务端，可以被本地的virsh调用，也可以被远程的virsh调用，virsh相当于客户端。</p>
+<p>Libvirtd调用qemu-kvm操作虚拟机，有关CPU虚拟化的部分，qemu-kvm调用kvm的内核模块来实现</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180307150815111-1223973253.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>这下子，整个相互关系才搞清楚了。</p>
+<p>&nbsp;</p>
+<p>虽然使用virsh创建虚拟机相对简单，但是为了探究虚拟机的究竟如何使用，下一次，我们来解析一下如何裸使用qemu-kvm来创建一台虚拟机，并且能上网。</p>
+<p>&nbsp;</p>
+<p>如果搭建使用过vmware桌面版或者virtualbox桌面版，创建一个能上网的虚拟机非常简单，但是其实背后做了很多事情，下一次我们裸用qemu-kvm，全部使用手工配置，看创建虚拟机都做了哪些事情。</p>
+<p>&nbsp;</p>
+<p>欢迎关注微信公众号</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180307151042530-1404999858.jpg" alt=""></p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2018-03-07 15:09</span>&nbsp;
+<a href="https://www.cnblogs.com/popsuper1982/">popsuper1982</a>&nbsp;
+阅读(<span id="post_view_count">2619</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=8522535" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(8522535);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 186637, cb_blogApp = 'popsuper1982', cb_blogUserGuid = 'cf2394f1-d0e0-e311-8d02-90b11c0b17d6';
+    var cb_entryId = 8522535, cb_entryCreatedDate = '2018-03-07 15:09', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjva9kbV1T79ENL3eEwlwzc-UerHmwiEKhYzIwSrW6wPBF6EMPqugxOH32sqd8nL_ceFkh8CgCxhwCVIfzixcYCY1Y5-dyJcTtyXJRGUKiGAMb_KC2sgoSLxOD1wNYwEH9U" />
+</body>
+</html>

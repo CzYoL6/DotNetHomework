@@ -1,0 +1,462 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="在上一节提到，Openvswitch的内核模块openvswitch.ko会在网卡上注册一个函数netdev_frame_hook，每当有网络包到达网卡的时候，这个函数就会被调用。 static st" />
+    <meta property="og:description" content="在上一节提到，Openvswitch的内核模块openvswitch.ko会在网卡上注册一个函数netdev_frame_hook，每当有网络包到达网卡的时候，这个函数就会被调用。 static st" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Openvswitch原理与代码分析(4)：网络包的处理过程 - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2016-09-13 11:26';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class = "postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5870181.html">
+    <span>Openvswitch原理与代码分析(4)：网络包的处理过程</span>
+    
+
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<p>
+&nbsp;</p><p>在上一节提到，Openvswitch的内核模块openvswitch.ko会在网卡上注册一个函数netdev_frame_hook，每当有网络包到达网卡的时候，这个函数就会被调用。
+</p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> sk_buff *netdev_frame_hook(<span style="color: rgba(0, 0, 255, 1)">struct</span> sk_buff *skb)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (unlikely(skb-&gt;pkt_type == PACKET_LOOPBACK))
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">return</span> skb;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;port_receive(skb);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">return</span> NULL;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p>调用port_receive即是调用netdev_port_receive
+</p><p>#define port_receive(skb)  netdev_port_receive(skb, NULL)
+</p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">void</span> netdev_port_receive(<span style="color: rgba(0, 0, 255, 1)">struct</span> sk_buff *skb, <span style="color: rgba(0, 0, 255, 1)">struct</span> ip_tunnel_info *tun_info)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> vport *vport;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;vport = ovs_netdev_get_vport(skb-&gt;dev);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">   ……
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;skb_push(skb, ETH_HLEN);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;ovs_skb_postpush_rcsum(skb, skb-&gt;data, ETH_HLEN);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;ovs_vport_receive(vport, skb, tun_info);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">return</span>;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error:
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;kfree_skb(skb);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p>在函数int ovs_vport_receive(struct vport *vport, struct sk_buff *skb,   const struct ip_tunnel_info *tun_info)实现如下
+</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">int</span> ovs_vport_receive(<span style="color: rgba(0, 0, 255, 1)">struct</span> vport *vport, <span style="color: rgba(0, 0, 255, 1)">struct</span> sk_buff *skb,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">const</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> ip_tunnel_info *tun_info)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> sw_flow_key key;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;......
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* Extract flow from 'skb' into 'key'. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;error = ovs_flow_key_extract(tun_info, skb, &amp;key);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (unlikely(error)) {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kfree_skb(skb);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">return</span> error;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;}
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;ovs_dp_process_packet(skb, &amp;key);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">return</span> 0;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p>在这个函数里面，首先声明了变量struct sw_flow_key key;
+</p><p>如果我们看这个key的定义
+</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">struct</span> sw_flow_key {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;u8 tun_opts[255];
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;u8 tun_opts_len;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> ip_tunnel_key tun_key; <span style="color: rgba(0, 128, 0, 1)">/* Encapsulating tunnel key. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u32 priority; <span style="color: rgba(0, 128, 0, 1)">/* Packet QoS priority. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u32 skb_mark; <span style="color: rgba(0, 128, 0, 1)">/* SKB mark. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u16 in_port; <span style="color: rgba(0, 128, 0, 1)">/* Input switch port (or DP_MAX_PORTS). */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;} __packed phy; <span style="color: rgba(0, 128, 0, 1)">/* Safe when right after 'tun_key'. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;u32 ovs_flow_hash; <span style="color: rgba(0, 128, 0, 1)">/* Datapath computed hash value. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;u32 recirc_id; <span style="color: rgba(0, 128, 0, 1)">/* Recirculation ID. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u8 src[ETH_ALEN]; <span style="color: rgba(0, 128, 0, 1)">/* Ethernet source address. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u8 dst[ETH_ALEN]; <span style="color: rgba(0, 128, 0, 1)">/* Ethernet destination address. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__be16 tci; <span style="color: rgba(0, 128, 0, 1)">/* 0 if no VLAN, VLAN_TAG_PRESENT set otherwise. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__be16 type; <span style="color: rgba(0, 128, 0, 1)">/* Ethernet frame type. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;} eth;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;union {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__be32 top_lse; <span style="color: rgba(0, 128, 0, 1)">/* top label stack entry */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} mpls;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u8 proto; <span style="color: rgba(0, 128, 0, 1)">/* IP protocol or lower 8 bits of ARP opcode. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u8 tos; <span style="color: rgba(0, 128, 0, 1)">/* IP ToS. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u8 ttl; <span style="color: rgba(0, 128, 0, 1)">/* IP TTL/hop limit. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u8 frag; <span style="color: rgba(0, 128, 0, 1)">/* One of OVS_FRAG_TYPE_*. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} ip;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;};
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__be16 src; <span style="color: rgba(0, 128, 0, 1)">/* TCP/UDP/SCTP source port. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__be16 dst; <span style="color: rgba(0, 128, 0, 1)">/* TCP/UDP/SCTP destination port. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__be16 flags; <span style="color: rgba(0, 128, 0, 1)">/* TCP flags. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;} tp;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;union {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__be32 src; <span style="color: rgba(0, 128, 0, 1)">/* IP source address. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__be32 dst; <span style="color: rgba(0, 128, 0, 1)">/* IP destination address. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} addr;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u8 sha[ETH_ALEN]; <span style="color: rgba(0, 128, 0, 1)">/* ARP source hardware address. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u8 tha[ETH_ALEN]; <span style="color: rgba(0, 128, 0, 1)">/* ARP target hardware address. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} arp;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} ipv4;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span>
+										<span style="color: rgba(0, 0, 255, 1)">in</span>6_addr src; <span style="color: rgba(0, 128, 0, 1)">/* IPv6 source address. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span>
+										<span style="color: rgba(0, 0, 255, 1)">in</span>6_addr dst; <span style="color: rgba(0, 128, 0, 1)">/* IPv6 destination address. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} addr;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__be32 label; <span style="color: rgba(0, 128, 0, 1)">/* IPv6 flow label. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span>
+										<span style="color: rgba(0, 0, 255, 1)">in</span>6_addr target; <span style="color: rgba(0, 128, 0, 1)">/* ND target address. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u8 sll[ETH_ALEN]; <span style="color: rgba(0, 128, 0, 1)">/* ND source link layer address. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u8 tll[ETH_ALEN]; <span style="color: rgba(0, 128, 0, 1)">/* ND target link layer address. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} nd;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} ipv6;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;};
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* Connection tracking fields. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u16 zone;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u32 mark;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u8 state;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> ovs_key_ct_labels labels;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;} ct;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">} __aligned(BITS_PER_LONG/8); <span style="color: rgba(0, 128, 0, 1)">/* Ensure that we can do comparisons as longs. */</span></span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p>可见这个key里面是一个大杂烩，数据包里面的几乎任何部分都可以作为key来查找flow表
+</p><ul><li>tunnel可以作为key
+</li><li>在物理层，in_port即包进入的网口的ID
+</li><li>在MAC层，源和目的MAC地址
+</li><li>在IP层，源和目的IP地址
+</li><li>在传输层，源和目的端口号
+</li><li>IPV6
+</li></ul><p>所以，要在内核态匹配流表，首先需要调用ovs_flow_key_extract，从包的正文中提取key的值。
+</p><p>接下来就是要调用ovs_dp_process_packet了。
+</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">void</span> ovs_dp_process_packet(<span style="color: rgba(0, 0, 255, 1)">struct</span> sk_buff *skb, <span style="color: rgba(0, 0, 255, 1)">struct</span> sw_flow_key *key)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">const</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> vport *p = OVS_CB(skb)-&gt;input_vport;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> datapath *dp = p-&gt;dp;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> sw_flow *flow;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> sw_flow_actions *sf_acts;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> dp_stats_percpu *stats;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;u64 *stats_counter;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;u32 n_mask_hit;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;stats = this_cpu_ptr(dp-&gt;stats_percpu);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* Look up flow. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;flow = ovs_flow_tbl_lookup_stats(&amp;dp-&gt;table, key, skb_get_hash(skb),
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&amp;n_mask_hit);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (unlikely(!flow)) {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> dp_upcall_info upcall;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">int</span> error;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memset(&amp;upcall, 0, <span style="color: rgba(0, 0, 255, 1)">sizeof</span>(upcall));
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;upcall.cmd = OVS_PACKET_CMD_MISS;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;upcall.portid = ovs_vport_find_upcall_portid(p, skb);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;upcall.mru = OVS_CB(skb)-&gt;mru;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;error = ovs_dp_upcall(dp, skb, key, &amp;upcall);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (unlikely(error))
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;kfree_skb(skb);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">else</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;consume_skb(skb);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stats_counter = &amp;stats-&gt;n_missed;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">goto</span>
+										<span style="color: rgba(0, 0, 255, 1)">out</span>;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;}
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;ovs_flow_stats_update(flow, key-&gt;tp.flags, skb);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;sf_acts = rcu_dereference(flow-&gt;sf_acts);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;ovs_execute_actions(dp, skb, sf_acts, key);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;stats_counter = &amp;stats-&gt;n_hit;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">out</span>:
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* Update datapath statistics. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;u64_stats_update_begin(&amp;stats-&gt;syncp);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;(*stats_counter)++;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;stats-&gt;n_mask_hit += n_mask_hit;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;u64_stats_update_end(&amp;stats-&gt;syncp);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p>这个函数首先在内核里面的流表中查找符合key的flow，也即ovs_flow_tbl_lookup_stats，如果找到了，很好说明用户态的流表已经放入内核，则走fast path就可了。于是直接调用ovs_execute_actions，执行这个key对应的action。
+</p><p>如果不能找到，则只好调用ovs_dp_upcall，让用户态去查找流表。会调用static int queue_userspace_packet(struct datapath *dp, struct sk_buff *skb,  const struct sw_flow_key *key,  const struct dp_upcall_info *upcall_info)
+</p><p>它会调用err = genlmsg_unicast(ovs_dp_get_net(dp), user_skb, upcall_info-&gt;portid);通过netlink将消息发送给用户态。在用户态，有线程监听消息，一旦有消息，则触发udpif_upcall_handler。
+</p><p>
+&nbsp;</p><p>Slow Path &amp; Fast Path
+</p><p><img src="https://images2015.cnblogs.com/blog/635909/201609/635909-20160913232546570-59130550.png" alt="">
+	</p><p>Slow Path:
+</p><p>当Datapath找不到flow rule对packet进行处理时
+</p><p>Vswitchd使用flow rule对packet进行处理。
+</p><p>
+&nbsp;</p><p>Fast Path:
+</p><p>将slow path的flow rule放在内核态，对packet进行处理
+</p><p>
+&nbsp;</p><p>Unknown Packet Processing
+</p><p>Datapath使用flow rule对packet进行处理，如果没有，则有vswitchd使用flow rule进行处理
+</p><p>
+&nbsp;</p><p><img src="https://images2015.cnblogs.com/blog/635909/201609/635909-20160913232547211-41937168.png" alt="">
+	</p><p>
+&nbsp;</p><ol><li>从Device接收Packet交给事先注册的event handler进行处理
+</li><li>接收Packet后识别是否是unknown packet，是则交由upcall处理
+</li><li>vswitchd对unknown packet找到flow rule进行处理
+</li><li>将Flow rule发送给datapath
+</li></ol><p>
+&nbsp;</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2016-09-13 23:26</span>&nbsp;
+<a href="https://www.cnblogs.com/popsuper1982/">popsuper1982</a>&nbsp;
+阅读(<span id="post_view_count">3513</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5870181" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(5870181);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 186637, cb_blogApp = 'popsuper1982', cb_blogUserGuid = 'cf2394f1-d0e0-e311-8d02-90b11c0b17d6';
+    var cb_entryId = 5870181, cb_entryCreatedDate = '2016-09-13 23:26', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjvzCRsRagsXibNWXPWM9RT99l6ZW52UB84mtkXNqf0cU-_XOHue-kySk-Ovj2xldXlwmFfk8VP3KeXzljDo7XGh2W7a429lcHWe07yR_FIOJsW2fUtgAb6LwBYpf4dBJKA" />
+</body>
+</html>

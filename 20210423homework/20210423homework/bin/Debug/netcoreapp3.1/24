@@ -1,0 +1,613 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    
+    
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>随笔列表第4页 - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		
+
+
+
+<div id="homepage_top_pager" class="topicListFooter">
+    
+
+<div class="pager">
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=3">上一页</a>
+    
+    
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=1">1</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=2">2</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=3">3</a>
+    4
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=5">5</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=6">6</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=7">7</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=8">8</a>
+    ···
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=16">16</a>
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=5">下一页</a>
+</div>
+</div>
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2016/08/06.html">2016年8月6日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5743767.html">
+    <span>
+        Mesos源码分析(1): Mesos的启动过程总论
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：        <a href="https://www.cnblogs.com/popsuper1982/p/5743767.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2016-08-06 12:24
+popsuper1982
+<span data-post-id="5743767" class="post-view-count">阅读(1961)</span> 
+<span data-post-id="5743767" class="post-comment-count">评论(0)</span> 
+<span data-post-id="5743767" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5743767" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2016/08/02.html">2016年8月2日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5727791.html">
+    <span>
+        Mesos源码分析(16): mesos-docker-executor的运行
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：mesos-docker-executor的运行代码在src/docker/executor.cpp中 int main(int argc, char** argv) { GOOGLE_PROTOBUF_VERIFY_VERSION; mesos::internal::docker::Flags flags; // Load flags from environment a...        <a href="https://www.cnblogs.com/popsuper1982/p/5727791.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2016-08-02 00:27
+popsuper1982
+<span data-post-id="5727791" class="post-view-count">阅读(984)</span> 
+<span data-post-id="5727791" class="post-comment-count">评论(0)</span> 
+<span data-post-id="5727791" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5727791" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+            <div class="postSeparator"></div>
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5727784.html">
+    <span>
+        Mesos源码分析(15): Test Executor的运行
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：Test Executor的代码在src/examples/test_executor.cpp中 int main(int argc, char** argv) { TestExecutor executor; MesosExecutorDriver driver(&amp;executor); return driver.run() == DRIVER_STOPPED ? 0 : 1; ...        <a href="https://www.cnblogs.com/popsuper1982/p/5727784.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2016-08-02 00:23
+popsuper1982
+<span data-post-id="5727784" class="post-view-count">阅读(1278)</span> 
+<span data-post-id="5727784" class="post-comment-count">评论(0)</span> 
+<span data-post-id="5727784" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5727784" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2016/08/01.html">2016年8月1日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5724379.html">
+    <span>
+        Mesos源码分析(14): DockerContainerier运行一个Task
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：DockerContainerizer的实现在文件src/slave/containerizer/docker.cpp中 Future DockerContainerizer::launch( const ContainerID&amp; containerId, const ExecutorInfo&amp; executorInfo, const stri...        <a href="https://www.cnblogs.com/popsuper1982/p/5724379.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2016-08-01 00:10
+popsuper1982
+<span data-post-id="5724379" class="post-view-count">阅读(892)</span> 
+<span data-post-id="5724379" class="post-comment-count">评论(0)</span> 
+<span data-post-id="5724379" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5724379" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+            <div class="postSeparator"></div>
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5724373.html">
+    <span>
+        Mesos源码分析(13): MesosContainerier运行一个Task
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：MesosContainerizer的实现在文件src/slave/containerizer/mesos/containerizer.cpp中 Future MesosContainerizer::launch( const ContainerID&amp; containerId, const TaskInfo&amp; taskInfo, const ExecutorInfo&amp; ...        <a href="https://www.cnblogs.com/popsuper1982/p/5724373.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2016-08-01 00:07
+popsuper1982
+<span data-post-id="5724373" class="post-view-count">阅读(719)</span> 
+<span data-post-id="5724373" class="post-comment-count">评论(0)</span> 
+<span data-post-id="5724373" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5724373" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2016/07/31.html">2016年7月31日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5724360.html">
+    <span>
+        Mesos源码分析(12): Mesos-Slave接收到RunTask消息
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：在前文Mesos源码分析(8): Mesos-Slave的初始化中，Mesos-Slave接收到RunTaskMessage消息，会调用Slave::runTask. void Slave::runTask( const UPID&amp; from, const FrameworkInfo&amp; frameworkInfo, const FrameworkID&amp; framewor...        <a href="https://www.cnblogs.com/popsuper1982/p/5724360.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2016-07-31 23:59
+popsuper1982
+<span data-post-id="5724360" class="post-view-count">阅读(879)</span> 
+<span data-post-id="5724360" class="post-comment-count">评论(0)</span> 
+<span data-post-id="5724360" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5724360" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+            <div class="postSeparator"></div>
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5724166.html">
+    <span>
+        Mesos源码分析(11): Mesos-Master接收到launchTasks消息
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：根据Mesos源码分析(6): Mesos Master的初始化中的代码分析，当Mesos-Master接收到launchTask消息的时候，会调用Master::launchTasks函数。 void Master::launchTasks( const UPID&amp; from, const FrameworkID&amp; frameworkId, const vector&amp;...        <a href="https://www.cnblogs.com/popsuper1982/p/5724166.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2016-07-31 22:46
+popsuper1982
+<span data-post-id="5724166" class="post-view-count">阅读(810)</span> 
+<span data-post-id="5724166" class="post-comment-count">评论(0)</span> 
+<span data-post-id="5724166" class="post-digg-count">推荐(1)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5724166" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+            <div class="postSeparator"></div>
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5724095.html">
+    <span>
+        Mesos源码分析(10): MesosSchedulerDriver的启动及运行一个Task
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：MesosSchedulerDriver的代码在src/sched/sched.cpp里面实现。 Driver-&gt;run()调用start() 首先检测Mesos-Master的leader 创建一个线程。 SchedulerProcess的initialize()函数 里面主要注册消息处理函数。 virtual ...        <a href="https://www.cnblogs.com/popsuper1982/p/5724095.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2016-07-31 22:18
+popsuper1982
+<span data-post-id="5724095" class="post-view-count">阅读(1275)</span> 
+<span data-post-id="5724095" class="post-comment-count">评论(0)</span> 
+<span data-post-id="5724095" class="post-digg-count">推荐(1)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5724095" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+            <div class="postSeparator"></div>
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5723916.html">
+    <span>
+        Mesos源码分析(9): Test Framework的启动
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：我们以Test Framework为例子解释Framework的启动方式。 Test Framework的代码在src/examples/test_framework.cpp中的main函数 首先要指定executor的uri 配置ExecutorInfo 配置FrameworkInfo 创建TestScheduler和MesosSchedulerDriver ...        <a href="https://www.cnblogs.com/popsuper1982/p/5723916.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2016-07-31 21:09
+popsuper1982
+<span data-post-id="5723916" class="post-view-count">阅读(556)</span> 
+<span data-post-id="5723916" class="post-comment-count">评论(0)</span> 
+<span data-post-id="5723916" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5723916" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2016/07/26.html">2016年7月26日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5709458.html">
+    <span>
+        Mesos源码分析(8): Mesos-Slave的初始化
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：Mesos-Slave的初始化在文件src/slave/slave.cpp里面 首先初始化资源预估器 初始化attributes 初始化hostname 初始化statusUpdateManager 注册一系列处理函数。 对于Slave注册成功的消息。 对于运行一个Task的消息。 对于注册上来的一个Execut...        <a href="https://www.cnblogs.com/popsuper1982/p/5709458.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2016-07-26 23:51
+popsuper1982
+<span data-post-id="5709458" class="post-view-count">阅读(593)</span> 
+<span data-post-id="5709458" class="post-comment-count">评论(0)</span> 
+<span data-post-id="5709458" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5709458" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+
+<div class="topicListFooter">
+    <div id="nav_next_page">
+        
+
+    </div>    
+</div>
+
+
+<div id="homepage_bottom_pager" class="topicListFooter">
+    
+
+<div class="pager">
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=3">上一页</a>
+    
+    
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=1">1</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=2">2</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=3">3</a>
+    4
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=5">5</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=6">6</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=7">7</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=8">8</a>
+    ···
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=16">16</a>
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=5">下一页</a>
+</div>
+</div>
+
+
+
+<script>
+    updatePostStats(
+        $(".post-view-count").map(function () { return this.dataset.postId }).get(),
+        function(id, count) { $(".post-view-count[data-post-id=" + id + "]").text("阅读(" + count + ")") },
+        function(id, count) { $(".post-comment-count[data-post-id=" + id + "]").text("评论(" + count + ")") },
+        function(id, count) { $(".post-digg-count[data-post-id=" + id + "]").text("推荐(" + count + ")") });
+</script>
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjtPSgfwLAHwLuFg4Q8hKH3JCbdAlWQuoaAsRx9w0oVLtn9rc5MEOC_JzL9Q9wBbd_JNftkbKKzrKpP1VgYWyqcgE3SLZKepeTX_PtkI7F022CC6gYBawOrLIZFfgJHf8ls" />
+</body>
+</html>

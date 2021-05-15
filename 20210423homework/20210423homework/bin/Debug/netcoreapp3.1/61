@@ -1,0 +1,516 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="上一节我们讲了ovs-vswitchd，其中虚拟网桥初始化的时候，对调用内核模块来添加虚拟网卡。 我们从openvswitch内核模块的加载过程，来看这个过程。 在datapath/datapath." />
+    <meta property="og:description" content="上一节我们讲了ovs-vswitchd，其中虚拟网桥初始化的时候，对调用内核模块来添加虚拟网卡。 我们从openvswitch内核模块的加载过程，来看这个过程。 在datapath/datapath." />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Openvswitch原理与代码分析(3): openvswitch内核模块的加载 - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2016-09-13 04:03';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class = "postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5868772.html">
+    <span>Openvswitch原理与代码分析(3): openvswitch内核模块的加载</span>
+    
+
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<p>
+&nbsp;</p><p>上一节我们讲了ovs-vswitchd，其中虚拟网桥初始化的时候，对调用内核模块来添加虚拟网卡。
+</p><p>
+&nbsp;</p><p>我们从openvswitch内核模块的加载过程，来看这个过程。
+</p><p>
+&nbsp;</p><p>在datapath/datapath.c中会调用module_init(dp_init);来初始化内核模块。
+</p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">int</span> __init dp_init(<span style="color: rgba(0, 0, 255, 1)">void</span>)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">int</span> err;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;BUILD_BUG_ON(<span style="color: rgba(0, 0, 255, 1)">sizeof</span>(<span style="color: rgba(0, 0, 255, 1)">struct</span> ovs_skb_cb) &gt; FIELD_SIZEOF(<span style="color: rgba(0, 0, 255, 1)">struct</span> sk_buff, cb));
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;pr_info("<span style="color: rgba(139, 0, 0, 1)">Open vSwitch switching datapath %s\n</span>", VERSION);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;err = compat_init();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (err)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">goto</span> error;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;err = action_fifos_init();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (err)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">goto</span> error_compat_exit;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;err = ovs_internal_dev_rtnl_link_register();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (err)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">goto</span> error_action_fifos_exit;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;err = ovs_flow_init();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (err)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">goto</span> error_unreg_rtnl_link;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;err = ovs_vport_init();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (err)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">goto</span> error_flow_exit;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;err = register_pernet_device(&amp;ovs_net_ops);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (err)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">goto</span> error_vport_exit;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;err = register_netdevice_notifier(&amp;ovs_dp_device_notifier);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (err)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">goto</span> error_netns_exit;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;err = ovs_netdev_init();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (err)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">goto</span> error_unreg_notifier;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;err = dp_register_genl();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (err &lt; 0)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">goto</span> error_unreg_netdev;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">return</span> 0;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error_unreg_netdev:
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;ovs_netdev_exit();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error_unreg_notifier:
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;unregister_netdevice_notifier(&amp;ovs_dp_device_notifier);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error_netns_exit:
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;unregister_pernet_device(&amp;ovs_net_ops);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error_vport_exit:
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;ovs_vport_exit();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error_flow_exit:
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;ovs_flow_exit();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error_unreg_rtnl_link:
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;ovs_internal_dev_rtnl_link_unregister();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error_action_fifos_exit:
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;action_fifos_exit();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error_compat_exit:
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;compat_exit();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error:
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">return</span> err;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p>其中比较重要的是调用了<span style="font-size: 9pt">dp_register_genl()，这个就是注册netlink函数，从而ovs-vswitchd可以通过netlink调用内核。
+</span></p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">int</span> dp_register_genl(<span style="color: rgba(0, 0, 255, 1)">void</span>)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">int</span> err;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">int</span> i;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">for</span> (i = 0; i &lt; ARRAY_SIZE(dp_genl_families); i++) {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;err = genl_register_family(dp_genl_families[i]);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (err)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">goto</span> error;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;}
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">return</span> 0;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error:
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;dp_unregister_genl(i);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">return</span> err;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-size: 9pt">这里dp_genl_families由四个netlink的family组成
+</span></p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> genl_family *dp_genl_families[] = {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&amp;dp_datapath_genl_family,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&amp;dp_vport_genl_family,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&amp;dp_flow_genl_family,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&amp;dp_packet_genl_family,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">};</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p>其中分别定义了以下的操作：
+</p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 139px"><col style="width: 305px"><col style="width: 435px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><p>Family名称</p></td><td style="padding-left: 7px; padding-right: 7px; border-top: 0.5pt solid; border-left: none; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><p>.name</p></td><td style="padding-left: 7px; padding-right: 7px; border-top: 0.5pt solid; border-left: none; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><p>.ops</p></td></tr><tr><td style="padding-left: 7px; padding-right: 7px; border-top: none; border-left: 0.5pt solid; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><p><span style="font-size: 9pt">dp_datapath_genl_family</span></p></td><td style="padding-left: 7px; padding-right: 7px; border-top: none; border-left: none; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> genl_family dp_datapath_genl_family = {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.id = GENL_ID_GENERATE,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.hdrsize = <span style="color: rgba(0, 0, 255, 1)">sizeof</span>(<span style="color: rgba(0, 0, 255, 1)">struct</span> ovs_header),
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.name = OVS_DATAPATH_FAMILY,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.version = OVS_DATAPATH_VERSION,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.maxattr = OVS_DP_ATTR_MAX,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.netnsok = <span style="color: rgba(0, 0, 255, 1)">true</span>,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.parallel_ops = <span style="color: rgba(0, 0, 255, 1)">true</span>,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.ops = dp_datapath_genl_ops,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.n_ops = ARRAY_SIZE(dp_datapath_genl_ops),
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.mcgrps = &amp;ovs_dp_datapath_multicast_group,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.n_mcgrps = 1,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">};</span></div></li></ol></td><td style="padding-left: 7px; padding-right: 7px; border-top: none; border-left: none; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> genl_ops dp_datapath_genl_ops[] = {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_DP_CMD_NEW,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = GENL_ADMIN_PERM, <span style="color: rgba(0, 128, 0, 1)">/* Requires CAP_NET_ADMIN privilege. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = datapath_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_dp_cmd_new
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;},
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_DP_CMD_DEL,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = GENL_ADMIN_PERM, <span style="color: rgba(0, 128, 0, 1)">/* Requires CAP_NET_ADMIN privilege. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = datapath_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_dp_cmd_del
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;},
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_DP_CMD_GET,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = 0, <span style="color: rgba(0, 128, 0, 1)">/* OK for unprivileged users. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = datapath_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_dp_cmd_get,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.dumpit = ovs_dp_cmd_dump
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;},
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_DP_CMD_SET,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = GENL_ADMIN_PERM, <span style="color: rgba(0, 128, 0, 1)">/* Requires CAP_NET_ADMIN privilege. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = datapath_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_dp_cmd_set,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;},
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">};</span></div></li></ol></td></tr><tr><td style="padding-left: 7px; padding-right: 7px; border-top: none; border-left: 0.5pt solid; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><p><span style="font-size: 9pt">dp_vport_genl_family</span></p></td><td style="padding-left: 7px; padding-right: 7px; border-top: none; border-left: none; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">struct</span> genl_family dp_vport_genl_family = {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.id = GENL_ID_GENERATE,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.hdrsize = <span style="color: rgba(0, 0, 255, 1)">sizeof</span>(<span style="color: rgba(0, 0, 255, 1)">struct</span> ovs_header),
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.name = OVS_VPORT_FAMILY,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.version = OVS_VPORT_VERSION,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.maxattr = OVS_VPORT_ATTR_MAX,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.netnsok = <span style="color: rgba(0, 0, 255, 1)">true</span>,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.parallel_ops = <span style="color: rgba(0, 0, 255, 1)">true</span>,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.ops = dp_vport_genl_ops,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.n_ops = ARRAY_SIZE(dp_vport_genl_ops),
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.mcgrps = &amp;ovs_dp_vport_multicast_group,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.n_mcgrps = 1,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">};</span></div></li></ol></td><td style="padding-left: 7px; padding-right: 7px; border-top: none; border-left: none; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> genl_ops dp_vport_genl_ops[] = {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_VPORT_CMD_NEW,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = GENL_ADMIN_PERM, <span style="color: rgba(0, 128, 0, 1)">/* Requires CAP_NET_ADMIN privilege. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = vport_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_vport_cmd_new
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;},
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_VPORT_CMD_DEL,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = GENL_ADMIN_PERM, <span style="color: rgba(0, 128, 0, 1)">/* Requires CAP_NET_ADMIN privilege. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = vport_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_vport_cmd_del
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;},
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_VPORT_CMD_GET,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = 0, <span style="color: rgba(0, 128, 0, 1)">/* OK for unprivileged users. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = vport_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_vport_cmd_get,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.dumpit = ovs_vport_cmd_dump
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;},
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_VPORT_CMD_SET,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = GENL_ADMIN_PERM, <span style="color: rgba(0, 128, 0, 1)">/* Requires CAP_NET_ADMIN privilege. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = vport_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_vport_cmd_set,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;},
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">};</span></div></li></ol></td></tr><tr><td style="padding-left: 7px; padding-right: 7px; border-top: none; border-left: 0.5pt solid; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><p><span style="font-size: 9pt">dp_flow_genl_family</span></p></td><td style="padding-left: 7px; padding-right: 7px; border-top: none; border-left: none; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> genl_family dp_flow_genl_family = {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.id = GENL_ID_GENERATE,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.hdrsize = <span style="color: rgba(0, 0, 255, 1)">sizeof</span>(<span style="color: rgba(0, 0, 255, 1)">struct</span> ovs_header),
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.name = OVS_FLOW_FAMILY,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.version = OVS_FLOW_VERSION,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.maxattr = OVS_FLOW_ATTR_MAX,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.netnsok = <span style="color: rgba(0, 0, 255, 1)">true</span>,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.parallel_ops = <span style="color: rgba(0, 0, 255, 1)">true</span>,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.ops = dp_flow_genl_ops,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.n_ops = ARRAY_SIZE(dp_flow_genl_ops),
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.mcgrps = &amp;ovs_dp_flow_multicast_group,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.n_mcgrps = 1,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">};</span></div></li></ol></td><td style="padding-left: 7px; padding-right: 7px; border-top: none; border-left: none; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> genl_ops dp_flow_genl_ops[] = {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_FLOW_CMD_NEW,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = GENL_ADMIN_PERM, <span style="color: rgba(0, 128, 0, 1)">/* Requires CAP_NET_ADMIN privilege. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = flow_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_flow_cmd_new
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;},
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_FLOW_CMD_DEL,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = GENL_ADMIN_PERM, <span style="color: rgba(0, 128, 0, 1)">/* Requires CAP_NET_ADMIN privilege. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = flow_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_flow_cmd_del
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;},
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_FLOW_CMD_GET,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = 0, <span style="color: rgba(0, 128, 0, 1)">/* OK for unprivileged users. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = flow_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_flow_cmd_get,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.dumpit = ovs_flow_cmd_dump
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;},
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_FLOW_CMD_SET,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = GENL_ADMIN_PERM, <span style="color: rgba(0, 128, 0, 1)">/* Requires CAP_NET_ADMIN privilege. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = flow_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_flow_cmd_set,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;},
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">};</span></div></li></ol></td></tr><tr><td style="padding-left: 7px; padding-right: 7px; border-top: none; border-left: 0.5pt solid; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><p><span style="font-size: 9pt">dp_packet_genl_family</span></p></td><td style="padding-left: 7px; padding-right: 7px; border-top: none; border-left: none; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> genl_family dp_packet_genl_family = {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.id = GENL_ID_GENERATE,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.hdrsize = <span style="color: rgba(0, 0, 255, 1)">sizeof</span>(<span style="color: rgba(0, 0, 255, 1)">struct</span> ovs_header),
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.name = OVS_PACKET_FAMILY,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.version = OVS_PACKET_VERSION,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.maxattr = OVS_PACKET_ATTR_MAX,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.netnsok = <span style="color: rgba(0, 0, 255, 1)">true</span>,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.parallel_ops = <span style="color: rgba(0, 0, 255, 1)">true</span>,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.ops = dp_packet_genl_ops,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.n_ops = ARRAY_SIZE(dp_packet_genl_ops),
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">};</span></div></li></ol></td><td style="padding-left: 7px; padding-right: 7px; border-top: none; border-left: none; border-bottom: 0.5pt solid; border-right: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> genl_ops dp_packet_genl_ops[] = {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;{ .cmd = OVS_PACKET_CMD_EXECUTE,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.flags = GENL_ADMIN_PERM, <span style="color: rgba(0, 128, 0, 1)">/* Requires CAP_NET_ADMIN privilege. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.policy = packet_policy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.doit = ovs_packet_cmd_execute
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;}
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">};</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p>如上一节中，ovs-vswitchd启动的时候，将虚拟网卡添加到虚拟交换机上的时候，会调用netlink的OVS_VPORT_CMD_NEW命令，因而会调用函数ovs_vport_cmd_new。
+</p><p>会调用static struct vport *new_vport(const struct vport_parms *parms)
+</p><p>会调用struct vport *ovs_vport_add(const struct vport_parms *parms)里面会调用vport = ops-&gt;create(parms);
+</p><p>ops是什么呢？在dp_init函数中会调用ovs_netdev_init，它会调用ovs_vport_ops_register(&amp;ovs_netdev_vport_ops);
+</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> vport_ops ovs_netdev_vport_ops = {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.type = OVS_VPORT_TYPE_NETDEV,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.create = netdev_create,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.destroy = netdev_destroy,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;.send = dev_queue_xmit,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">};</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p>所以ops-&gt;create会调用netdev_create，它会调用ovs_netdev_link，其中有下面的代码：
+</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">err = netdev_rx_handler_register(vport-&gt;dev, netdev_frame_hook,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vport);</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p>注册一个方法叫做netdev_frame_hook，每当网卡收到包的时候，就调用这个方法。
+</p><p>
+&nbsp;</p><p>在下面的章节中，我们会从这个函数开始，解析整个网络包的处理过程。
+</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2016-09-13 16:03</span>&nbsp;
+<a href="https://www.cnblogs.com/popsuper1982/">popsuper1982</a>&nbsp;
+阅读(<span id="post_view_count">2662</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5868772" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(5868772);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 186637, cb_blogApp = 'popsuper1982', cb_blogUserGuid = 'cf2394f1-d0e0-e311-8d02-90b11c0b17d6';
+    var cb_entryId = 5868772, cb_entryCreatedDate = '2016-09-13 16:03', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjsliTDbW-HmhW47F7jqrvCZHnzGK1Awq6UuItWb3KUWvHYuNIOBACEBS74v-BrJqiBWznZHDuAXFa97FSLsqWBWGQCplKRvFmlInNW3WCx28_ldO3Ks_Sah9vpKpXHWstI" />
+</body>
+</html>

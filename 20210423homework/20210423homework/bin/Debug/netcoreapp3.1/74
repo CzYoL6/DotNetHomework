@@ -1,0 +1,1715 @@
+﻿
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <link rel="canonical" href="https://blog.csdn.net/weixin_43975771/article/details/115913228"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="renderer" content="webkit"/>
+    <meta name="force-rendering" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="report" content='{"pid": "blog", "spm":"1001.2101"}'>
+    <meta name="referrer" content="always">
+    <meta http-equiv="Cache-Control" content="no-siteapp" /><link rel="alternate" media="handheld" href="#" />
+    <meta name="shenma-site-verification" content="5a59773ab8077d4a62bf469ab966a63b_1497598848">
+    <meta name="applicable-device" content="pc">
+    <link  href="https://g.csdnimg.cn/static/logo/favicon32.ico"  rel="shortcut icon" type="image/x-icon" />
+    <title>TDH和CDH的简介和对比_不积跬步，无以致千里的博客-CSDN博客</title>
+    <script>
+      (function(){ 
+        var el = document.createElement("script"); 
+        el.src = "https://s3a.pstatp.com/toutiao/push.js?1abfa13dfe74d72d41d83c86d240de427e7cac50c51ead53b2e79d40c7952a23ed7716d05b4a0f683a653eab3e214672511de2457e74e99286eb2c33f4428830"; 
+        el.id = "ttzz"; 
+        var s = document.getElementsByTagName("script")[0]; 
+        s.parentNode.insertBefore(el, s);
+      })(window)
+    </script>
+        <meta name="keywords" content="TDH和CDH的简介和对比">
+        <meta name="csdn-baidu-search"  content='{"autorun":true,"install":true,"keyword":"TDH和CDH的简介和对比"}'>
+    <meta name="description" content="前言hadoop是一个开源项目，所以很多公司在这个基础进行商业化，下面简单介绍下应用比较广泛的TDH和CDH两个版本。【TDH】TDH：Transwarp Data Hub1 Transwarp Inceptor简介TranswarpInceptor是星环科技推出的用于数据仓库和交互式分析的大数据平台软件，它基于Hadoop和Spark技术平台打造，加上自主开发的创新功能组件，有效的解决了企业级大数据数据处理和分析的各种技术难题，帮助企业快速的构建和推广数据业务。TranswarpIncept">
+    <script src="//g.csdnimg.cn/tingyun/1.8.5/blog.js" type='text/javascript'></script>
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/css/detail_enter-b70b7f940c.min.css">
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/themesSkin/skin-ink/skin-ink-a11cfdaac3.min.css">
+    <script src="https://csdnimg.cn/public/common/libs/jquery/jquery-1.9.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var isCorporate = false;//注释删除enterprise
+        var username =  "weixin_43975771";
+        var skinImg = "white";
+        var blog_address = "https://blog.csdn.net/weixin_43975771";
+        var currentUserName = "";
+        var isOwner = false;
+        var loginUrl = "http://passport.csdn.net/account/login?from=https://blog.csdn.net/weixin_43975771/article/details/115913228";
+        var blogUrl = "https://blog.csdn.net/";
+        var avatar = "https://profile.csdnimg.cn/8/5/7/3_weixin_43975771";
+        var articleTitle = "TDH和CDH的简介和对比";
+        var articleDesc = "前言hadoop是一个开源项目，所以很多公司在这个基础进行商业化，下面简单介绍下应用比较广泛的TDH和CDH两个版本。【TDH】TDH：Transwarp Data Hub1 Transwarp Inceptor简介TranswarpInceptor是星环科技推出的用于数据仓库和交互式分析的大数据平台软件，它基于Hadoop和Spark技术平台打造，加上自主开发的创新功能组件，有效的解决了企业级大数据数据处理和分析的各种技术难题，帮助企业快速的构建和推广数据业务。TranswarpIncept";
+        var articleTitles = "TDH和CDH的简介和对比_不积跬步，无以致千里的博客-CSDN博客";
+        var nickName = "不积跬步，无以致千里";
+        var articleDetailUrl = "https://blog.csdn.net/weixin_43975771/article/details/115913228";
+        if(window.location.host.split('.').length == 3) {
+            blog_address = blogUrl + username;
+        }
+        var skinStatus = "White";
+        var blogStaticHost = "https://csdnimg.cn/release/blogv2/"
+    </script>
+    <script src="https://g.csdnimg.cn/??fixed-sidebar/1.1.6/fixed-sidebar.js" type="text/javascript"></script>
+    <script src='//g.csdnimg.cn/common/csdn-report/report.js' type='text/javascript'></script>
+    <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/public/sandalstrap/1.4/css/sandalstrap.min.css">
+    <style>
+        .MathJax, .MathJax_Message, .MathJax_Preview{
+            display: none
+        }
+    </style>
+    <script src="https://dup.baidustatic.com/js/ds.js"></script>
+</head>
+<body class="nodata " style="">
+        <script>
+            var toolbarSearchExt = '{"landingWord":[],"queryWord":"","tag":[],"title":"TDH和CDH的简介和对比"}';
+        </script>
+    <script src="https://g.csdnimg.cn/common/csdn-toolbar/csdn-toolbar.js" type="text/javascript"></script>
+    <script>
+    (function(){
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        }
+        else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+    </script>
+<link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/pc/css/blog_code-01256533b5.min.css">
+<link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/chart-3456820cac.css" />
+<div class="main_father clearfix d-flex justify-content-center" style="height:100%;"> 
+    <div class="container clearfix" id="mainBox">
+        <main>
+<script type="text/javascript">
+    var blogSensitiveWords = "";
+    function getQueryString(name) {   
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象  
+      var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+      if( r != null ) return decodeURIComponent( r[2] ); return '';   
+    }
+    function stripscript(s){ 
+      var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？%]") 
+      var rs = ""; 
+      for (var i = 0; i < s.length; i++) { 
+        rs = rs+s.substr(i, 1).replace(pattern, ''); 
+      } 
+      return rs; 
+    }
+    var blogHotWords = stripscript(getQueryString('utm_term')).length > 1 ? stripscript(getQueryString('utm_term')) : ''
+</script>
+<div class="blog-content-box">
+    <div class="article-header-box">
+        <div class="article-header">
+            <div class="article-title-box">
+                <h1 class="title-article" id="articleContentId">TDH和CDH的简介和对比</h1>
+            </div>
+            <div class="article-info-box">
+                <div class="article-bar-top">
+                    <img class="article-type-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/reprint.png" alt="">
+                    <div class="bar-content">
+                    <a class="follow-nickName " href="https://blog.csdn.net/weixin_43975771" target="_blank" rel="noopener">不积跬步，无以致千里</a>
+                    <span class="time">2021-04-20 16:58:52</span>
+                    <img class="article-read-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/articleReadEyes.png" alt="">
+                    <span class="read-count">38</span>
+                    <a id="blog_detail_zk_collection" class="un-collection" data-report-click='{"mod":"popu_823","spm":"1001.2101.3001.4232","ab":"new"}'>
+                        <img class="article-collect-img article-heard-img un-collect-status isdefault" style="display:inline-block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollect.png" alt="">
+                        <img class="article-collect-img article-heard-img collect-status isactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive.png" alt="">
+                        <span class="name">收藏</span>
+                        <span class="get-collection">
+                        </span>
+                    </a>
+                    </div>
+                </div>
+                <div class="blog-tags-box">
+                    <div class="tags-box artic-tag-box">
+                            <span class="label">分类专栏：</span>
+                                <a class="tag-link" href="https://blog.csdn.net/weixin_43975771/category_9098425.html" target="_blank" rel="noopener">大数据开发</a>
+                    </div>
+                </div>
+                <div class="slide-content-box">
+                    <div class="article-source-link">
+                        原文链接：<a href="https://blog.csdn.net/dscfirst/article/details/86736765" target="_blank" rel="noopener">https://blog.csdn.net/dscfirst/article/details/86736765</a>
+                    </div>
+                </div>
+                <div class="operating">
+                    <a class="href-article-edit slide-toggle">版权</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="csdn-shop-window-top" class="csdn-shop-window-common" style="margin-top:18px;padding:0"></div>
+    <article class="baidu_pl">
+        <div id="article_content" class="article_content clearfix">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-b5506197d8.css">
+                <div id="content_views" class="markdown_views prism-atom-one-dark">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                        <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                    </svg>
+                    <h3><a id="_0"></a>前言</h3> 
+<p>hadoop是一个开源项目&#xff0c;所以很多公司在这个基础进行商业化&#xff0c;下面简单介绍下应用比较广泛的TDH和CDH两个版本。</p> 
+<pre><code class="prism language-bash">【TDH】
+TDH&#xff1a;Transwarp Data Hub
+1 Transwarp Inceptor简介
+TranswarpInceptor是星环科技推出的用于数据仓库和交互式分析的大数据平台软件&#xff0c;它基于Hadoop和Spark技术平台打造&#xff0c;加上自主开发的创新功能组件&#xff0c;有效的解决了企业级大数据数据处理和分析的各种技术难题&#xff0c;帮助企业快速的构建和推广数据业务。
+</code></pre> 
+<p><a href="https://www.transwarp.cn/transwarp/product-TDH.html?categoryId&#61;18">TDH产品官网</a><br /> TranswarpInceptor可提供完整的SQL支持&#xff0c;支持主流的SQL模块化扩展&#xff0c;兼容通用开发框架和工具&#xff0c;支持事务特性保证数据的准确性&#xff0c;允许多租户的隔离与管理&#xff0c;且能够利用内存或者SSD来加速数据的读取&#xff0c;支持与关系型数据库实时对接并做统计分析&#xff0c;辅以高性能的SQL执行引擎&#xff0c;为企业提供高性价比和高度可扩展的解决方案。</p> 
+<p>在Inceptor中&#xff0c;您可以使用常见的数据库对象&#xff0c;包括数据库&#xff08;database&#xff09;&#xff0c;表&#xff08;table&#xff09;&#xff0c;视图&#xff08;view&#xff09;和函数&#xff08;function&#xff09;。您可以使用Inceptor SQL、Inceptor PL/SQL以及Inceptor SQL PL来操作这些数据库对象。Inceptor中数据库对象的元数据保存在Inceptor Metastore中&#xff0c;而数据库对象内的数据可以存放在&#xff1a;<br /> 1&#xff0e;内存或者SSD中&#xff08;Holodesk表&#xff09;<br /> 2&#xff0e;HDFS中&#xff08;TEXT表/ORC表/CSV表&#xff09;<br /> 2 产品背景</p> 
+<p>Transwarp Data Hub (TDH) <a href="https://zhuanlan.zhihu.com/p/33067651">更多</a></p> 
+<p>2006年Hadoop技术的出现标志着大数据技术时代的开始&#xff0c;经过10多年的蓬勃发展&#xff0c;大数据技术已经真正承托起一大批企业的数据基础架构。经过4年的快速演进&#xff0c;Transwarp Data Hub&#xff08;简称TDH&#xff09;已成为国际一流的大数据平台。从2016年起&#xff0c;TDH正式成为Gartner认可的Hadoop国际主 流发行版本。</p> 
+<p>TDH是国内首个全面支持Spark的Hadoop发行版&#xff0c;也是国内落地案例最多的商业版本&#xff0c;是国内外领先的高性能平台&#xff0c;比开源基于Hadoop MapReduce计算框架的版本快10x~100x倍。TDH应用范围覆盖各种规模和不同数据量的企业&#xff0c;通过内存计算、高效索引、执行优化和高度容错的技术&#xff0c;使得一个平台能够处理GB级到PB级的数据&#xff0c;并且在每个数量级上&#xff0c;都能比现有技术提供更快的性能&#xff1b;企业客户不再需要混合架构&#xff0c;TDH可以伴随企业客户的数据增长&#xff0c;动态不停机扩容&#xff0c;避免MPP或混合架构数据迁移的棘手问题。</p> 
+<p>3 核心产品与架构</p> 
+<p>Transwarp Data Hub由Apache Hadoop、6款核心产品、大数据开发工具集Studio、安全管控平台 Guardian和管理服务Manager构成。 TDH主要提供6款核心产品:Transwarp Inceptor是大数据分析数据库&#xff0c;Transwarp Slipstream是实时计算引擎&#xff0c;Transwarp Discover专注于利用机器学习从数据提中取价值内容&#xff0c;Transwarp Hyperbase用于处理非结构化数据&#xff0c;Transwarp Search用于构建企业搜索引擎&#xff0c;Transwarp Sophon则是支持图形化操作的深度学习平台。通过使用TDH&#xff0c;企业能够更有效的利用数据构建核心商业系统&#xff0c;加速商业创新。</p> 
+<p>TDH产品架构图如下图所示&#xff1a;<br /> <img src="https://img-blog.csdnimg.cn/20210420165742235.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzk3NTc3MQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
+<p>4 技术优势</p> 
+<p>TDH产品的主要技术优势包括以下几个方面&#xff1a;<br /> ①　极致的性能与可扩展性<br /> TDH的批处理速度是开源Hadoop的10-100倍&#xff0c;是MPP的5-10倍&#xff0c;可以对从GB到PB级的数据量实现复杂的查询和分析。TDH具有高可扩展性&#xff0c;用户可以通过增加集群节点数量&#xff0c;线性提高系统的处理能力。<br /> ②　容器技术与大数据平台<br /> TDH支持部署于TOS之上。TOS是为大数据应用量身订做的云操作系统&#xff0c;基于Docker和Kubernetes&#xff0c;支持一键部署TDH、扩容、缩容&#xff0c;同时支持基于优先级的抢占式资源调度和细粒度资源分配。<br /> ③　完整的SQL和ACID支持<br /> Transwarp Inceptor是第一个实现完整SQL支持的Hadoop发行产品。它不仅支持SQL 2003&#xff0c;Oracle PL/SQL以及DB2 SQL PL&#xff0c;还实现了完整的ACID和CRUD功能。TDH提供JDBC和ODBC驱动连接&#xff0c;方便第三方工具运行于TDH之上。<br /> ④　低延迟的流处理<br /> Transwarp Slipstream是同时支持事件驱动和微批处理的流处理引擎&#xff0c;计算延迟最低可至5ms。它提供标准的SQL编程接口&#xff0c;还支持高可用性&#xff08;HA&#xff09;和Exactly-Once的语义&#xff0c;从而支持7x24小时的 生产业务。<br /> ⑤　丰富的机器学习和深度学习功能<br /> Transwarp Discover支持用户通过R语言和Python开发机器学习项目&#xff0c;也可以用图形化的工具做分析。深度学习平台Sophon能 帮助用户快捷的创建AI应用程序。<br /> ⑥　大数据上的全文搜索<br /> Transwarp Search支持通过SQL实现大数据上的秒级全文搜索&#xff0c;它利用层次化存储、堆外内存管理等创新性技术&#xff0c;极大的提高了系统的可用性。此外&#xff0c;Search还可以结合Inceptor提供较 强的数据分析能力。<br /> ⑦　图形化的大数据开发工具套件<br /> Transwarp Studio是TDH中的大数据开发工具集&#xff0c;包括元数据管理Governor、工作流Workflow、数据整合工具Transporter&#xff0c;Cube设计工具Rubik以及报表工具Pilot。用户可以使用这些图形化工具来提高大数据的开发效率&#xff0c;降低技术门槛。<br /> ⑧　多样化的数据处理功能<br /> Transwarp Hyperbase用于存储和计算结构化或非结构化数据&#xff0c;包括日志记录、JSON/XML文件以及二进制数据&#xff08;如图像和视频&#xff09;。Hyperbase底层是KV的数据库&#xff0c;因此其非常适合高频次的数据入库、高并发精确检索等业务。<br /> ⑨　简易的操作和管理<br /> Transwarp Transwarp Manager是专门用于部署、管理和运维TDH集群的组件。它支持产品一键安装、一键升级和图形化运维&#xff0c;并提供了预警和健康检测功能&#xff0c;帮助用户简化运维过程。<br /> ⑩　统一的安全/多租户管理<br /> Transwarp Guardian是TDH平台中实现安全控制和资源管理的中央服务平台&#xff0c;它支持Kerberos和LDAP认证&#xff0c;可以做细粒度的权限控制&#xff0c;并且提供租户管理功能。</p> 
+<pre><code class="prism language-c">【CDH】
+CDH&#xff1a;Cloudera Data Hub
+Cloudera公司的发行版&#xff0c;我们将该版本称为CDH&#xff08;Cloudera Distribution Hadoop&#xff09;。截至目前为止&#xff0c;CDH共有<span class="token number">5</span>个版本&#xff0c;其中&#xff0c;前两个已经不再更新&#xff0c;最近的两个&#xff0c;分别是CDH4在Apache Hadoop <span class="token number">2.0</span><span class="token number">.0</span>版本基础上演化而来的&#xff09;&#xff0c;CDH5&#xff0c;它们每隔一段时间便会更新一次。
+</code></pre> 
+<p>Cloudera以patch level划分小版本&#xff0c;比如patch level为923.142表示在原生态Apache Hadoop 0.20.2基础上添加了1065个patch&#xff08;这些patch是各个公司或者个人贡献的&#xff0c;在Hadoop jira上均有记录&#xff09;&#xff0c;其中923个是最后一个beta版本添加的patch&#xff0c;而142个是稳定版发行后新添加的patch。由此可见&#xff0c;patch level越高&#xff0c;功能越完备且解决的bug越多。</p> 
+<p>Cloudera版本层次更加清晰&#xff0c;且它提供了适用于各种操作系统的Hadoop安装包&#xff0c;可直接使用apt-get或者yum命令进行安装&#xff0c;更加省事。<br /> CDH是由cloudera进行开发的大数据一站式平台管理解决方案,基于Hadoop生态的第三方发行版本,这样的描述相信大家还是挺难理解的,我们一起来梳理下CDH带来的改观。</p> 
+<p><img src="https://img-blog.csdnimg.cn/20210420165656986.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzk3NTc3MQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /></p> 
+<p>下面对图中体系结构做些简单说明&#xff1a;</p> 
+<p>数据整合</p> 
+<p>flume主要是日志采集组件,可以从tomcat服务日志或者nginx日志中获取产生的日志</p> 
+<p>sqoop主要用于在Hadoop(Hive)与传统的数据库(mysql、postgresql…)间进行数据的传递&#xff0c;可以将一个关系型数据库&#xff08;例如 &#xff1a; MySQL ,Oracle ,Postgres等&#xff09;中的数据导进到Hadoop的HDFS中&#xff0c;也可以将HDFS的数据导进到关系型数据库中。</p> 
+<p>nfs是FreeBSD支持的文件系统中的一种&#xff0c;它允许网络中的计算机之间通过TCP/IP网络共享资源。在NFS的应用中&#xff0c;本地NFS的客户端应用可以透明地读写位于远端NFS服务器上的文件&#xff0c;就像访问本地文件一样。</p> 
+<p>HDFS</p> 
+<p>hdfs是一个分布式文件存储系统,可以将大量的大文件进行存储,它和其他的分布式文件系统的主要区别是它是一个高容错的系统,适合部署在廉价的机器上,并且hdfs能提供高吞吐量的数据访问&#xff0c;非常适合大规模数据集上的应用。</p> 
+<p>Hbase</p> 
+<p>官网解释:<br /> 当您需要对大数据进行随机&#xff0c;实时读/写访问时&#xff0c;请使用Apache HBase™。该项目的目标是托管非常大的表 - 数十亿行X百万列 - 在商品硬件集群上。Apache HBase是一个开源的&#xff0c;分布式的&#xff0c;版本化的非关系数据库&#xff0c;模仿Google的Bigtable&#xff1a; Chang等人的结构化数据分布式存储系统。正如Bigtable利用Google文件系统提供的分布式数据存储一样&#xff0c;Apache HBase在Hadoop和HDFS之上提供类似Bigtable的功能。</p> 
+<p>参考&#xff1a; https://blog.csdn.net/dscfirst/article/details/86736765</p>
+                </div>
+                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-d7a94ec6ab.css" rel="stylesheet">
+                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-f1c5feb645.css" rel="stylesheet">
+        </div>
+    </article>
+</div>
+            <div id="csdn-shop-window" class="csdn-shop-window-common"></div>
+<div class="more-toolbox" id="toolBarBox">
+    <span id="fixedBar"></span>
+    <div class="left-toolbox">
+        <ul class="toolbox-list ">
+            <li class="tool-item tool-item-size tool-active is-like" id="is-like"><a>
+            <img style="display:none;" id="is-like-imgactive-animation-like" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUpactive.png" alt="">
+            <img class="isactive" style="display:none" id="is-like-imgactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUpactive.png" alt="">
+            <img class="isdefault" style="display:block" id="is-like-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUp.png" alt="">   
+            <span class="name" id="is-like-span">点赞</span>
+            <span id="spanCount" class="count">
+            </span>
+            </a></li>
+            <li class="tool-item tool-item-size tool-active tool-item-comment">
+                <a href="#commentBox">
+                    <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarComment.png" alt="">
+                    <img class="isactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCommentactive.png" style="display:none;" alt="">
+                    <span class="name">评论</span>
+                    <span class="count">
+                    </span>
+                </a>
+            </li>
+            <li class="tool-item tool-item-size tool-active tool-QRcode" id="tool-share">
+                <a href="javascript:;" data-report-click='{"mod":"1582594662_002","spm":"1001.2101.3001.4129","ab":"new"}'>
+                    <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarShare.png" alt="">
+                    <img class="isactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarShareactive.png" style="display:none;" alt="">
+                    <span class="name">分享</span>
+                </a>
+                <div class="QRcode" id="tool-QRcode" style="left:-92%;">
+                    <span id="QRcode-close">x</span>
+                    <p class="title">
+                    海报分享
+                    </p>
+                    <div id='shareCode'></div>
+                    <p>
+                    扫一扫，分享海报
+                    </p>
+                </div>
+            </li>
+            <li class="tool-item tool-item-size tool-active is-collection ">
+                <a href="javascript:;" data-report-click='{"mod":"popu_824","spm":"1001.2101.3001.4130","ab":"new"}'>
+                    <img style="display:none" id="is-collection-img-collection" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive.png" alt="">
+                    <img class="isdefault" id="is-collection-img" style="display:block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollect.png" alt="">
+                    <img class="isactive" id="is-collection-imgactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive.png" alt="">
+                    <span class="name" id="is-collection">收藏</span>
+                    <span class="count get-collection" id="get-collection">
+                    </span>
+                </a>
+            </li>
+            <li class="tool-item tool-item-size tool-active tool-more">
+              <a class="article-report">
+                <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarReport.png" alt="">
+                <img class="isactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarReportactive.png" style="display:none;" alt="">
+                <span class="name">举报</span>
+              </a>
+            </li>
+            <li class="tool-item">
+                    <a class="tool-attend tool-bt-button tool-bt-attend" href="javascript:;" data-report-view='{"mod":"1592215036_002","spm":"1001.2101.3001.4232","extend1":"关注"}'>关注</a>
+                <a class="tool-item-follow active-animation" style="display:none;">关注</a>
+            </li>
+            <li class="tool-item">
+                    <p class="company active" id="health-companies" href="javascript:;" >一键三连</p>
+            </li>
+        </ul>
+    </div>  
+</div>
+<script type=text/javascript crossorigin src="https://csdnimg.cn/release/phoenix/production/qrcode-7c90a92189.min.js"></script>
+<script src="//g.csdnimg.cn/??sharewx/1.2.1/sharewx.js" type="text/javascript"></script>
+<script type="text/javascript" crossorigin src="https://g.csdnimg.cn/collection-box/2.0.4/collection-box.js"></script>
+                <div id="dmp_ad_58" style="width:100%;overflow-x:hidden"><div id="kp_box_58" data-pid="58"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-format="fluid"
+     data-ad-layout-key="-gi-21+3s-18+2p"
+     data-ad-client="ca-pub-1076724771190722"
+     data-ad-slot="5869798804"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script><img class="pre-img-lasy" data-src="https://kunyu.csdn.net/1.png?p=58&a=3778&c=0&k=&spm=1001.2101.3001.5002&d=1&t=3&u=aa76a1162a4449e7b22a09d09981adf8" style="display: block;width: 0px;height: 0px;"></div></div>
+            <div class="second-recommend-box recommend-box">
+<div class="recommend-item-box type_blog clearfix" data-url="https://xumaosheng.blog.csdn.net/article/details/79072393"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-1.control\"}","dist_request_id":"1621077344303_90168","index":"1","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://xumaosheng.blog.csdn.net/article/details/79072393"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://xumaosheng.blog.csdn.net/article/details/79072393" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-1.control\"}","dist_request_id":"1621077344303_90168","index":"1","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://xumaosheng.blog.csdn.net/article/details/79072393"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control'>
+					<em>td</em>h
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/bingoxubin" target="_blank"><span class="blog-title">bingoabin</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">01-16</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					17万+
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://xumaosheng.blog.csdn.net/article/details/79072393" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-1.control\"}","dist_request_id":"1621077344303_90168","index":"1","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://xumaosheng.blog.csdn.net/article/details/79072393"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">1 Transwarp Inceptor<em>简介</em>
+  TranswarpInceptor是星环科技推出<em>的</em>用于数据仓库<em>和</em>交互式分析<em>的</em>大数据平台软件，它基于Hadoop<em>和</em>Spark技术平台打造，加上自主开发<em>的</em>创新功能组件，有效<em>的</em>解决了企业级大数据数据处理<em>和</em>分析<em>的</em>各种技术难题，帮助企业快速<em>的</em>构建<em>和</em>推广数据业务。
+  
+  TranswarpInceptor可提供完整<em>的</em>SQL支持，支持主流<em>的</em>SQL模块化扩展，兼</div>
+			</a>
+		</div>
+	</div>
+</div>
+            </div>
+<a id="commentBox" name="commentBox"></a>
+<div class="comment-box">
+	<div class="comment-edit-box d-flex">
+		<a id="commentsedit"></a>
+		<div class="user-img">
+			<a href="javascript:void(0);" >
+				<img class="show_loginbox" src="https://g.csdnimg.cn/static/user-img/anonymous-User-img.png">
+			</a>
+		</div>
+		<form id="commentform">
+			<img class="comment-sofa-flag" src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentFlag@2x.png">
+      <textarea class="comment-content" name="comment_content" id="comment_content" placeholder="优质评论可以帮助作者获得更高权重" maxlength="1000"></textarea>
+			<div class="comment-emoticon"><img class="comment-emoticon-img" data-url="https://csdnimg.cn/release/blogv2/dist/pc/img/" src="https://csdnimg.cn/release/blogv2/dist/pc/img/emoticon.png" alt="表情包"></div> 
+      <span class="comment-emoticon-tip">插入表情</span>
+      <div class="comment-emoticon-box">
+        <div class="comment-emoticon-img-box">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:001.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/001.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:002.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/002.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:003.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/003.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:004.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/004.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:005.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/005.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:006.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/006.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:007.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/007.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:008.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/008.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:009.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/009.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:010.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/010.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:011.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/011.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:012.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/012.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:013.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/013.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:014.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/014.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:015.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/015.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:016.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/016.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:017.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/017.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:018.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/018.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:019.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/019.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:020.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/020.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:021.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/021.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:022.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/022.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:023.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/023.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:024.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/024.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:025.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/025.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:026.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/026.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:027.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/027.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:028.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/028.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:029.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/029.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:030.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/030.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:031.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/031.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:032.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/032.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:033.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/033.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:034.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/034.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:035.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/035.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:036.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/036.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:037.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/037.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:038.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/038.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:039.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/039.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:040.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/040.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:041.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/041.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:042.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/042.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:043.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/043.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:044.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/044.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:045.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/045.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:046.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/046.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:047.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/047.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:048.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/048.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:049.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/049.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:050.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/050.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:051.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/051.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:052.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/052.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:053.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/053.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:054.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/054.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:055.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/055.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:056.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/056.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:057.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/057.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:058.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/058.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:059.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/059.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:060.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/060.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:061.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/061.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:062.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/062.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:063.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/063.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:064.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/064.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:065.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/065.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:066.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/066.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:067.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/067.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:068.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/068.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:069.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/069.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:070.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/070.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:071.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/071.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:072.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/072.png">
+        </div>
+      </div>
+      <div class="opt-box">
+				<div id="ubbtools" class="add_code">
+					<a href="#insertcode" code="code" target="_self"><i class="icon iconfont icon-daima"></i></a>
+				</div>
+				<input type="hidden" id="comment_replyId" name="comment_replyId">
+				<input type="hidden" id="article_id" name="article_id" value="115913228">
+				<input type="hidden" id="comment_userId" name="comment_userId" value="">
+				<input type="hidden" id="commentId" name="commentId" value="">
+				<div class="dropdown" id="myDrap">
+					<a class="dropdown-face d-flex align-items-center" data-toggle="dropdown" role="button"
+						aria-haspopup="true" aria-expanded="false">
+						<div class="txt-selected text-truncate">添加代码片</div>
+						<svg class="icon d-block" width="200px" height="100.00px" viewBox="0 0 2048 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path  d="M597.33333292 298.666667h853.333334L1023.99999992 725.333333 597.33333292 298.666667z"  /></svg>
+					</a>
+					<ul class="dropdown-menu" id="commentCode" aria-labelledby="drop4">
+						<li><a data-code="html">HTML/XML</a></li>
+						<li><a data-code="objc">objective-c</a></li>
+						<li><a data-code="ruby">Ruby</a></li>
+						<li><a data-code="php">PHP</a></li>
+						<li><a data-code="csharp">C</a></li>
+						<li><a data-code="cpp">C++</a></li>
+						<li><a data-code="javascript">JavaScript</a></li>
+						<li><a data-code="python">Python</a></li>
+						<li><a data-code="java">Java</a></li>
+						<li><a data-code="css">CSS</a></li>
+						<li><a data-code="sql">SQL</a></li>
+						<li><a data-code="plain">其它</a></li>
+					</ul>
+				</div>
+				<div class="right-box" id="rightBox" data-type="2">
+							<span id="tip_comment" class="tip">还能输入<em>1000</em>个字符</span>
+							<a data-report-click='{"mod":"1582594662_003","spm":"1001.2101.3001.4227","ab":"new"}'><input type="submit"
+									class="btn btn-sm btn-comment" value="发表评论"></a>
+				</div>
+			</div>
+		</form>
+		<input type="button" class="bt-comment-show" value="评论">
+	</div>
+	<div class="comment-list-container">
+		<a id="comments"></a>
+		<div class="comment-list-box">
+		</div>
+		<div id="commentPage" class="pagination-box d-none"></div>
+		<div class="opt-box text-center">
+			<div class="btn btn-sm btn-link-blue" id="btnMoreComment"></div>
+		</div>
+	</div>
+</div>            <div class="recommend-tit-mod">相关推荐</div>
+            <div class="recommend-box insert-baidu-box">
+                <div class="recommend-item-box clearfix" style="display:none"></div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/MrZhangBaby/article/details/88319498"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-2.control\"}","dist_request_id":"1621077344303_90168","index":"2","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/MrZhangBaby/article/details/88319498"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/MrZhangBaby/article/details/88319498" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-2.control\"}","dist_request_id":"1621077344303_90168","index":"2","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/MrZhangBaby/article/details/88319498"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.control'>
+					C<em>DH</em> <em>和</em>Ambari之间<em>的</em>优缺点
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/MrZhangBaby" target="_blank"><span class="blog-title">阿尼古</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">03-07</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					3905
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/MrZhangBaby/article/details/88319498" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-2.control\"}","dist_request_id":"1621077344303_90168","index":"2","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/MrZhangBaby/article/details/88319498"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">1 、什么是C<em>DH</em>，Ambari？
+
+Apache Ambari是一种基于Web<em>的</em>工具，支持Apache Hadoop集群<em>的</em>供应、管理<em>和</em>监控。Ambari已支持大多数Hadoop组件，包括HDFS、MapReduce、Hive、Pig、 Hbase、Zookeper、Sqoop<em>和</em>Hcatalog等。
+
+Apache Ambari 支持HDFS、MapReduce、Hive、Pig、Hbase、Zo...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://yuhui.blog.csdn.net/article/details/51570183"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-3.control\"}","dist_request_id":"1621077344303_90168","index":"3","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://yuhui.blog.csdn.net/article/details/51570183"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://yuhui.blog.csdn.net/article/details/51570183" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-3.control\"}","dist_request_id":"1621077344303_90168","index":"3","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://yuhui.blog.csdn.net/article/details/51570183"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control'>
+					Apache，C<em>DH</em><em>和</em>Cloudera三者有什么区别
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/silentwolfyh" target="_blank"><span class="blog-title">北京小辉</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">06-02</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					8118
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://yuhui.blog.csdn.net/article/details/51570183" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-3.control\"}","dist_request_id":"1621077344303_90168","index":"3","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://yuhui.blog.csdn.net/article/details/51570183"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">Hortonworks Hadoop区别于其他<em>的</em>Hadoop发行版(如Cloudera)<em>的</em>根本就在于，Hortonworks<em>的</em>产品均是百分之百开源。
+Cloudera有免费版<em>和</em>企业版，企业版只有试用期。
+apache hadoop则是原生<em>的</em>hadoop。
+
+目前在中国流行<em>的</em>是apache hadoop，Cloudera C<em>DH</em>，当然Hortonworks也有用<em>的</em>
+
+Apache Amb</div>
+			</a>
+		</div>
+	</div>
+</div>
+		<dl id="recommend-item-box-tow" class="recommend-item-box type_blog clearfix">
+			
+		</dl>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/sinat_29581293/article/details/53266661"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-4.control\"}","dist_request_id":"1621077344303_90168","index":"4","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/sinat_29581293/article/details/53266661"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/sinat_29581293/article/details/53266661" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-4.control\"}","dist_request_id":"1621077344303_90168","index":"4","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/sinat_29581293/article/details/53266661"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-4.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-4.control'>
+					C<em>DH</em>,<em>TD</em>H常用命令总结
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/sinat_29581293" target="_blank"><span class="blog-title">何成俭的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">11-21</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					6163
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/sinat_29581293/article/details/53266661" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-4.control\"}","dist_request_id":"1621077344303_90168","index":"4","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/sinat_29581293/article/details/53266661"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-4.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-4.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">transwarp -t -h localhost
+
+
+beeline -u jdbc:hive2://HADOOP-01:10000/default -n hive
+
+
+beeline -u &#39;jdbc:inceptor2://ipaddress:10000/wasu_sjq&#39;</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_30673611/article/details/96658198"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-5.control\"}","dist_request_id":"1621077344303_90168","index":"5","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_30673611/article/details/96658198"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_30673611/article/details/96658198" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-5.control\"}","dist_request_id":"1621077344303_90168","index":"5","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_30673611/article/details/96658198"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control'>
+					<em>TD</em>H-大数据基础
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_30673611" target="_blank"><span class="blog-title">weixin_30673611的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">09-06</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					678
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_30673611/article/details/96658198" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-5.control\"}","dist_request_id":"1621077344303_90168","index":"5","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_30673611/article/details/96658198"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">------------------------------------------------------------------------------------*******大数据概念<em>和</em>基础**********1.大数据<em>的</em>四个特点：数据规模大，生成、处理速度快，数据类型多样，价值巨大密度低；2.大数据历史：三篇论文（GFS,mapReduce,bigTable）,C<em>DH</em>,HBASE,SPA...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_39027420/article/details/81239661"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-6.control\"}","dist_request_id":"1621077344303_90168","index":"6","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_39027420/article/details/81239661"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_39027420/article/details/81239661" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-6.control\"}","dist_request_id":"1621077344303_90168","index":"6","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_39027420/article/details/81239661"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-6.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-6.control'>
+					HDP，C<em>DH</em>，FusionInSight平台<em>的</em>优劣比较。
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_39027420" target="_blank"><span class="blog-title">weixin_39027420的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">07-27</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					9346
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_39027420/article/details/81239661" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-6.control\"}","dist_request_id":"1621077344303_90168","index":"6","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_39027420/article/details/81239661"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-6.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-6.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">（总结了下网上现有<em>的</em>对三个平台<em>的</em>评价，待续。。）
+
+&nbsp;
+
+C<em>DH</em>
+
+最成型<em>的</em>发行版本，拥有最多<em>的</em>部署案例。提供强大<em>的</em>部署、管理<em>和</em>监控工具。Cloudera开发并贡献了可实时处理大数据<em>的</em>Impala项目。拥有强大<em>的</em>社区支持，当出现一个问题时，能够通过社区、论坛等网络资源快速获取解决方法。
+
+
+	费用
+		&nbsp;
+		宝贵<em>的</em>特点
+	
+Cloudera Manager 是 提供易用性、特性、易于升级<em>和</em>安装组...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/lvtula/article/details/88580124"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-7.control\"}","dist_request_id":"1621077344303_90168","index":"7","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/lvtula/article/details/88580124"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/lvtula/article/details/88580124" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-7.control\"}","dist_request_id":"1621077344303_90168","index":"7","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/lvtula/article/details/88580124"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-7.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-7.control'>
+					大数据平台比较-C<em>DH</em>，HDP
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/lvtula" target="_blank"><span class="blog-title">阿正的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">03-15</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					4419
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/lvtula/article/details/88580124" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-7.control\"}","dist_request_id":"1621077344303_90168","index":"7","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/lvtula/article/details/88580124"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-7.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-7.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">参考：
+
+http://www.mamicode.com/info-detail-2375058.html
+
+https://www.cnblogs.com/zlslch/p/6118862.html
+</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/jinzheng069/article/details/41045455"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-8.control\"}","dist_request_id":"1621077344303_90168","index":"8","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/jinzheng069/article/details/41045455"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/jinzheng069/article/details/41045455" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-8.control\"}","dist_request_id":"1621077344303_90168","index":"8","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/jinzheng069/article/details/41045455"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-8.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-8.control'>
+					Hadoop发行版厂商星环发布TPC-DS评测结果
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/jinzheng069" target="_blank"><span class="blog-title">江南晚来客的专栏</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">11-12</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					3369
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/jinzheng069/article/details/41045455" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-8.control\"}","dist_request_id":"1621077344303_90168","index":"8","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/jinzheng069/article/details/41045455"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-8.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-8.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">Hadoop发行版厂商星环发布TPC-DS评测结果，结果惊人，性能<em>和</em>稳定性不逊于世界头号hadoop发行商Cloudera<em>的</em> TPC-DS性能数据
+为何星环<em>的</em>hadoop发行版如此高性能？
+据说星环发展于intel<em>的</em>hadoop核心团队？
+难道星环将引领中国大数据<em>的</em>浪潮？</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/qq_39723363/article/details/108869691"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-9.control\"}","dist_request_id":"1621077344303_90168","index":"9","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/qq_39723363/article/details/108869691"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/qq_39723363/article/details/108869691" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-9.control\"}","dist_request_id":"1621077344303_90168","index":"9","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/qq_39723363/article/details/108869691"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-9.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-9.control'>
+					excel<em>对比</em>两边数据去重
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/qq_39723363" target="_blank"><span class="blog-title">夏天吹雪的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">09-29</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					329
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/qq_39723363/article/details/108869691" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-9.control\"}","dist_request_id":"1621077344303_90168","index":"9","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/qq_39723363/article/details/108869691"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-9.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-9.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">需求:筛选重复数据，A列是1000条数据，C列是100条数据，删除重复<em>的</em>数据，只剩900条。
+
+
+
+首先，A列数据要分列，因为数据格式不一样，会导致后面<em>的</em>问题，一直下一步到完成
+
+
+
+第二步，在B<em>和</em>D列加数字1，相当于索引，相同<em>的</em>数据长度，做匹配，下图A<em>和</em>C<em>的</em>数据取反了
+
+
+
+第三步，数据--筛选，然后过滤掉C列数据
+
+
+
+最后复制A列<em>的</em>数据，已经处理好<em>的</em>数据，到其他页面，验证完成
+
+
+...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/DH2442897094/article/details/108276887"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-10.control\"}","dist_request_id":"1621077344303_90168","index":"10","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/DH2442897094/article/details/108276887"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/DH2442897094/article/details/108276887" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-10.control\"}","dist_request_id":"1621077344303_90168","index":"10","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/DH2442897094/article/details/108276887"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-10.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-10.control'>
+					datax从<em>TD</em>H同步数据到C<em>DH</em><em>的</em>json模板（待kerberos认证及HA高可用）
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/DH2442897094" target="_blank"><span class="blog-title">hello</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">08-28</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					167
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/DH2442897094/article/details/108276887" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-10.control\"}","dist_request_id":"1621077344303_90168","index":"10","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/DH2442897094/article/details/108276887"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-10.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-10.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">1、模板json：
+
+
+{
+  &quot;job&quot; : {
+    &quot;setting&quot; : {
+      &quot;speed&quot; : {
+        &quot;byte&quot; : 104857600
+      },
+      &quot;errorLimit&quot; : {
+        &quot;record&quot; : 0
+      }
+    },
+    &quot;content&quot; : [ {
+      &quot;reader&quot; : {
+        &quot;name&quot; : &quot;hdfsreader&quot;,
+        &quot;parameter&quot; : {
+    .</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_34216196/article/details/91596628"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-11.control\"}","dist_request_id":"1621077344303_90168","index":"11","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_34216196/article/details/91596628"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_34216196/article/details/91596628" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-11.control\"}","dist_request_id":"1621077344303_90168","index":"11","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_34216196/article/details/91596628"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-11.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-11.control'>
+					Hadoop之POC测试总结
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_34216196" target="_blank"><span class="blog-title">weixin_34216196的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">01-29</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					4054
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_34216196/article/details/91596628" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-11.control\"}","dist_request_id":"1621077344303_90168","index":"11","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_34216196/article/details/91596628"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-11.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-11.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">POC测试总结一、 测试内容测试内容测试目<em>的</em>其他功能测试验证产品<em>的</em>自动部署安装、集成统一管理、运维监控功能是否完善、对SQL<em>的</em>支持能力（SQL-标准、事务支持能力、索引、存储过程、UDF），混合负载管理能力存储特性及多重分区能力组件测试验证产品<em>的</em>数据压缩存储特性、多种计算接口支持、对异构数据库支持、数据挖掘能力压缩对性能<em>的</em>影响性能测试测试产品<em>的</em>单查询性能<em>和</em>并发查询...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_30808693/article/details/98413641"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-12.control\"}","dist_request_id":"1621077344303_90168","index":"12","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_30808693/article/details/98413641"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_30808693/article/details/98413641" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-12.control\"}","dist_request_id":"1621077344303_90168","index":"12","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_30808693/article/details/98413641"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-12.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-12.control'>
+					星环大数据安全组件Guardian与hadoop自带<em>的</em>安全组件区别
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_30808693" target="_blank"><span class="blog-title">weixin_30808693的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">02-12</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					215
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_30808693/article/details/98413641" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-12.control\"}","dist_request_id":"1621077344303_90168","index":"12","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_30808693/article/details/98413641"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-12.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-12.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">在进行讲解之前，先带大家学习下hadoop关于hdfs自己<em>的</em>安全如何实现<em>的</em>---------------------------
+名词：
+ACL-访问控制列表（Access Control List，ACL）
+ARBAC-基于角色<em>的</em>权限访问控制（Role-Based Access Control）
+所有安全体系<em>的</em>了解，大数据平台安全体系<em>的</em>四个层次说起：外围安全、数据安全、访问安全以及访问行...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://dataclub.blog.csdn.net/article/details/112551456"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-13.control\"}","dist_request_id":"1621077344303_90168","index":"13","strategy":"2~default~OPENSEARCH~default","dest":"https://dataclub.blog.csdn.net/article/details/112551456"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://dataclub.blog.csdn.net/article/details/112551456" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-13.control\"}","dist_request_id":"1621077344303_90168","index":"13","strategy":"2~default~OPENSEARCH~default","dest":"https://dataclub.blog.csdn.net/article/details/112551456"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-13.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-13.control'>
+					细节决定成败之hive跨集群数据同步采过<em>的</em>坑
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/WindyQCF" target="_blank"><span class="blog-title">数据一哥，公众号：数据社</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">01-12</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					2648
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://dataclub.blog.csdn.net/article/details/112551456" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-13.control\"}","dist_request_id":"1621077344303_90168","index":"13","strategy":"2~default~OPENSEARCH~default","dest":"https://dataclub.blog.csdn.net/article/details/112551456"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-13.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-13.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">公众号推文规则变了，点击上方&quot;数据社&quot;关注,设为星标后台回复【加群】，申请加入数据学习交流群大数据集群内部都有节点级别<em>和</em>机架级别<em>的</em>容错机制（存储层对应<em>的</em>就是传统<em>的</em>三副...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_33836223/article/details/90304412"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-14.control\"}","dist_request_id":"1621077344303_90168","index":"14","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_33836223/article/details/90304412"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_33836223/article/details/90304412" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-14.control\"}","dist_request_id":"1621077344303_90168","index":"14","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_33836223/article/details/90304412"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-14.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-14.control'>
+					使用python fabric搭建RHEL 7.2大数据基础环境以及部分优化
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_33836223" target="_blank"><span class="blog-title">weixin_33836223的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">05-07</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					66
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_33836223/article/details/90304412" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-14.control\"}","dist_request_id":"1621077344303_90168","index":"14","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_33836223/article/details/90304412"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-14.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-14.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">1.使用python fabric进行Linux基础配置
+
+使用python，可以让任何事情高效起来，包括运维工作，fabric正式这样一套基于python2<em>的</em>类库，它执行本地或远程shell命令提供了操作<em>的</em>基本套件（正常或通过sudo）<em>和</em>上传/下载文件，如提示用户输入运行辅助功能，或中止执行。
+
+用Python3开发<em>的</em>部署工具叫fab...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_other clearfix" data-url="https://plugin.csdn.net/?from=blog_detail"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.534984.control\"}","dist_request_id":"1621077344303_90168","index":"15","strategy":"11_534984_RCMD","dest":"https://plugin.csdn.net/?from=blog_detail"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://plugin.csdn.net/?from=blog_detail" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.534984.control\"}","dist_request_id":"1621077344303_90168","index":"15","strategy":"11_534984_RCMD","dest":"https://plugin.csdn.net/?from=blog_detail"}'  data-report-query='utm_medium=distribute.pc_relevant.534984.control&depth_1-utm_source=distribute.pc_relevant.534984.control'>
+					CSDN开发者助手，常用网站自动整合，多种工具一键调用
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info display-flex">
+					<span class="info-block"></span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://plugin.csdn.net/?from=blog_detail" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.534984.control\"}","dist_request_id":"1621077344303_90168","index":"15","strategy":"11_534984_RCMD","dest":"https://plugin.csdn.net/?from=blog_detail"}'  data-report-query='utm_medium=distribute.pc_relevant.534984.control&depth_1-utm_source=distribute.pc_relevant.534984.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">CSDN开发者助手由CSDN官方开发，集成一键呼出搜索、万能快捷工具、个性化新标签页<em>和</em>官方免广告四大功能。帮助您提升10倍开发效率！</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/arno_wzkdhr/article/details/113499546"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-16.control\"}","dist_request_id":"1621077344303_90168","index":"16","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/arno_wzkdhr/article/details/113499546"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/arno_wzkdhr/article/details/113499546" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-16.control\"}","dist_request_id":"1621077344303_90168","index":"16","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/arno_wzkdhr/article/details/113499546"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-16.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-16.control'>
+					Hadoop之Hadoop<em>的</em>前世今生，适合什么场景？
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/arno_wzkdhr" target="_blank"><span class="blog-title">arno_wzkdhr的专栏</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">02-01</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					60
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/arno_wzkdhr/article/details/113499546" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-16.control\"}","dist_request_id":"1621077344303_90168","index":"16","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/arno_wzkdhr/article/details/113499546"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-16.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-16.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">一提大数据，人们就想到Hadoop。Hadoop基本上成为了大数据<em>的</em>代言人了。那Hadoop到底是什么？用于解决什么问题？
+
+​
+
+
+
+hadoop<em>的</em>起源背景
+
+HDFS源自于Goole<em>的</em>GFS论文（发表于2003年10月），HDFS是GFS<em>的</em>克隆版。
+
+
+			PS: 近些年<em>和</em>google相关<em>的</em>几个开源产品对软件进步影响还是挺大<em>的</em>，比如：移动应用圈<em>的</em>Android、大数据圈<em>的</em>Hadoop、云原生圈<em>的</em>Kubernetes。这是众多计算机牛人喜欢google<em>的</em>很大<em>的</em>一个原因吧
+			
+		
+
+hadoop<em>的</em>.</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_45942451/article/details/112836936"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-17.control\"}","dist_request_id":"1621077344303_90168","index":"17","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_45942451/article/details/112836936"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_45942451/article/details/112836936" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-17.control\"}","dist_request_id":"1621077344303_90168","index":"17","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_45942451/article/details/112836936"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-17.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-17.control'>
+					2021爱分析&middot;中国人工智能应用趋势报告&mdash;&mdash;新基建助推，人工智能应用迈入新阶段
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_45942451" target="_blank"><span class="blog-title">weixin_45942451的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">01-19</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					7057
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_45942451/article/details/112836936" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-17.control\"}","dist_request_id":"1621077344303_90168","index":"17","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_45942451/article/details/112836936"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-17.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-17.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">报告编委
+报告指导人
+黄勇   爱分析  首席分析师
+报告执笔人
+莫业林 爱分析  分析师
+李毓   爱分析  分析师
+外部专家（按姓氏拼音排序）
+陈志豪 华东空管局  气象中心气象创新实验室主任
+胡一川 来也科技   CTO
+黄九鸣 星汉数智   CEO
+简仁贤 竹间智能   CEO
+乔昕   深睿医疗   联合创始人兼CEO
+孙元浩 星环科技   创始人兼CEO
+童臻   山景智能   资深行业专家
+闫正   眼控科技   人工智能研究院院长
+特别鸣谢（按拼音排序）
+
+报告摘要
+
+新基建加速人工智能应.</div>
+			</a>
+		</div>
+	</div>
+</div>
+            </div>
+            <div class="template-box">
+                <span>©️2020 CSDN</span>
+                <span>皮肤主题: 书香水墨</span>
+                <span> 设计师:CSDN官方博客</span>
+                <span>
+                    <a href="https://blog.csdn.net/" class="back-home c-blue c-blue-hover c-blue-focus">返回首页</a>
+                </span>
+            </div>
+<div class="blog-footer-bottom" style="margin-top:10px;"></div>
+<script src="https://g.csdnimg.cn/common/csdn-footer/csdn-footer.js" data-isfootertrack="false" type="text/javascript"></script>
+<script type="text/javascript">
+    window.csdn.csdnFooter.options = {
+        el: '.blog-footer-bottom',
+        type: 2
+    }
+</script>        </main>
+<aside class="blog_container_aside">
+	<div id="asideProfile" class="aside-box">
+    <div class="profile-intro d-flex">
+        <div class="avatar-box d-flex justify-content-center flex-column">
+            <a href="https://blog.csdn.net/weixin_43975771" data-report-click='{"mod":"popu_379","spm":"1001.2101.3001.4121","dest":"https://blog.csdn.net/weixin_43975771","ab":"new"}'>
+                <img src="https://profile.csdnimg.cn/8/5/7/3_weixin_43975771" class="avatar_pic">
+            </a>
+        </div>
+        <div class="user-info d-flex flex-column profile-intro-name-box">
+            <div class="profile-intro-name-boxTop">
+                <a href="https://blog.csdn.net/weixin_43975771" class="" id="uid" title="不积跬步，无以致千里" data-report-click='{"mod":"popu_379","spm":"1001.2101.3001.4122","dest":"https://blog.csdn.net/weixin_43975771","ab":"new"}'>
+                    <span class="name " username="weixin_43975771">不积跬步，无以致千里</span>
+                </a>
+                <span>
+                </span>
+                <span class="flag expert-blog">
+                <span class="bubble">CSDN认证博客专家</span>
+                </span>
+                <span class="flag company-blog">
+                <span class="bubble">CSDN认证企业博客</span>
+                </span>
+            </div>
+            <div class="profile-intro-name-boxFooter">
+                <span class="personal-home-page personal-home-years">码龄2年</span>
+                    <span class="personal-home-page">
+                    <a class="personal-home-certification" href="https://i.csdn.net/#/uc/profile?utm_source=14998968" target="_blank" title="暂无认证">
+                    <img src="https://csdnimg.cn/identity/nocErtification.png" alt="">
+                    暂无认证
+                    </a>
+                    </span>
+            </div>
+        </div>
+    </div>
+    <div class="data-info d-flex item-tiling">
+        <dl class="text-center" title="90">
+            <a href="https://blog.csdn.net/weixin_43975771" data-report-click='{"mod":"1598321000_001","spm":"1001.2101.3001.4310"}' data-report-query="t=1">  
+                <dt><span class="count">90</span></dt>
+                <dd class="font">原创</dd>
+            </a>
+        </dl>
+        <dl class="text-center" data-report-click='{"mod":"1598321000_002","spm":"1001.2101.3001.4311"}' title="3062">
+            <a href="https://blog.csdn.net/rank/list/weekly" target="_blank">
+                <dt><span class="count">3062</span></dt>
+                <dd class="font">周排名</dd>
+            </a>
+        </dl>
+        <dl class="text-center" title="114248">
+            <a href="https://blog.csdn.net/rank/list/total" data-report-click='{"mod":"1598321000_003","spm":"1001.2101.3001.4312"}' target="_blank">
+                <dt><span class="count">11万+</span></dt>
+                <dd class="font">总排名</dd>
+            </a>
+        </dl>
+        <dl class="text-center" style="min-width:58px" title="15730">  
+            <dt><span class="count">1万+</span></dt>
+            <dd>访问</dd>
+        </dl>
+        <dl class="text-center" title="4级,点击查看等级说明">
+            <dt><a href="https://blog.csdn.net/blogdevteam/article/details/103478461" target="_blank">
+                <img class="level" src="https://csdnimg.cn/identity/blog4.png">
+            </a>
+            </dt>
+            <dd>等级</dd>
+        </dl>
+    </div>
+    <div class="item-rank"></div>
+    <div class="data-info d-flex item-tiling">
+        <dl class="text-center" title="1028">
+            <dt><span class="count">1028</span></dt>
+            <dd>积分</dd>
+        </dl>
+         <dl class="text-center" id="fanBox" title="15">
+            <dt><span class="count" id="fan">15</span></dt>
+            <dd>粉丝</dd>
+        </dl>
+        <dl class="text-center" title="14">
+            <dt><span class="count">14</span></dt>
+            <dd>获赞</dd>
+        </dl>
+        <dl class="text-center" title="25">
+            <dt><span class="count">25</span></dt>
+            <dd>评论</dd>
+        </dl>
+        <dl class="text-center" title="34">
+            <dt><span class="count">34</span></dt>
+            <dd>收藏</dd>
+        </dl>
+    </div>
+    <div class="aside-box-footer" data-report-view='{"spm":"3001.4296"}'>
+        <div class="badge-box d-flex">
+            <div class="badge d-flex">
+                <div class="icon-badge" title="新人勋章">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/blinknewcomer@240.png" alt="新人勋章">
+                    </div>
+                </div>
+                <div class="icon-badge" title="签到新秀">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/qiandao10@240.png" alt="签到新秀">
+                    </div>
+                </div>
+                <div class="icon-badge" title="阅读者勋章Lv3">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/yuedu30@240.png" alt="阅读者勋章Lv3">
+                    </div>
+                </div>
+                <div class="icon-badge" title="持之以恒">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/chizhiyiheng@240.png" alt="持之以恒">
+                    </div>
+                </div>
+                <div class="icon-badge" title="1024勋章">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/1024@240.png" alt="1024勋章">
+                    </div>
+                </div>
+                <div class="icon-badge" title="勤写标兵Lv3">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/qixiebiaobing3@240.png" alt="勤写标兵Lv3">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="profile-intro-name-boxOpration">
+        <div class="opt-letter-watch-box">
+        <a class="bt-button personal-letter" href="https://im.csdn.net/chat/weixin_43975771" target="_blank" rel="noopener">私信</a>
+        </div>
+        <div class="opt-letter-watch-box"> 
+            <a class="personal-watch bt-button" id="btnAttent" >关注</a>  
+        </div>
+    </div>
+</div>
+<div id="asideSearchArticle" class="aside-box">
+	<div class="aside-content search-comter">
+    <div class="aside-search aside-search-blog">         
+        <input type="text" class="input-serch-blog" name="" autocomplete="off" value="" id="search-blog-words" placeholder="搜博主文章">
+        <a class="btn-search-blog">
+                    <img src="//csdnimg.cn/cdn/content-toolbar/csdn-sou.png?v=1587021042">
+        </a>
+    </div>
+    </div>
+</div>
+
+
+<div id="asideHotArticle" class="aside-box">
+	<h3 class="aside-title">热门文章</h3>
+	<div class="aside-content">
+		<ul class="hotArticle-list">
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/97630828" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/97630828","ab":"new"}'>
+				tps 、qps、bps、Bps的含义
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">4311</span>
+                </a>
+			</li>
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/113099180" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/113099180","ab":"new"}'>
+				线程池的核心线程数 设置大小与cpu 的关系
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">963</span>
+                </a>
+			</li>
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/105028750" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/105028750","ab":"new"}'>
+				时空时序数据库 TSDB的用法
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">688</span>
+                </a>
+			</li>
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/103306930" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/103306930","ab":"new"}'>
+				索引什么情况下会失效及注意事项
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">597</span>
+                </a>
+			</li>
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/106744836" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/106744836","ab":"new"}'>
+				GDB图形数据库/Tinkerpop gremlin使用总结
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">471</span>
+                </a>
+			</li>
+		</ul>
+	</div>
+</div>
+<div id="asideCategory" class="aside-box flexible-box">
+    <h3 class="aside-title">分类专栏</h3>
+    <div class="aside-content">
+        <ul>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9971643.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9971643.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20190918135101160.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">数据库</span>
+                    </span>
+                    <span class="count float-right">11篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10505512.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10505512.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756919.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">架构</span>
+                    </span>
+                    <span class="count float-right">1篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10570875.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10570875.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756780.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">scala</span>
+                    </span>
+                    <span class="count float-right">3篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10303159.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10303159.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756724.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">多线程 高并发</span>
+                    </span>
+                    <span class="count float-right">8篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10775654.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10775654.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756913.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">常用开发框架</span>
+                    </span>
+                    <span class="count float-right">3篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10281951.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10281951.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756927.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">中间件</span>
+                    </span>
+                    <span class="count float-right">3篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10734857.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10734857.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756754.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">spring循环依赖</span>
+                    </span>
+                    <span class="count float-right">2篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9807877.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9807877.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756754.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">Python</span>
+                    </span>
+                    <span class="count float-right">2篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9594245.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9594245.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756925.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">springcould 开发</span>
+                    </span>
+                    <span class="count float-right">1篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9098425.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9098425.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756925.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">大数据开发</span>
+                    </span>
+                    <span class="count float-right">17篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9079738.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9079738.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756738.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">java开发日常总结</span>
+                    </span>
+                    <span class="count float-right">39篇</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <p class="text-center">
+        <a class="flexible-btn" data-fbox="aside-archive"><img class="look-more" src="https://csdnimg.cn/release/blogv2/dist/pc/img/arrowDownWhite.png" alt=""></a>
+    </p>
+</div>
+<div id="asideNewComments" class="aside-box">
+    <h3 class="aside-title">最新评论</h3>
+    <div class="aside-content">
+        <ul class="newcomment-list">
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/116308584#comments_16437215" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116308584#comments_16437215","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116308584#comments_16437215","ab":"new"}'>kafka单机版环境搭建</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/weixin_39032019" class="user-name" target="_blank">明月十四桥: </a>
+                    <span class="code-comments">非常有用，感谢大佬的整理，期待后续大作</span>
+                </p>
+            </li>
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/115705948#comments_16397376" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/115705948#comments_16397376","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/115705948#comments_16397376","ab":"new"}'>mybatis查询一张表的部分字段，没有指定的字段返回为null的场景</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/yuerliang" class="user-name" target="_blank">A-Liang: </a>
+                    <span class="code-comments">初学后端小白，能看懂，引出另外一个问题，值为null的字段不返回。
+[code=plain]
+[
+		{
+			&quot;recrumentDate&quot;: &quot;2020-05-12T22:30:00.000+00:00&quot;,
+			&quot;memId&quot;: 5
+		},
+		{
+			&quot;recrumentDate&quot;: &quot;2020-05-12T22:30:00.000+00:00&quot;,
+			&quot;mobile&quot;: &quot;12367890909&quot;,
+			&quot;name&quot;: &quot;赵四&quot;,
+			&quot;memId&quot;: 6
+		}
+]
+
+[/code]</span>
+                </p>
+            </li>
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/116496928#comments_16321375" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116496928#comments_16321375","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116496928#comments_16321375","ab":"new"}'>flink sql 使用</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/kimol_justdo" class="user-name" target="_blank">不正经的kimol君: </a>
+                    <span class="code-comments">快进我的收藏夹</span>
+                </p>
+            </li>
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/114383227#comments_16318728" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/114383227#comments_16318728","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/114383227#comments_16318728","ab":"new"}'>SQL规约的意义</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/weixin_39032019" class="user-name" target="_blank">明月十四桥: </a>
+                    <span class="code-comments">非常有用，感谢大佬的整理，期待后续大作</span>
+                </p>
+            </li>
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/116532790#comments_16316194" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116532790#comments_16316194","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116532790#comments_16316194","ab":"new"}'>clickhouse的mysql引擎的实现</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/weixin_43975771" class="user-name" target="_blank">不积跬步，无以致千里: </a>
+                    <span class="code-comments">一起加油,拥抱开源<img src="https://g.csdnimg.cn/static/face/emoji/012.png" alt='表情包' ><img src="https://g.csdnimg.cn/static/face/emoji/012.png" alt='表情包' ></span>
+                </p>
+            </li>
+        </ul>
+    </div>
+</div>
+<div id="asideArchive" class="aside-box" style="display:block!important; width:300px;">
+    <h3 class="aside-title">最新文章</h3>
+    <div class="aside-content">
+        <ul class="inf_list clearfix">
+            <li class="clearfix">
+            <a href="https://blog.csdn.net/weixin_43975771/article/details/116532790" target="_blank" data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/weixin_43975771/article/details/116532790","ab":"new"}' data-report-view='{"mod":"popu_382","dest":"https://blog.csdn.net/weixin_43975771/article/details/116532790","ab":"new"}'>clickhouse的mysql引擎的实现</a>
+            </li>
+            <li class="clearfix">
+            <a href="https://blog.csdn.net/weixin_43975771/article/details/116496928" target="_blank" data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/weixin_43975771/article/details/116496928","ab":"new"}' data-report-view='{"mod":"popu_382","dest":"https://blog.csdn.net/weixin_43975771/article/details/116496928","ab":"new"}'>flink sql 使用</a>
+            </li>
+            <li class="clearfix">
+            <a href="https://blog.csdn.net/weixin_43975771/article/details/116461469" target="_blank" data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/weixin_43975771/article/details/116461469","ab":"new"}' data-report-view='{"mod":"popu_382","dest":"https://blog.csdn.net/weixin_43975771/article/details/116461469","ab":"new"}'>kafka生产者和消费者测试指令</a>
+            </li>
+        </ul>
+        <div class="archive-bar"></div>
+        <div class="archive-box">
+                <div class="archive-title">2021</div> 
+                <div class="archive-content">
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/05" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/05"}'>
+                        <span class="time">05月</span>
+                        <span class="count">3篇</span>
+                        </a>
+                    </div>
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/04" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/04"}'>
+                        <span class="time">04月</span>
+                        <span class="count">12篇</span>
+                        </a>
+                    </div>
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/03" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/03"}'>
+                        <span class="time">03月</span>
+                        <span class="count">9篇</span>
+                        </a>
+                    </div>
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/02" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/02"}'>
+                        <span class="time">02月</span>
+                        <span class="count">5篇</span>
+                        </a>
+                    </div>
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/01" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/01"}'>
+                        <span class="time">01月</span>
+                        <span class="count">12篇</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="archive-list-item"><a href="https://blog.csdn.net/weixin_43975771/article/month/2020/12" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":""}'><span class="year">2020年</span><span class="num">34篇</span></a></div>
+                <div class="archive-list-item"><a href="https://blog.csdn.net/weixin_43975771/article/month/2019/12" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":""}'><span class="year">2019年</span><span class="num">16篇</span></a></div>
+        </div>
+    </div>
+</div>
+	<div id="footerRightAds" class="isShowFooterAds">
+		<div class="aside-box">
+			<div id="kp_box_57" data-pid="57"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- PC-博客详情页-左下视窗（300*600） -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-1076724771190722"
+     data-ad-slot="1173711872"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script><img class="pre-img-lasy" data-src="https://kunyu.csdn.net/1.png?p=57&a=2488&c=0&k=&spm=1001.2101.3001.5001&d=1&t=3&u=8da44e82628e41c6bd3d1e57d0cb8324" style="display: block;width: 0px;height: 0px;"></div>
+		</div>
+	</div>
+    <!-- 详情页显示目录 -->
+<!--文章目录-->
+<div id="asidedirectory" class="aside-box">
+    <div class='groupfile' id="directory">
+        <h3 class="aside-title">目录</h3>
+        <div class="align-items-stretch group_item">
+            <div class="pos-box">
+            <div class="scroll-box">
+                <div class="toc-box"></div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+</aside>
+<script>
+	$("a.flexible-btn").click(function(){
+		$(this).parents('div.aside-box').removeClass('flexible-box');
+		$(this).parents("p.text-center").remove();
+	})
+</script>
+<script type="text/javascript"  src="https://g.csdnimg.cn/user-tooltip/2.4/user-tooltip.js"></script>
+<script type="text/javascript"  src="https://g.csdnimg.cn/user-medal/1.0.6/user-medal.js"></script>    </div>
+<div class="recommend-right  align-items-stretch clearfix" id="rightAside" data-type="recommend">
+    <aside class="recommend-right_aside">
+        <div id="recommend-right" >
+                        <div class='flex-column aside-box groupfile' id="groupfile">
+                <div class="groupfile-div">
+                <h3 class="aside-title">目录</h3>
+                <div class="align-items-stretch group_item">
+                    <div class="pos-box">
+                        <div class="scroll-box">
+                            <div class="toc-box"></div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+                <div id="recommendAdBox">
+                    <div id="kp_box_479" data-pid="479"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- PC-博客详情页-右侧视窗300*600 -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-1076724771190722"
+     data-ad-slot="8441704093"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script><img class="pre-img-lasy" data-src="https://kunyu.csdn.net/1.png?p=479&a=2487&c=0&k=&spm=1001.2101.3001.4834&d=1&t=3&u=8f4005f14ace4f04a78885995e33cc4d" style="display: block;width: 0px;height: 0px;"></div>
+                </div>
+            <div class='aside-box kind_person d-flex flex-column'>
+                    <h3 class="aside-title">分类专栏</h3>
+                    <div class="align-items-stretch kindof_item" id="kind_person_column">
+                        <div class="aside-content">
+                            <ul>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9971643.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9971643.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20190918135101160.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">数据库</span>
+                                        </span>
+                                        <span class="count float-right">11篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10505512.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10505512.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756919.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">架构</span>
+                                        </span>
+                                        <span class="count float-right">1篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10570875.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10570875.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756780.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">scala</span>
+                                        </span>
+                                        <span class="count float-right">3篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10303159.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10303159.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756724.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">多线程 高并发</span>
+                                        </span>
+                                        <span class="count float-right">8篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10775654.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10775654.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756913.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">常用开发框架</span>
+                                        </span>
+                                        <span class="count float-right">3篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10281951.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10281951.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756927.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">中间件</span>
+                                        </span>
+                                        <span class="count float-right">3篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10734857.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10734857.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756754.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">spring循环依赖</span>
+                                        </span>
+                                        <span class="count float-right">2篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9807877.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9807877.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756754.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">Python</span>
+                                        </span>
+                                        <span class="count float-right">2篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9594245.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9594245.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756925.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">springcould 开发</span>
+                                        </span>
+                                        <span class="count float-right">1篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9098425.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9098425.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756925.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">大数据开发</span>
+                                        </span>
+                                        <span class="count float-right">17篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9079738.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9079738.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756738.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">java开发日常总结</span>
+                                        </span>
+                                        <span class="count float-right">39篇</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+</div>
+<div class="mask-dark"></div>
+<script type="text/javascript">
+    var timert = setInterval(function(){
+      sideToolbar = $(".csdn-side-toolbar");
+      if (sideToolbar.length > 0) {
+        sideToolbar.css('cssText','bottom:64px !important;')
+        clearInterval(timert);
+      }
+    }, 200);
+</script>
+<script>
+    var articleId = 115913228;
+    var commentscount = 0;
+    var curentUrl = "https://blog.csdn.net/weixin_43975771/article/details/115913228";
+    var myUrl = "https://my.csdn.net/";
+    var highlight = ["td","和","dh","的","简介","和","对比"];//高亮数组
+    var isRecommendModule = true;
+    var isBaiduPre = true;
+    var baiduCount = 2;
+    var share_card_url = "https://blog.csdn.net/weixin_43975771/article/shareArticleCardPage?article_id=115913228"
+	var articleType = 2;
+    var baiduKey = "TDH和CDH的简介和对比";
+    var userNewReport = false;
+    var needInsertBaidu = true;
+    var recommendRegularDomainArr = ["blog.csdn.net/.+/article/details/","download.csdn.net/download/","edu.csdn.net/course/detail/","ask.csdn.net/questions/","bbs.csdn.net/topics/","www.csdn.net/gather_.+/"]
+    var codeStyle = "";
+    var baiduSearchType = "title";
+    var canRead = true;
+    var blogMoveHomeArticle = false;
+    var showPcWindowAd = false;
+    var showSearchText = "";
+    var linkPage = true;
+    var articleSource = 1;
+    var articleReport = '{"pid": "blog", "spm":"1001.2101"}';
+    var isShowToQuestion = false;
+</script>
+<script src="https://csdnimg.cn/public/sandalstrap/1.4/js/sandalstrap.min.js"></script>
+<div class="skin-boxshadow"></div>
+<div style="display:none;">
+	<img src="" onerror='setTimeout(function(){if(!/(csdn.net|iteye.com|baiducontent.com|googleusercontent.com|360webcache.com|sogoucdn.com|bingj.com|baidu.com)$/.test(window.location.hostname)){window.location.href="\x68\x74\x74\x70\x73\x3a\x2f\x2f\x77\x77\x77\x2e\x63\x73\x64\x6e\x2e\x6e\x65\x74"}},3000);'>
+</div>
+</body>
+<script src="https://csdnimg.cn/release/blogv2/dist/components/js/pc_wap_highlight-db1e81323a.min.js" type="text/javascript"></script>
+<script src="https://csdnimg.cn/release/blogv2/dist/components/js/pc_wap_common-906586e915.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/codesnippet/lib/highlight/styles/atom-one-light.css">
+<script>
+ // 全局声明
+ if (window.csdn === undefined) {
+      window.csdn = {};
+    }
+    window.csdn.sideToolbar = {
+        options: {
+            report:{
+                isShow: true,
+            },
+            qr: {
+                isShow: false,
+            },
+            guide: {
+                isShow: true
+            }
+        }
+    }
+    $(function(){
+        $(document).on('click',"a.option-box[data-type='report']",function() {
+            window.csdn.userLogin.loadAjax(function(res){
+                if(userNewReport){
+                    showReportNew(false,articleTitles);
+                }else{
+                    showReport(false,articleTitles);
+                }
+            })
+        });
+    })
+</script>
+    <script src="https://g.csdnimg.cn/baidu-search/1.0.9/baidu-search.js"  type="text/javascript"></script>
+<script src="https://csdnimg.cn/release/download/old_static/js/qrcode.js"></script>
+<script src="https://csdnimg.cn/release/blogv2/dist/pc/js/common-d56939e7f0.min.js" type="text/javascript"></script>
+<script src="https://csdnimg.cn/release/blogv2/dist/pc/js/detail-a3145084a7.min.js" type="text/javascript"></script>
+<script src="https://g.csdnimg.cn/user-ordercart/1.0.6/user-ordercart.js" type="text/javascript"></script>
+<script src="https://csdnimg.cn/release/blogv2/dist/pc/js/column-78261cfea6.min.js" type="text/javascript"></script>
+<script src="https://g.csdnimg.cn/side-toolbar/3.0/side-toolbar.js" type="text/javascript"></script>
+<script src="https://g.csdnimg.cn/common/shop-window-v2/shop-window.js" type="text/javascript"></script>
+<script>
+    var shopUserName = username;
+    ;$(function(){
+        window.csdn.shop.show({
+            userName: shopUserName,
+            topEl: $("#csdn-shop-window-top"),
+            bottomEl: $("#csdn-shop-window"),
+            callBack: function(res){
+                if(!res.top){
+                    $("#blogColumnPayAdvert").css({"display":"block"})
+                    $("#csdn-shop-window-top").css({"display":"none"})
+                }
+            }
+        })
+    })
+</script>
+<script src="https://g.csdnimg.cn/copyright/1.0.3/copyright.js" type="text/javascript"></script>
+<script>
+    $(".MathJax").remove();
+    if ($('div.markdown_views pre.prettyprint code.hljs').length > 0) {
+        $('div.markdown_views')[0].className = 'markdown_views';
+    }
+</script>
+<script type="text/javascript" src="https://csdnimg.cn/release/blog_mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+            "HTML-CSS": {
+                    linebreaks: { automatic: true, width: "94%container" },
+                    imageFont: null
+            },
+            tex2jax: {
+                preview: "none",
+                ignoreClass:"title-article"
+            },
+            mml2jax: {
+                preview: 'none'
+            }
+    });
+</script>
+<script type="text/javascript" crossorigin src="https://g.csdnimg.cn/user-login/3.0.0/user-login.js"></script>
+<script type="text/javascript" crossorigin src="https://g.csdnimg.cn/login-box/1.1.4/login-box.js"></script></html>

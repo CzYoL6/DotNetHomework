@@ -1,0 +1,619 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="ovs-vswitchd.c的main函数最终会进入一个while循环，在这个无限循环中，里面最重要的两个函数是bridge_run()和netdev_run()。 Openvswitch主要管理两种" />
+    <meta property="og:description" content="ovs-vswitchd.c的main函数最终会进入一个while循环，在这个无限循环中，里面最重要的两个函数是bridge_run()和netdev_run()。 Openvswitch主要管理两种" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Openvswitch原理与代码分析(2): ovs-vswitchd的启动 - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2016-09-08 12:26';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class = "postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/5851603.html">
+    <span>Openvswitch原理与代码分析(2): ovs-vswitchd的启动</span>
+    
+
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<p>ovs-vswitchd.c的main函数最终会进入一个while循环，在这个无限循环中，里面最重要的两个函数是bridge_run()和netdev_run()。
+</p><p>
+&nbsp;</p><p><img src="https://images2015.cnblogs.com/blog/635909/201609/635909-20160913115337961-958862462.png" alt=""><span style="font-family: 宋体; font-size: 12pt">
+		</span></p><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">Openvswitch主要管理两种类型的设备，一个是创建的虚拟网桥，一个是连接到虚拟网桥上的设备。
+</span></p><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">其中bridge_run就是初始化数据库中已经创建的虚拟网桥。
+</span></p><p>
+&nbsp;</p><h1>一、虚拟网桥的初始化bridge_run
+</h1><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">bridge_run会调用bridge_run__，bridge_run__中最重要的是对于所有的网桥，都调用ofproto_run
+</span></p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 12pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">void</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 12pt">bridge_run__(<span style="color: rgba(0, 0, 255, 1)">void</span>)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 12pt">{
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 12pt"><span style="color: rgba(0, 0, 255, 1)">……</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 12pt">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* Let each bridge do the work that it needs to do. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 12pt">&nbsp;&nbsp;&nbsp;&nbsp;HMAP_FOR_EACH (br, node, &amp;all_bridges) {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 12pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ofproto_run(br-&gt;ofproto);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 12pt">&nbsp;&nbsp;&nbsp;&nbsp;}
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 12pt">}</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">Int ofproto_run(struct ofproto *p)会调用error = p-&gt;ofproto_class-&gt;run(p);
+</span></p><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">ofproto_class的定义在ofproto-provider.h中，它的实现定义在ofproto-dpif.c中，这里面的所有的函数，在这个文件中都有定义。
+</span></p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">const</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> ofproto_class ofproto_dpif_class = {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;init,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;enumerate_types,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;enumerate_names,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;del,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_open_type,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;type_run,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;type_wait,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;alloc,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;construct,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;destruct,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;dealloc,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;run,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;wait,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* get_memory_usage. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;type_get_memory_usage,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;flush,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;query_tables,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_tables_version,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_alloc,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_construct,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_destruct,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_dealloc,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_modified,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_reconfigured,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_query_by_name,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_add,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_del,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_get_stats,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_dump_start,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_dump_next,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_dump_done,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_poll,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_poll_wait,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_is_lacp_current,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;port_get_lacp_stats,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* rule_choose_table */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;rule_alloc,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;rule_construct,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;rule_insert,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;rule_delete,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;rule_destruct,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;rule_dealloc,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;rule_get_stats,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;rule_execute,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_frag_handling,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;packet_out,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_netflow,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;get_netflow_ids,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_sflow,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_ipfix,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_cfm,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;cfm_status_changed,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;get_cfm_status,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_lldp,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;get_lldp_status,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_aa,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;aa_mapping_set,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;aa_mapping_unset,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;aa_vlan_get_queued,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;aa_vlan_get_queue_size,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_bfd,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;bfd_status_changed,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;get_bfd_status,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_stp,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;get_stp_status,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_stp_port,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;get_stp_port_status,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;get_stp_port_stats,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_rstp,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;get_rstp_status,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_rstp_port,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;get_rstp_port_status,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_queues,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;bundle_set,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;bundle_remove,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;mirror_set__,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;mirror_get_stats__,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_flood_vlans,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;is_mirror_output_bundle,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;forward_bpdu_changed,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_mac_table_config,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_mcast_snooping,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_mcast_snooping_port,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;set_realdev,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* meter_get_features */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* meter_set */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* meter_get */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* meter_del */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;group_alloc, <span style="color: rgba(0, 128, 0, 1)">/* group_alloc */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;group_construct, <span style="color: rgba(0, 128, 0, 1)">/* group_construct */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;group_destruct, <span style="color: rgba(0, 128, 0, 1)">/* group_destruct */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;group_dealloc, <span style="color: rgba(0, 128, 0, 1)">/* group_dealloc */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;group_modify, <span style="color: rgba(0, 128, 0, 1)">/* group_modify */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;group_get_stats, <span style="color: rgba(0, 128, 0, 1)">/* group_get_stats */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;get_datapath_version, <span style="color: rgba(0, 128, 0, 1)">/* get_datapath_version */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">};</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">在ofproto-provider.h中注释里是这样说的。
+</span></p><p><span style="font-family: 宋体; font-size: 12pt">这里定义了四类数据结构
+</span></p><p><span style="font-family: 宋体; font-size: 12pt">Struct ofproto表示一个交换机
+</span></p><p><span style="font-family: 宋体; font-size: 12pt">Struct ofport表示交换机上的一个端口
+</span></p><p><span style="font-family: 宋体; font-size: 12pt">Struct rule表示交换机上的一条flow规则
+</span></p><p><span style="font-family: 宋体; font-size: 12pt">Struct ofgroup表示一个flow规则组
+</span></p><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">上面说到启动的过程中，会调用ofproto_class-&gt;run，也即会调用ofproto-dpif.c中的static int run(struct ofproto *ofproto_)函数。
+</span></p><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">在这个函数中，会初始化netflow, sflow, ipfix，stp, rstp, mac address learning等一系列操作。
+</span></p><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">bridge_run还会调用static void bridge_reconfigure(const struct ovsrec_open_vswitch *ovs_cfg)，其中ovs_cfg是从ovsdb-server里面读取出来的配置。
+</span></p><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">在这个函数里面，对于每一个网桥，将网卡添加进去
+</span></p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">HMAP_FOR_EACH (br, node, &amp;all_bridges) {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;bridge_add_ports(br, &amp;br-&gt;wanted_ports);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;shash_destroy(&amp;br-&gt;wanted_ports);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">void</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">bridge_add_ports(<span style="color: rgba(0, 0, 255, 1)">struct</span> bridge *br, <span style="color: rgba(0, 0, 255, 1)">const</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> shash *wanted_ports)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* First add interfaces that request a particular port number. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;bridge_add_ports__(br, wanted_ports, <span style="color: rgba(0, 0, 255, 1)">true</span>);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 128, 0, 1)">/* Then add interfaces that want automatic port number assignment.
+</span></span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="color: rgba(0, 128, 0, 1); font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* We add these afterward to avoid accidentally taking a specifically
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 128, 0, 1)">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;* requested port number. */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;bridge_add_ports__(br, wanted_ports, <span style="color: rgba(0, 0, 255, 1)">false</span>);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">static void bridge_add_ports__(struct bridge *br, const struct shash *wanted_ports, bool with_requested_port)会调用
+</span></p><p><span style="font-family: 宋体; font-size: 12pt">static bool iface_create(struct bridge *br, const struct ovsrec_interface *iface_cfg, const struct ovsrec_port *port_cfg)会调用
+</span></p><p><span style="font-family: 宋体; font-size: 12pt">static int iface_do_create(const struct bridge *br, const struct ovsrec_interface *iface_cfg, const struct ovsrec_port *port_cfg, ofp_port_t *ofp_portp, struct netdev **netdevp, char **errp)会调用
+</span></p><p><span style="font-family: 宋体; font-size: 12pt">int ofproto_port_add(struct ofproto *ofproto, struct netdev *netdev, ofp_port_t *ofp_portp)会调用
+</span></p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error = ofproto-&gt;ofproto_class-&gt;port_add(ofproto, netdev);</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">会调用ofproto-dpif.c中的ofproto_dpif_class的static int port_add(struct ofproto *ofproto_, struct netdev *netdev)函数。
+</span></p><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">会调用int dpif_port_add(struct dpif *dpif, struct netdev *netdev, odp_port_t *port_nop)会调用
+</span></p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error = dpif-&gt;dpif_class-&gt;port_add(dpif, netdev, &amp;port_no);</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">会调用dpif_netlink_class的port_add函数，也即dpif_netlink_port_add，也即
+</span></p><p><span style="font-family: 宋体; font-size: 12pt">static int dpif_netlink_port_add(struct dpif *dpif_, struct netdev *netdev,odp_port_t *port_nop)会调用
+</span></p><p><span style="font-family: 宋体; font-size: 12pt">static int dpif_netlink_port_add__(struct dpif_netlink *dpif, struct netdev *netdev,                       odp_port_t *port_nop)
+</span></p><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">在这个函数里面，会调用netlink的API，命令为OVS_VPORT_CMD_NEW
+</span></p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">const</span>
+										<span style="color: rgba(0, 0, 255, 1)">char</span> *name = netdev_vport_get_dpif_port(netdev,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;namebuf, <span style="color: rgba(0, 0, 255, 1)">sizeof</span> namebuf);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">struct</span> dpif_netlink_vport request, reply;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">struct</span> nl_sock **socksp = NULL;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">if</span> (dpif-&gt;handlers) {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;socksp = vport_create_socksp(dpif, &amp;error);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (!socksp) {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">return</span> error;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;}
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">dpif_netlink_vport_init(&amp;request);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">request.cmd = OVS_VPORT_CMD_NEW;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">request.dp_ifindex = dpif-&gt;dp_ifindex;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">request.type = netdev_to_ovs_vport_type(netdev);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">request.name = name;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">upcall_pids = vport_socksp_to_pids(socksp, dpif-&gt;n_handlers);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">request.n_upcall_pids = socksp ? dpif-&gt;n_handlers : 1;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">request.upcall_pids = upcall_pids;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error = dpif_netlink_vport_transact(&amp;request, &amp;reply, &amp;buf);</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">这里会调用内核模块openvswitch.ko，在内核中添加虚拟网卡。这部分详细的过程将在下一节分析。
+</span></p><h1>二、虚拟网卡的初始化netdev_run()
+</h1><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">void</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">netdev_run(<span style="color: rgba(0, 0, 255, 1)">void</span>)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;OVS_EXCLUDED(netdev_class_mutex, netdev_mutex)
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> netdev_registered_class *rc;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)">
+&nbsp;</div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_initialize();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;ovs_mutex_lock(&amp;netdev_class_mutex);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;HMAP_FOR_EACH (rc, hmap_node, &amp;netdev_classes) {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (rc-&gt;<span style="color: rgba(0, 0, 255, 1)">class</span>-&gt;run) {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rc-&gt;<span style="color: rgba(0, 0, 255, 1)">class</span>-&gt;run();
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;}
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;ovs_mutex_unlock(&amp;netdev_class_mutex);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">依次循环调用netdev_classes中的每一个run。
+</span></p><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">对于不同类型的虚拟网卡，都有对应的netdev_class。
+</span></p><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">例如对于dpdk的网卡有
+</span></p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">static</span>
+										<span style="color: rgba(0, 0, 255, 1)">const</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> netdev_class dpdk_class =
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NETDEV_DPDK_CLASS(
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">dpdk</span>",
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NULL,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_dpdk_construct,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_dpdk_destruct,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_dpdk_set_multiq,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_dpdk_eth_send,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_dpdk_get_carrier,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_dpdk_get_stats,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_dpdk_get_features,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_dpdk_get_status,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_dpdk_rxq_recv);</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">对于物理网卡，也需要有相应的netdev_class
+</span></p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">const</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> netdev_class netdev_linux_class =
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NETDEV_LINUX_CLASS(
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">system</span>",
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_construct,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_stats,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_features,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_status);</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">对于连接到KVM的tap网卡
+</span></p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">const</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> netdev_class netdev_tap_class =
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NETDEV_LINUX_CLASS(
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">tap</span>",
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_construct_tap,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_tap_get_stats,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_features,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_status);</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">对于虚拟的软网卡，比如veth pair
+</span></p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">const</span>
+										<span style="color: rgba(0, 0, 255, 1)">struct</span> netdev_class netdev_internal_class =
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NETDEV_LINUX_CLASS(
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"<span style="color: rgba(139, 0, 0, 1)">internal</span>",
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_construct,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_internal_get_stats,
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* get_features */</span>
+									</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_internal_get_status);</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">其中NETDEV_LINUX_CLASS是一个宏，不是所有的参数都需要全部填写。
+</span></p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">#define NETDEV_LINUX_CLASS(NAME, CONSTRUCT, GET_STATS, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GET_FEATURES, GET_STATUS) \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">{ \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NAME, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_run, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_wait, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_alloc, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;CONSTRUCT, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_destruct, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_dealloc, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* get_config */</span> \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* set_config */</span> \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* get_tunnel_config */</span> \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* build header */</span> \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* push header */</span> \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* pop header */</span> \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* get_numa_id */</span> \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;NULL, <span style="color: rgba(0, 128, 0, 1)">/* set_multiq */</span> \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_send, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_send_wait, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_set_etheraddr, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_etheraddr, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_mtu, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_set_mtu, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_ifindex, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_carrier, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_carrier_resets, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_set_miimon_interval, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;GET_STATS, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;GET_FEATURES, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_set_advertisements, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_set_policing, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_qos_types, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_qos_capabilities, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_qos, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_set_qos, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_queue, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_set_queue, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_delete_queue, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_queue_stats, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_queue_dump_start, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_queue_dump_next, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_queue_dump_done, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_dump_queue_stats, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_in4, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_set_in4, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_in6, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_add_router, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_get_next_hop, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;GET_STATUS, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_arp_lookup, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_update_flags, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_rxq_alloc, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_rxq_construct, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_rxq_destruct, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_rxq_dealloc, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_rxq_recv, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_rxq_wait, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_rxq_drain, \
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}</span></div></li></ol></td></tr></tbody></table></div><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">rc-&gt;class-&gt;run()调用的是netdev-linux.c下的netdev_linux_run
+</span></p><p>
+&nbsp;</p><p><span style="font-family: 宋体; font-size: 12pt">netdev_linux_run会调用netlink的sock得到虚拟网卡的状态，并且更新状态。
+</span></p><p>
+&nbsp;</p><div><table style="border-collapse: collapse" border="0"><colgroup><col style="width: 575px"></colgroup><tbody valign="top"><tr><td style="padding-left: 7px; padding-right: 7px; border: 0.5pt solid"><ol><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">error = nl_sock_recv(sock, &amp;buf, <span style="color: rgba(0, 0, 255, 1)">false</span>);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt"><span style="color: rgba(0, 0, 255, 1)">if</span> (!error) {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> rtnetlink_change change;
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (rtnetlink_parse(&amp;buf, &amp;change)) {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> netdev *netdev_ = netdev_from_name(change.ifname);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">if</span> (netdev_ &amp;&amp; is_netdev_linux_class(netdev_-&gt;netdev_class)) {
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: rgba(0, 0, 255, 1)">struct</span> netdev_linux *netdev = netdev_linux_cast(netdev_);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ovs_mutex_lock(&amp;netdev-&gt;mutex);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_linux_update(netdev, &amp;change);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ovs_mutex_unlock(&amp;netdev-&gt;mutex);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netdev_close(netdev_);
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+</span></div></li><li><div style="background: rgba(244, 244, 244, 1)"><span style="font-size: 9pt">}</span></div></li></ol></td></tr></tbody></table></div>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2016-09-08 00:26</span>&nbsp;
+<a href="https://www.cnblogs.com/popsuper1982/">popsuper1982</a>&nbsp;
+阅读(<span id="post_view_count">4521</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=5851603" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(5851603);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 186637, cb_blogApp = 'popsuper1982', cb_blogUserGuid = 'cf2394f1-d0e0-e311-8d02-90b11c0b17d6';
+    var cb_entryId = 5851603, cb_entryCreatedDate = '2016-09-08 00:26', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAju6BPHNZrKn51tdzwgNfYuUkm_vUPZ8DYkc7-Kd4tZpfplnryuCLzB_Joa4z_xGWsF6b23dCeuID79Z7wRm5Tc3TkVAm4ngQWSOyheQsKVBFBf09gnIESYkZzKyY18PIWE" />
+</body>
+</html>

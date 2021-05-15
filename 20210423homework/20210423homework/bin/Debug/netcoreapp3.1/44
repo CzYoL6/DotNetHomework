@@ -1,0 +1,527 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="所有做过网络编程的程序员，想必都会看《TCP/IP详解》卷一：协议 后来出了第二版，但是由于第一版才是Rechard Stevens的原版，本人还是多次看了第一版。 对这一版印象最深的就是下面这个拓扑" />
+    <meta property="og:description" content="所有做过网络编程的程序员，想必都会看《TCP/IP详解》卷一：协议 后来出了第二版，但是由于第一版才是Rechard Stevens的原版，本人还是多次看了第一版。 对这一版印象最深的就是下面这个拓扑" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>有了Openvswitch和Docker，终于可以做《TCP/IP详解》的实验了！ - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2018-03-02 11:25';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class = "postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/8492254.html">
+    <span>有了Openvswitch和Docker，终于可以做《TCP/IP详解》的实验了！</span>
+    
+
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<div id="js_content" class="rich_media_content ">
+<p>所有做过网络编程的程序员，想必都会看《TCP/IP详解》卷一：协议</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180302113109692-1322711488.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>后来出了第二版，但是由于第一版才是Rechard Stevens的原版，本人还是多次看了第一版。</p>
+<p>&nbsp;</p>
+<p>对这一版印象最深的就是下面这个拓扑图</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180302113128586-1218475729.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>书上的很多实验，都是基于这个图做的，看了实验结果，很多理论才有真实的感觉。</p>
+<p>&nbsp;</p>
+<p>看这本书的时候，不尽感慨Rechard Stevens的天赋英才，他能够利用工作中当时少于的实验环境，做了大量的实验，写出了普惠程序员的这本书。</p>
+<p>&nbsp;</p>
+<p>可是除了看书中的实验结果，如何能够模拟这么一个环境，也动手测试一下呢？</p>
+<p>&nbsp;</p>
+<p>可是对于大部分的同学来讲，是几乎不可能的事情，除非能够真的管理实验室或者机房。</p>
+<p>&nbsp;</p>
+<p>后来有了Docker和Openvswitch，发现这个拓扑图在一个虚拟机里面就能够模拟完成。</p>
+<p>&nbsp;</p>
+<p>接下来我们就看这个过程。</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>一、创建一个Ubuntu的VirtualBox虚拟机</strong></span></p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180302113146735-943369892.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>里面有两张网卡，一个是NAT，用于访问公网，一个是Host-only，用于ssh进去配置。</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>二、安装Docker</strong></span></p>
+<p>&nbsp;</p>
+<p>apt-get remove docker docker-engine docker.io</p>
+<p>apt-get update</p>
+<p>apt-get install &nbsp; &nbsp; apt-transport-https &nbsp; &nbsp; ca-certificates &nbsp; &nbsp; curl &nbsp; &nbsp; software-properties-common</p>
+<p>curl -fsSL https://download.docker.com/linux/ubuntu/gpg &gt; gpg</p>
+<p>apt-key add gpg</p>
+<p>apt-key fingerprint 0EBFCD88</p>
+<p>add-apt-repository &nbsp; &nbsp;"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"</p>
+<p>apt-get update</p>
+<p>apt-cache madison docker-ce</p>
+<p>apt-get install docker-ce=17.03.2~ce-0~ubuntu-xenial</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>三、安装Openvswitch</strong></span></p>
+<p>&nbsp;</p>
+<p>apt-get install openvswitch-common openvswitch-dbg openvswitch-switch python-openvswitch openvswitch-ipsec openvswitch-pki openvswitch-vtep</p>
+<p>&nbsp;</p>
+<p><strong>安装网桥</strong></p>
+<p>apt-get install bridge-utils</p>
+<p>&nbsp;</p>
+<p>apt-get install arping</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>四、创建br-ex，用于gateway连接外网</strong></span></p>
+<p>&nbsp;</p>
+<p><strong>在虚拟机里面找到NAT的那张网卡</strong></p>
+<p>2: enp0s3: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc pfifo_fast state UP group default qlen 1000</p>
+<p>link/ether 08:00:27:77:d9:16 brd ff:ff:ff:ff:ff:ff</p>
+<p>inet 10.0.2.15/24 brd 10.0.2.255 scope global enp0s3</p>
+<p>valid_lft forever preferred_lft forever</p>
+<p>&nbsp;</p>
+<p><strong>创建br-ex，将NAT网卡连接到br-ex，然后将IP地址放在br-ex上</strong></p>
+<p>&nbsp;</p>
+<p>brctl addbr br-ex</p>
+<p>brctl addif br-ex enp0s3</p>
+<p>ifconfig enp0s3 0</p>
+<p>ifconfig br-ex 10.0.2.15/24</p>
+<p>ip route add default via 10.0.2.2 dev br-ex</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>五、准备一个Ubuntu容器镜像<br></strong></span></p>
+<p>&nbsp;</p>
+<p><strong>准备一个Dockerfile</strong></p>
+<p>&nbsp;</p>
+<p>FROM hub.c.163.com/public/ubuntu:14.04</p>
+<p>RUN
+ apt-get -y update &amp;&amp; apt-get install -y iproute2 iputils-arping
+ net-tools arping tcpdump curl telnet iputils-tracepath traceroute</p>
+<p>ENTRYPOINT /usr/sbin/sshd -D</p>
+<p>&nbsp;</p>
+<p><strong>编译这个Dockerfile</strong></p>
+<p>&nbsp;</p>
+<p>docker build -f Dockerfile -t hub.c.163.com/liuchao110119163/ubuntu:1 .</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>六、创建图中所有的节点，每个一个容器</strong></span></p>
+<p>&nbsp;</p>
+<p>docker run --privileged=true --net none --name aix -d hub.c.163.com/liuchao110119163/ubuntu:1</p>
+<p>docker run --privileged=true --net none --name solaris -d hub.c.163.com/liuchao110119163/ubuntu:1</p>
+<p>docker run --privileged=true --net none --name gemini -d hub.c.163.com/liuchao110119163/ubuntu:1</p>
+<p>docker run --privileged=true --net none --name gateway -d hub.c.163.com/liuchao110119163/ubuntu:1</p>
+<p>docker run --privileged=true --net none --name netb -d hub.c.163.com/liuchao110119163/ubuntu:1</p>
+<p>docker run --privileged=true --net none --name sun -d hub.c.163.com/liuchao110119163/ubuntu:1</p>
+<p>docker run --privileged=true --net none --name svr4 -d hub.c.163.com/liuchao110119163/ubuntu:1</p>
+<p>docker run --privileged=true --net none --name bsdi -d hub.c.163.com/liuchao110119163/ubuntu:1</p>
+<p>docker run --privileged=true --net none --name slip -d hub.c.163.com/liuchao110119163/ubuntu:1</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>七、创建两个网桥，代表两个二层网络</strong></span></p>
+<p>&nbsp;</p>
+<p>ovs-vsctl add-br net1</p>
+<p>ovs-vsctl add-br net2</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>八、将所有的节点连接到两个网络</strong></span></p>
+<p>&nbsp;</p>
+<p><strong>在这里我们使用pipework</strong></p>
+<p>&nbsp;</p>
+<p>./pipework net1 aix 140.252.1.92/24</p>
+<p>./pipework net1 solaris 140.252.1.32/24</p>
+<p>./pipework net1 gemini 140.252.1.11/24</p>
+<p>./pipework net1 gateway 140.252.1.4/24</p>
+<p>./pipework net1 netb 140.252.1.183/24</p>
+<p>&nbsp;</p>
+<p>./pipework net2 bsdi 140.252.13.35/27</p>
+<p>./pipework net2 sun 140.252.13.33/27</p>
+<p>./pipework net2 svr4 140.252.13.34/27</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>九、添加从slip到bsdi的p2p网络</strong></span></p>
+<p>&nbsp;</p>
+<p><strong>创建一个peer的两个网卡</strong></p>
+<p>ip link add name slipside mtu 1500 type veth peer name bsdiside mtu 1500</p>
+<p>&nbsp;</p>
+<p><strong>把其中一个塞到slip的网络namespace里面</strong></p>
+<p>root@k8smaster:~# docker inspect '--format={{ .State.Pid }}' slip</p>
+<p>14521</p>
+<p>ln -s /proc/14521/ns/net /var/run/netns/14521</p>
+<p>ip link set slipside netns 14521</p>
+<p>&nbsp;</p>
+<p><strong>把另一个塞到bsdi的网络的namespace里面</strong></p>
+<p>root@k8smaster:~# docker inspect '--format={{ .State.Pid }}' bsdi</p>
+<p>14478</p>
+<p>ln -s /proc/14478/ns/net /var/run/netns/14478</p>
+<p>ip link set bsdiside netns 14478</p>
+<p>&nbsp;</p>
+<p><strong>给slip这面的网卡添加IP地址</strong></p>
+<p>docker exec -it slip ip addr add 140.252.13.65/27 dev slipside</p>
+<p>docker exec -it slip ip link set slipside up</p>
+<p>&nbsp;</p>
+<p><strong>给bsdi这面的网卡添加IP地址</strong></p>
+<p>docker exec -it bsdi ip addr add 140.252.13.66/27 dev bsdiside</p>
+<p>docker exec -it bsdi ip link set bsdiside up</p>
+<p>&nbsp;</p>
+<p><strong>如果我们仔细分析，p2p网络和下面的二层网络不是同一个网络。</strong></p>
+<p>&nbsp;</p>
+<p><strong>p2p网络的cidr是140.252.13.64/27，而下面的二层网络的cidr是140.252.13.32/27</strong></p>
+<p>&nbsp;</p>
+<p><strong>所以对于slip来讲，对外访问的默认网关是13.66</strong></p>
+<p>docker exec -it slip ip route add default via 140.252.13.66 dev slipside</p>
+<p>&nbsp;</p>
+<p><strong>而对于bsdi来讲，对外访问的默认网关13.33</strong></p>
+<p>docker exec -it bsdi ip route add default via 140.252.13.33 dev eth1</p>
+<p>&nbsp;</p>
+<p><strong>对于sun来讲，要想访问p2p网络，需要添加下面的路由表</strong></p>
+<p>docker exec -it sun ip route add 140.252.13.64/27 via 140.252.13.35 dev eth1</p>
+<p>&nbsp;</p>
+<p><strong>对于svr4来讲，对外访问的默认网关是13.33</strong></p>
+<p>docker exec -it svr4 ip route add default via 140.252.13.33 dev eth1</p>
+<p>&nbsp;</p>
+<p><strong>对于svr4来讲，要访问p2p网关，需要添加下面的路由表</strong></p>
+<p>docker exec -it svr4 ip route add 140.252.13.64/27 via 140.252.13.35 dev eth1</p>
+<p>&nbsp;</p>
+<p><strong>这个时候，从slip是可以ping的通下面的所有的节点的。</strong></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>十、添加从sun到netb的点对点网络</strong></span></p>
+<p>&nbsp;</p>
+<p><strong>创建一个peer的网卡对</strong></p>
+<p>ip link add name sunside mtu 1500 type veth peer name netbside mtu 1500</p>
+<p>&nbsp;</p>
+<p><strong>一面塞到sun的网络namespace里面</strong></p>
+<p>root@k8smaster:~# docker inspect '--format={{ .State.Pid }}' sun</p>
+<p>14384</p>
+<p>ln -s /proc/14384/ns/net /var/run/netns/14384</p>
+<p>ip link set sunside netns 14384</p>
+<p>&nbsp;</p>
+<p><strong>另一面塞到netb的网络的namespace里面</strong></p>
+<p>root@k8smaster:~# docker inspect '--format={{ .State.Pid }}' netb</p>
+<p>14336</p>
+<p>ln -s /proc/14336/ns/net /var/run/netns/14336</p>
+<p>ip link set netbside netns 14336</p>
+<p>&nbsp;</p>
+<p><strong>给sun里面的网卡添加地址</strong></p>
+<p>docker exec -it sun ip addr add 140.252.1.29/24 dev sunside</p>
+<p>docker exec -it sun ip link set sunside up</p>
+<p>&nbsp;</p>
+<p><strong>在sun里面，对外访问的默认路由是1.4</strong></p>
+<p>docker exec -it sun ip route add default via 140.252.1.4 dev sunside</p>
+<p>&nbsp;</p>
+<p><strong>在netb里面，对外访问的默认路由是1.4</strong></p>
+<p>docker exec -it netb ip route add default via 140.252.1.4 dev eth1</p>
+<p>&nbsp;</p>
+<p><strong>在netb里面，p2p这面可以没有IP地址，但是需要配置路由规则，访问到下面的二层网络</strong></p>
+<p>docker exec -it netb ip link set netbside up</p>
+<p>docker exec -it netb ip route add 140.252.1.29/32 dev netbside</p>
+<p>docker exec -it netb ip route add 140.252.13.32/27 via 140.252.1.29 dev netbside</p>
+<p>docker exec -it netb ip route add 140.252.13.64/27 via 140.252.1.29 dev netbside</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>十一、对于netb，配置arp proxy</strong><br></span></p>
+<p>&nbsp;</p>
+<p><strong>对于netb来讲，不是一个普通的路由器，因为netb两边是同一个二层网络，所以需要配置arp proxy，将同一个二层网络隔离称为两个。</strong></p>
+<p>&nbsp;</p>
+<p><strong>配置proxy_arp为1</strong></p>
+<p>&nbsp;</p>
+<p>docker exec -it netb bash -c "echo 1 &gt; /proc/sys/net/ipv4/conf/eth1/proxy_arp"</p>
+<p>docker exec -it netb bash -c "echo 1 &gt; /proc/sys/net/ipv4/conf/netbside/proxy_arp"</p>
+<p>&nbsp;</p>
+<p><strong>通过一个脚本proxy-arp脚本设置arp响应</strong></p>
+<p>&nbsp;</p>
+<p><strong>设置proxy-arp.conf</strong></p>
+<p>eth1 140.252.1.29</p>
+<p>netbside 140.252.1.92</p>
+<p>netbside 140.252.1.32</p>
+<p>netbside 140.252.1.11</p>
+<p>netbside 140.252.1.4</p>
+<p>&nbsp;</p>
+<p><strong>将配置文件添加到docker里面</strong></p>
+<p>docker cp proxy-arp.conf netb:/etc/proxy-arp.conf</p>
+<p>docker cp proxy-arp netb:/root/proxy-arp</p>
+<p>&nbsp;</p>
+<p><strong>在docker里面执行脚本proxy-arp</strong></p>
+<p>docker exec -it netb bash</p>
+<p>chmod +x proxy-arp</p>
+<p>./proxy-arp start</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>十二、配置上面的二层网络里面所有机器的路由</strong></span></p>
+<p>&nbsp;</p>
+<p><strong>在aix里面，默认外网访问路由是1.4</strong></p>
+<p>docker exec -it aix ip route add default via 140.252.1.4 dev eth1</p>
+<p>&nbsp;</p>
+<p><strong>在aix里面，可以通过下面的路由访问下面的二层网络</strong></p>
+<p>docker exec -it aix ip route add 140.252.13.32/27 via 140.252.1.29 dev eth1</p>
+<p>docker exec -it aix ip route add 140.252.13.64/27 via 140.252.1.29 dev eth1</p>
+<p>&nbsp;</p>
+<p><strong>同理配置solaris</strong></p>
+<p>docker exec -it solaris ip route add default via 140.252.1.4 dev eth1</p>
+<p>docker exec -it solaris ip route add 140.252.13.32/27 via 140.252.1.29 dev eth1</p>
+<p>docker exec -it solaris ip route add 140.252.13.64/27 via 140.252.1.29 dev eth1</p>
+<p>&nbsp;</p>
+<p><strong>同理配置gemini</strong></p>
+<p>docker exec -it gemini ip route add default via 140.252.1.4 dev eth1</p>
+<p>docker exec -it gemini ip route add 140.252.13.32/27 via 140.252.1.29 dev eth1</p>
+<p>docker exec -it gemini ip route add 140.252.13.64/27 via 140.252.1.29 dev eth1</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>十三、在gateway里面创建一个网卡连接到br-ex</strong></span></p>
+<p>&nbsp;</p>
+<p><strong>连接到br-ex用于连接外网</strong></p>
+<p>./pipework br-ex gateway 10.0.2.88/24@10.0.2.2</p>
+<p>&nbsp;</p>
+<p><strong>通过配置路由可以连接到下面的二层网络</strong></p>
+<p>docker exec -it gateway ip route add 140.252.13.32/27 via 140.252.1.29 dev eth1</p>
+<p>docker exec -it gateway ip route add 140.252.13.64/27 via 140.252.1.29 dev eth1</p>
+<p>&nbsp;</p>
+<p><strong>到此为止，上下的二层网络都能相互访问了，并且可以访问外网。</strong></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>脚本在这里https://github.com/popsuper1982/tcpipillustrated</strong></span></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>欢迎关注个人微信公众号</strong></span></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180302112455123-579219934.jpg" alt=""></strong></span></p>
+<p>&nbsp;</p>
+
+
+
+
+
+                </div>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2018-03-02 11:25</span>&nbsp;
+<a href="https://www.cnblogs.com/popsuper1982/">popsuper1982</a>&nbsp;
+阅读(<span id="post_view_count">2729</span>)&nbsp;
+评论(<span id="post_comment_count">1</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=8492254" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(8492254);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 186637, cb_blogApp = 'popsuper1982', cb_blogUserGuid = 'cf2394f1-d0e0-e311-8d02-90b11c0b17d6';
+    var cb_entryId = 8492254, cb_entryCreatedDate = '2018-03-02 11:25', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjuUn5Shm3jnPPDgP5c-eXlLbjCSbvM4ZJ3lDIOpctuo_k_MP8TRHAk_7pfvbSNNE0YpdFTSxnn9smtcgIoTp911ohq8OETD2LJeoFg_V3d-MvI8Zv0nlpPt8K3lRTM64xc" />
+</body>
+</html>

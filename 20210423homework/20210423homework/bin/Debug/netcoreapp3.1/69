@@ -1,0 +1,1827 @@
+﻿
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <link rel="canonical" href="https://blog.csdn.net/weixin_43975771/article/details/116275367"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="renderer" content="webkit"/>
+    <meta name="force-rendering" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="report" content='{"pid": "blog", "spm":"1001.2101"}'>
+    <meta name="referrer" content="always">
+    <meta http-equiv="Cache-Control" content="no-siteapp" /><link rel="alternate" media="handheld" href="#" />
+    <meta name="shenma-site-verification" content="5a59773ab8077d4a62bf469ab966a63b_1497598848">
+    <meta name="applicable-device" content="pc">
+    <link  href="https://g.csdnimg.cn/static/logo/favicon32.ico"  rel="shortcut icon" type="image/x-icon" />
+    <title>Mybatis的TypeHandler使用和实现原理_不积跬步，无以致千里的博客-CSDN博客</title>
+    <script>
+      (function(){ 
+        var el = document.createElement("script"); 
+        el.src = "https://s3a.pstatp.com/toutiao/push.js?1abfa13dfe74d72d41d83c86d240de427e7cac50c51ead53b2e79d40c7952a23ed7716d05b4a0f683a653eab3e214672511de2457e74e99286eb2c33f4428830"; 
+        el.id = "ttzz"; 
+        var s = document.getElementsByTagName("script")[0]; 
+        s.parentNode.insertBefore(el, s);
+      })(window)
+    </script>
+        <meta name="keywords" content="Mybatis的TypeHandler使用和实现原理">
+        <meta name="csdn-baidu-search"  content='{"autorun":true,"install":true,"keyword":"Mybatis的TypeHandler使用和实现原理"}'>
+    <meta name="description" content="前言在clickhouse数据库的使用中发现，它数据字段定义可以为    bid_price Array(Int64) CODEC(T64,LZ4),  	bid_qty Array(Int64) CODEC(T64,LZ4),  	offer_price Array(Int64) CODEC(T64,LZ4), 	offer_qty Array(Int64) CODEC(T64,LZ4) 数组类型，这样在使用mybatis的时候类型是不匹配的，所以要自定义数据类型。Mybatis中的Typ">
+    <script src="//g.csdnimg.cn/tingyun/1.8.5/blog.js" type='text/javascript'></script>
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/css/detail_enter-b70b7f940c.min.css">
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/themesSkin/skin-ink/skin-ink-a11cfdaac3.min.css">
+    <script src="https://csdnimg.cn/public/common/libs/jquery/jquery-1.9.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var isCorporate = false;//注释删除enterprise
+        var username =  "weixin_43975771";
+        var skinImg = "white";
+        var blog_address = "https://blog.csdn.net/weixin_43975771";
+        var currentUserName = "";
+        var isOwner = false;
+        var loginUrl = "http://passport.csdn.net/account/login?from=https://blog.csdn.net/weixin_43975771/article/details/116275367";
+        var blogUrl = "https://blog.csdn.net/";
+        var avatar = "https://profile.csdnimg.cn/8/5/7/3_weixin_43975771";
+        var articleTitle = "Mybatis的TypeHandler使用和实现原理";
+        var articleDesc = "前言在clickhouse数据库的使用中发现，它数据字段定义可以为    bid_price Array(Int64) CODEC(T64,LZ4),  \tbid_qty Array(Int64) CODEC(T64,LZ4),  \toffer_price Array(Int64) CODEC(T64,LZ4), \toffer_qty Array(Int64) CODEC(T64,LZ4) 数组类型，这样在使用mybatis的时候类型是不匹配的，所以要自定义数据类型。Mybatis中的Typ";
+        var articleTitles = "Mybatis的TypeHandler使用和实现原理_不积跬步，无以致千里的博客-CSDN博客";
+        var nickName = "不积跬步，无以致千里";
+        var articleDetailUrl = "https://blog.csdn.net/weixin_43975771/article/details/116275367";
+        if(window.location.host.split('.').length == 3) {
+            blog_address = blogUrl + username;
+        }
+        var skinStatus = "White";
+        var blogStaticHost = "https://csdnimg.cn/release/blogv2/"
+    </script>
+    <script src="https://g.csdnimg.cn/??fixed-sidebar/1.1.6/fixed-sidebar.js" type="text/javascript"></script>
+    <script src='//g.csdnimg.cn/common/csdn-report/report.js' type='text/javascript'></script>
+    <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/public/sandalstrap/1.4/css/sandalstrap.min.css">
+    <style>
+        .MathJax, .MathJax_Message, .MathJax_Preview{
+            display: none
+        }
+    </style>
+    <script src="https://dup.baidustatic.com/js/ds.js"></script>
+</head>
+<body class="nodata " style="">
+        <script>
+            var toolbarSearchExt = '{"landingWord":[],"queryWord":"","tag":["TypeHandler用法","mybatis"],"title":"Mybatis的TypeHandler使用和实现原理"}';
+        </script>
+    <script src="https://g.csdnimg.cn/common/csdn-toolbar/csdn-toolbar.js" type="text/javascript"></script>
+    <script>
+    (function(){
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        }
+        else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+    </script>
+<link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/pc/css/blog_code-01256533b5.min.css">
+<link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/chart-3456820cac.css" />
+<div class="main_father clearfix d-flex justify-content-center" style="height:100%;"> 
+    <div class="container clearfix" id="mainBox">
+        <main>
+<script type="text/javascript">
+    var blogSensitiveWords = "";
+    function getQueryString(name) {   
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象  
+      var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+      if( r != null ) return decodeURIComponent( r[2] ); return '';   
+    }
+    function stripscript(s){ 
+      var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？%]") 
+      var rs = ""; 
+      for (var i = 0; i < s.length; i++) { 
+        rs = rs+s.substr(i, 1).replace(pattern, ''); 
+      } 
+      return rs; 
+    }
+    var blogHotWords = stripscript(getQueryString('utm_term')).length > 1 ? stripscript(getQueryString('utm_term')) : ''
+</script>
+<div class="blog-content-box">
+    <div class="article-header-box">
+        <div class="article-header">
+            <div class="article-title-box">
+                <h1 class="title-article" id="articleContentId">Mybatis的TypeHandler使用和实现原理</h1>
+            </div>
+            <div class="article-info-box">
+                <div class="article-bar-top">
+                    <img class="article-type-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/original.png" alt="">
+                    <div class="bar-content">
+                    <a class="follow-nickName " href="https://blog.csdn.net/weixin_43975771" target="_blank" rel="noopener">不积跬步，无以致千里</a>
+                    <span class="time">2021-04-29 19:31:10</span>
+                    <img class="article-read-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/articleReadEyes.png" alt="">
+                    <span class="read-count">9</span>
+                    <a id="blog_detail_zk_collection" class="un-collection" data-report-click='{"mod":"popu_823","spm":"1001.2101.3001.4232","ab":"new"}'>
+                        <img class="article-collect-img article-heard-img un-collect-status isdefault" style="display:inline-block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollect.png" alt="">
+                        <img class="article-collect-img article-heard-img collect-status isactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive.png" alt="">
+                        <span class="name">收藏</span>
+                        <span class="get-collection">
+                        </span>
+                    </a>
+                    </div>
+                </div>
+                <div class="blog-tags-box">
+                    <div class="tags-box artic-tag-box">
+                            <span class="label">分类专栏：</span>
+                                <a class="tag-link" href="https://blog.csdn.net/weixin_43975771/category_9079738.html" target="_blank" rel="noopener">java开发日常总结</a>
+                            <span class="label">文章标签：</span>
+                                <a data-report-click='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"TypeHandler用法","ab":"new"}' class="tag-link" href="https://so.csdn.net/so/search/s.do?q=TypeHandler用法&amp;t=blog&amp;o=vip&amp;s=&amp;l=&amp;f=&amp;viparticle=" target="_blank" rel="noopener">TypeHandler用法</a>
+                                <a data-report-click='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"mybatis","ab":"new"}' class="tag-link" href="https://www.csdn.net/tags/MtTaEg0sMjEzMjItYmxvZwO0O0OO0O0O.html" target="_blank" rel="noopener">mybatis</a>
+                    </div>
+                </div>
+                <div class="slide-content-box">
+                    <div class="article-copyright">
+                        <div class="creativecommons">
+                            版权声明：本文为博主原创文章，遵循<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 BY-SA </a>版权协议，转载请附上原文出处链接和本声明。
+                        </div>
+                        <div class="article-source-link">
+                            本文链接：<a href="https://blog.csdn.net/weixin_43975771/article/details/116275367" target="_blank">https://blog.csdn.net/weixin_43975771/article/details/116275367</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="operating">
+                    <a class="href-article-edit slide-toggle">版权</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="csdn-shop-window-top" class="csdn-shop-window-common" style="margin-top:18px;padding:0"></div>
+    <article class="baidu_pl">
+        <div id="article_content" class="article_content clearfix">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-b5506197d8.css">
+                <div id="content_views" class="markdown_views prism-atom-one-dark">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                        <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                    </svg>
+                    <h3><a id="_1"></a>前言</h3> 
+<p>在clickhouse数据库的使用中发现&#xff0c;它数据字段定义可以为</p> 
+<pre><code class="prism language-sql">    bid_price Array<span class="token punctuation">(</span>Int64<span class="token punctuation">)</span> CODEC<span class="token punctuation">(</span>T64<span class="token punctuation">,</span>LZ4<span class="token punctuation">)</span><span class="token punctuation">,</span>  
+	bid_qty Array<span class="token punctuation">(</span>Int64<span class="token punctuation">)</span> CODEC<span class="token punctuation">(</span>T64<span class="token punctuation">,</span>LZ4<span class="token punctuation">)</span><span class="token punctuation">,</span>  
+	offer_price Array<span class="token punctuation">(</span>Int64<span class="token punctuation">)</span> CODEC<span class="token punctuation">(</span>T64<span class="token punctuation">,</span>LZ4<span class="token punctuation">)</span><span class="token punctuation">,</span> 
+	offer_qty Array<span class="token punctuation">(</span>Int64<span class="token punctuation">)</span> CODEC<span class="token punctuation">(</span>T64<span class="token punctuation">,</span>LZ4<span class="token punctuation">)</span> 
+</code></pre> 
+<p>数组类型&#xff0c;这样在使用mybatis的时候类型是不匹配的&#xff0c;所以要自定义数据类型。</p> 
+<h3><a id="MybatisTypeHandler_13"></a>Mybatis中的TypeHandler是什么&#xff1f;</h3> 
+<p>无论是 MyBatis 在预处理语句&#xff08;PreparedStatement&#xff09;中设置一个参数时&#xff0c;还是从结果集中取出一个值时&#xff0c;都会用类型处理器将获取的值以合适的方式转换成 Java 类型。Mybatis默认为我们实现了许多TypeHandler, 当我们没有配置指定TypeHandler时&#xff0c;Mybatis会根据参数或者返回结果的不同&#xff0c;默认为我们选择合适的TypeHandler处理。</p> 
+<p>自定义了一个类</p> 
+<pre><code class="prism language-java"><span class="token keyword">package</span> org<span class="token punctuation">.</span>demo<span class="token punctuation">.</span>comm<span class="token punctuation">.</span>typehandler<span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> com<span class="token punctuation">.</span>alibaba<span class="token punctuation">.</span>fastjson<span class="token punctuation">.</span>JSONObject<span class="token punctuation">;</span>
+<span class="token keyword">import</span> org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>ibatis<span class="token punctuation">.</span>type<span class="token punctuation">.</span>JdbcType<span class="token punctuation">;</span>
+<span class="token keyword">import</span> org<span class="token punctuation">.</span>apache<span class="token punctuation">.</span>ibatis<span class="token punctuation">.</span>type<span class="token punctuation">.</span>TypeHandler<span class="token punctuation">;</span>
+<span class="token keyword">import</span> org<span class="token punctuation">.</span>springframework<span class="token punctuation">.</span>util<span class="token punctuation">.</span>StringUtils<span class="token punctuation">;</span>
+<span class="token keyword">import</span> ru<span class="token punctuation">.</span>yandex<span class="token punctuation">.</span>clickhouse<span class="token punctuation">.</span>ClickHouseArray<span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> java<span class="token punctuation">.</span>sql<span class="token punctuation">.</span>CallableStatement<span class="token punctuation">;</span>
+<span class="token keyword">import</span> java<span class="token punctuation">.</span>sql<span class="token punctuation">.</span>PreparedStatement<span class="token punctuation">;</span>
+<span class="token keyword">import</span> java<span class="token punctuation">.</span>sql<span class="token punctuation">.</span>ResultSet<span class="token punctuation">;</span>
+<span class="token keyword">import</span> java<span class="token punctuation">.</span>sql<span class="token punctuation">.</span>SQLException<span class="token punctuation">;</span>
+<span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>Collections<span class="token punctuation">;</span>
+<span class="token keyword">import</span> java<span class="token punctuation">.</span>util<span class="token punctuation">.</span>List<span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * &#64;Description: note
+ * &#64;Author fl
+ * &#64;CreateDate: 2021/4/16 16:36
+ * &lt;p&gt;
+ */</span>
+<span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">ArrayTypeHandler</span> <span class="token keyword">implements</span> <span class="token class-name">TypeHandler</span><span class="token operator">&lt;</span>List<span class="token generics function"><span class="token punctuation">&lt;</span>Long<span class="token punctuation">&gt;</span></span><span class="token operator">&gt;</span> <span class="token punctuation">{<!-- --></span>
+
+    <span class="token annotation punctuation">&#64;Override</span>
+    <span class="token keyword">public</span> <span class="token keyword">void</span> <span class="token function">setParameter</span><span class="token punctuation">(</span>PreparedStatement preparedStatement<span class="token punctuation">,</span> <span class="token keyword">int</span> i<span class="token punctuation">,</span> List<span class="token generics function"><span class="token punctuation">&lt;</span>Long<span class="token punctuation">&gt;</span></span> longs<span class="token punctuation">,</span> JdbcType jdbcType<span class="token punctuation">)</span> <span class="token keyword">throws</span> SQLException <span class="token punctuation">{<!-- --></span>
+        preparedStatement<span class="token punctuation">.</span><span class="token function">setArray</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span><span class="token keyword">new</span> <span class="token class-name">ClickHouseArray</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span>longs<span class="token punctuation">.</span><span class="token function">toArray</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token annotation punctuation">&#64;Override</span>
+    <span class="token keyword">public</span> List<span class="token generics function"><span class="token punctuation">&lt;</span>Long<span class="token punctuation">&gt;</span></span> <span class="token function">getResult</span><span class="token punctuation">(</span>ResultSet resultSet<span class="token punctuation">,</span> String s<span class="token punctuation">)</span> <span class="token keyword">throws</span> SQLException <span class="token punctuation">{<!-- --></span>
+        <span class="token keyword">return</span> <span class="token function">getList</span><span class="token punctuation">(</span>resultSet<span class="token punctuation">.</span><span class="token function">getString</span><span class="token punctuation">(</span>s<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token annotation punctuation">&#64;Override</span>
+    <span class="token keyword">public</span> List<span class="token generics function"><span class="token punctuation">&lt;</span>Long<span class="token punctuation">&gt;</span></span> <span class="token function">getResult</span><span class="token punctuation">(</span>ResultSet resultSet<span class="token punctuation">,</span> <span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token keyword">throws</span> SQLException <span class="token punctuation">{<!-- --></span>
+        <span class="token keyword">return</span> <span class="token function">getList</span><span class="token punctuation">(</span>resultSet<span class="token punctuation">.</span><span class="token function">getString</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">private</span> List<span class="token generics function"><span class="token punctuation">&lt;</span>Long<span class="token punctuation">&gt;</span></span> <span class="token function">getList</span><span class="token punctuation">(</span>String data<span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>StringUtils<span class="token punctuation">.</span><span class="token function">hasText</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{<!-- --></span>
+            <span class="token keyword">return</span> JSONObject<span class="token punctuation">.</span><span class="token function">parseArray</span><span class="token punctuation">(</span>data<span class="token punctuation">,</span> Long<span class="token punctuation">.</span><span class="token keyword">class</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> Collections<span class="token punctuation">.</span><span class="token function">emptyList</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token annotation punctuation">&#64;Override</span>
+    <span class="token keyword">public</span> List<span class="token generics function"><span class="token punctuation">&lt;</span>Long<span class="token punctuation">&gt;</span></span> <span class="token function">getResult</span><span class="token punctuation">(</span>CallableStatement callableStatement<span class="token punctuation">,</span> <span class="token keyword">int</span> i<span class="token punctuation">)</span> <span class="token keyword">throws</span> SQLException <span class="token punctuation">{<!-- --></span>
+        <span class="token keyword">return</span> <span class="token function">getList</span><span class="token punctuation">(</span>callableStatement<span class="token punctuation">.</span><span class="token function">getString</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+</code></pre> 
+<p>然后在 mybatis xml 文件对应即可</p> 
+<pre><code class="prism language-java">  <span class="token operator">&lt;</span>resultMap id<span class="token operator">&#61;</span><span class="token string">&#34;BaseResultMap&#34;</span> type<span class="token operator">&#61;</span><span class="token string">&#34;xxx&#34;</span><span class="token operator">&gt;</span>
+   <span class="token operator">&lt;</span>result column<span class="token operator">&#61;</span><span class="token string">&#34;bid_price&#34;</span> property<span class="token operator">&#61;</span><span class="token string">&#34;bidPrice&#34;</span> typeHandler<span class="token operator">&#61;</span><span class="token string">&#34;org.demo.comm.typehandler.ArrayTypeHandler&#34;</span><span class="token operator">/</span><span class="token operator">&gt;</span>
+        <span class="token operator">&lt;</span>result column<span class="token operator">&#61;</span><span class="token string">&#34;bid_qty&#34;</span>  property<span class="token operator">&#61;</span><span class="token string">&#34;bidQty&#34;</span> typeHandler<span class="token operator">&#61;</span><span class="token string">&#34;org.demo.comm.typehandler.ArrayTypeHandler&#34;</span><span class="token operator">/</span><span class="token operator">&gt;</span>
+        <span class="token operator">&lt;</span>result column<span class="token operator">&#61;</span><span class="token string">&#34;offer_price&#34;</span> property<span class="token operator">&#61;</span><span class="token string">&#34;offerPrice&#34;</span> typeHandler<span class="token operator">&#61;</span><span class="token string">&#34;org.demo.comm.typehandler.ArrayTypeHandler&#34;</span><span class="token operator">/</span><span class="token operator">&gt;</span>
+        <span class="token operator">&lt;</span>result column<span class="token operator">&#61;</span><span class="token string">&#34;offer_qty&#34;</span>  property<span class="token operator">&#61;</span><span class="token string">&#34;offerQty&#34;</span> typeHandler<span class="token operator">&#61;</span><span class="token string">&#34;org.demo.comm.typehandler.ArrayTypeHandler&#34;</span><span class="token operator">/</span><span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span><span class="token operator">/</span>resultMap<span class="token operator">&gt;</span>
+</code></pre>
+                </div>
+                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-d7a94ec6ab.css" rel="stylesheet">
+                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-f1c5feb645.css" rel="stylesheet">
+        </div>
+    </article>
+</div>
+            <div id="csdn-shop-window" class="csdn-shop-window-common"></div>
+<div class="more-toolbox" id="toolBarBox">
+    <span id="fixedBar"></span>
+    <div class="left-toolbox">
+        <ul class="toolbox-list ">
+            <li class="tool-item tool-item-size tool-active is-like" id="is-like"><a>
+            <img style="display:none;" id="is-like-imgactive-animation-like" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUpactive.png" alt="">
+            <img class="isactive" style="display:none" id="is-like-imgactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUpactive.png" alt="">
+            <img class="isdefault" style="display:block" id="is-like-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUp.png" alt="">   
+            <span class="name" id="is-like-span">点赞</span>
+            <span id="spanCount" class="count">
+            </span>
+            </a></li>
+            <li class="tool-item tool-item-size tool-active tool-item-comment">
+                <a href="#commentBox">
+                    <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarComment.png" alt="">
+                    <img class="isactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCommentactive.png" style="display:none;" alt="">
+                    <span class="name">评论</span>
+                    <span class="count">
+                    </span>
+                </a>
+            </li>
+            <li class="tool-item tool-item-size tool-active tool-QRcode" id="tool-share">
+                <a href="javascript:;" data-report-click='{"mod":"1582594662_002","spm":"1001.2101.3001.4129","ab":"new"}'>
+                    <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarShare.png" alt="">
+                    <img class="isactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarShareactive.png" style="display:none;" alt="">
+                    <span class="name">分享</span>
+                </a>
+                <div class="QRcode" id="tool-QRcode" style="left:-92%;">
+                    <span id="QRcode-close">x</span>
+                    <p class="title">
+                    海报分享
+                    </p>
+                    <div id='shareCode'></div>
+                    <p>
+                    扫一扫，分享海报
+                    </p>
+                </div>
+            </li>
+            <li class="tool-item tool-item-size tool-active is-collection ">
+                <a href="javascript:;" data-report-click='{"mod":"popu_824","spm":"1001.2101.3001.4130","ab":"new"}'>
+                    <img style="display:none" id="is-collection-img-collection" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive.png" alt="">
+                    <img class="isdefault" id="is-collection-img" style="display:block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollect.png" alt="">
+                    <img class="isactive" id="is-collection-imgactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive.png" alt="">
+                    <span class="name" id="is-collection">收藏</span>
+                    <span class="count get-collection" id="get-collection">
+                    </span>
+                </a>
+            </li>
+            <li class="tool-item tool-item-size tool-active tool-reward">
+                <a  id="toolreward" data-report-click='{"mod":"popu_830","spm":"1001.2101.3001.4237","dest":"","ab":"new"}'>
+                    <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarReward.png" alt="">
+                    <img class="isactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarRewardactive.png" style="display:none;" alt="">
+                    <span class="name">打赏</span>
+                </a>
+<div id="reward" class="reward-box">
+	<p class="rewad-title">打赏<span class="reward-close"><svg t="1567152543821" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10924" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12"><defs><style type="text/css"></style></defs><path d="M512 438.378667L806.506667 143.893333a52.032 52.032 0 1 1 73.6 73.621334L585.621333 512l294.485334 294.485333a52.074667 52.074667 0 0 1-73.6 73.642667L512 585.621333 217.514667 880.128a52.053333 52.053333 0 1 1-73.621334-73.642667L438.378667 512 143.893333 217.514667a52.053333 52.053333 0 1 1 73.621334-73.621334L512 438.378667z" fill="" p-id="10925"></path></svg></span></p>
+	<dl>
+		<dd>
+		<a href="https://blog.csdn.net/weixin_43975771" data-report-click='{"mod":"popu_379","dest":"https://blog.csdn.net/weixin_43975771","ab":"new"}'>
+			<img src="https://profile.csdnimg.cn/8/5/7/3_weixin_43975771" class="avatar_pic">
+		</a>
+		</dd>
+		<dt>
+			<p class="blog-name">不积跬步，无以致千里</p>
+			<p class="blog-discript">你的鼓励将是我创作的最大动力</p>
+		</dt>
+	</dl>
+	<div class="change-bt-box">
+		<span class="reward-bt reward-bt-coin">C币</span>
+		<span class="reward-bt-space"></span>
+		<span class="reward-bt reward-bt-money reward-bt-active">余额</span>
+	</div>
+	<div class="money-box">
+			<span class="choose_money choosed" data-id="2">2C币</span>
+			<span class="choose_money " data-id="4">4C币</span>
+			<span class="choose_money " data-id="6">6C币</span>
+			<span class="choose_money " data-id="10">10C币</span>
+			<span class="choose_money " data-id="20">20C币</span>
+			<span class="choose_money " data-id="50">50C币</span>
+	</div>
+	<div class="sure-box">
+		<p class="is-have-money"><a class="reward-sure">确定</a></p>
+	</div>
+</div>
+            </li>
+            <li class="tool-item tool-item-size tool-active tool-more">
+              <a class="article-report">
+                <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarReport.png" alt="">
+                <img class="isactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarReportactive.png" style="display:none;" alt="">
+                <span class="name">举报</span>
+              </a>
+            </li>
+            <li class="tool-item">
+                    <a class="tool-attend tool-bt-button tool-bt-attend" href="javascript:;" data-report-view='{"mod":"1592215036_002","spm":"1001.2101.3001.4232","extend1":"关注"}'>关注</a>
+                <a class="tool-item-follow active-animation" style="display:none;">关注</a>
+            </li>
+            <li class="tool-item">
+                    <p class="company active" id="health-companies" href="javascript:;" >一键三连</p>
+            </li>
+        </ul>
+    </div>  
+</div>
+<script type=text/javascript crossorigin src="https://csdnimg.cn/release/phoenix/production/qrcode-7c90a92189.min.js"></script>
+<script src="//g.csdnimg.cn/??sharewx/1.2.1/sharewx.js" type="text/javascript"></script>
+<script type="text/javascript" crossorigin src="https://g.csdnimg.cn/collection-box/2.0.4/collection-box.js"></script>
+                <div id="dmp_ad_58" style="width:100%;overflow-x:hidden"><div id="kp_box_58" data-pid="58"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-format="fluid"
+     data-ad-layout-key="-gi-21+3s-18+2p"
+     data-ad-client="ca-pub-1076724771190722"
+     data-ad-slot="5869798804"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script><img class="pre-img-lasy" data-src="https://kunyu.csdn.net/1.png?p=58&a=3778&c=0&k=&spm=1001.2101.3001.5002&d=1&t=3&u=dff4947281934da189d8aefd936a5815" style="display: block;width: 0px;height: 0px;"></div></div>
+            <div class="second-recommend-box recommend-box">
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/jiaqingShareing/article/details/81876649"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-1.control\"}","dist_request_id":"1621077340472_41493","index":"1","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/jiaqingShareing/article/details/81876649"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/jiaqingShareing/article/details/81876649" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-1.control\"}","dist_request_id":"1621077340472_41493","index":"1","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/jiaqingShareing/article/details/81876649"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control'>
+					<em>Mybatis</em>类型处理器原理以及实现自定义<em>TypeHandler</em>
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/jiaqingShareing" target="_blank"><span class="blog-title">Hand East China 8th Group*</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">08-20</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					814
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/jiaqingShareing/article/details/81876649" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-1.control\"}","dist_request_id":"1621077340472_41493","index":"1","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/jiaqingShareing/article/details/81876649"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">一、基本<em>使用</em>
+
+<em>Mybatis</em>中<em>的</em><em>TypeHandler</em>有两个功能，一个是实现javaType到jdbcType<em>的</em>转换，另外一个是实现jdbcType到javaType<em>的</em>转换。
+
+<em>TypeHandler</em>是一个接口，其中重点是四个方法，一个取值<em>的</em>方法，三个设置值<em>的</em>方法：
+
+
+
+/**
+ * @author Clinton Begin
+ */
+public interface <em>TypeHandler</em>&amp;...</div>
+			</a>
+		</div>
+	</div>
+</div>
+            </div>
+<a id="commentBox" name="commentBox"></a>
+<div class="comment-box">
+	<div class="comment-edit-box d-flex">
+		<a id="commentsedit"></a>
+		<div class="user-img">
+			<a href="javascript:void(0);" >
+				<img class="show_loginbox" src="https://g.csdnimg.cn/static/user-img/anonymous-User-img.png">
+			</a>
+		</div>
+		<form id="commentform">
+			<img class="comment-sofa-flag" src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentFlag@2x.png">
+      <textarea class="comment-content" name="comment_content" id="comment_content" placeholder="优质评论可以帮助作者获得更高权重" maxlength="1000"></textarea>
+			<div class="comment-emoticon"><img class="comment-emoticon-img" data-url="https://csdnimg.cn/release/blogv2/dist/pc/img/" src="https://csdnimg.cn/release/blogv2/dist/pc/img/emoticon.png" alt="表情包"></div> 
+      <span class="comment-emoticon-tip">插入表情</span>
+      <div class="comment-emoticon-box">
+        <div class="comment-emoticon-img-box">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:001.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/001.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:002.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/002.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:003.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/003.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:004.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/004.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:005.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/005.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:006.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/006.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:007.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/007.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:008.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/008.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:009.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/009.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:010.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/010.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:011.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/011.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:012.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/012.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:013.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/013.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:014.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/014.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:015.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/015.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:016.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/016.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:017.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/017.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:018.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/018.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:019.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/019.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:020.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/020.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:021.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/021.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:022.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/022.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:023.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/023.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:024.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/024.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:025.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/025.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:026.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/026.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:027.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/027.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:028.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/028.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:029.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/029.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:030.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/030.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:031.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/031.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:032.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/032.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:033.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/033.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:034.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/034.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:035.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/035.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:036.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/036.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:037.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/037.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:038.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/038.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:039.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/039.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:040.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/040.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:041.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/041.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:042.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/042.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:043.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/043.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:044.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/044.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:045.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/045.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:046.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/046.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:047.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/047.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:048.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/048.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:049.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/049.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:050.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/050.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:051.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/051.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:052.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/052.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:053.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/053.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:054.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/054.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:055.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/055.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:056.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/056.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:057.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/057.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:058.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/058.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:059.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/059.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:060.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/060.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:061.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/061.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:062.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/062.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:063.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/063.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:064.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/064.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:065.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/065.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:066.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/066.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:067.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/067.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:068.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/068.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:069.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/069.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:070.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/070.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:071.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/071.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:072.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/072.png">
+        </div>
+      </div>
+      <div class="opt-box">
+				<div id="ubbtools" class="add_code">
+					<a href="#insertcode" code="code" target="_self"><i class="icon iconfont icon-daima"></i></a>
+				</div>
+				<input type="hidden" id="comment_replyId" name="comment_replyId">
+				<input type="hidden" id="article_id" name="article_id" value="116275367">
+				<input type="hidden" id="comment_userId" name="comment_userId" value="">
+				<input type="hidden" id="commentId" name="commentId" value="">
+				<div class="dropdown" id="myDrap">
+					<a class="dropdown-face d-flex align-items-center" data-toggle="dropdown" role="button"
+						aria-haspopup="true" aria-expanded="false">
+						<div class="txt-selected text-truncate">添加代码片</div>
+						<svg class="icon d-block" width="200px" height="100.00px" viewBox="0 0 2048 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path  d="M597.33333292 298.666667h853.333334L1023.99999992 725.333333 597.33333292 298.666667z"  /></svg>
+					</a>
+					<ul class="dropdown-menu" id="commentCode" aria-labelledby="drop4">
+						<li><a data-code="html">HTML/XML</a></li>
+						<li><a data-code="objc">objective-c</a></li>
+						<li><a data-code="ruby">Ruby</a></li>
+						<li><a data-code="php">PHP</a></li>
+						<li><a data-code="csharp">C</a></li>
+						<li><a data-code="cpp">C++</a></li>
+						<li><a data-code="javascript">JavaScript</a></li>
+						<li><a data-code="python">Python</a></li>
+						<li><a data-code="java">Java</a></li>
+						<li><a data-code="css">CSS</a></li>
+						<li><a data-code="sql">SQL</a></li>
+						<li><a data-code="plain">其它</a></li>
+					</ul>
+				</div>
+				<div class="right-box" id="rightBox" data-type="2">
+							<span id="tip_comment" class="tip">还能输入<em>1000</em>个字符</span>
+							<a data-report-click='{"mod":"1582594662_003","spm":"1001.2101.3001.4227","ab":"new"}'><input type="submit"
+									class="btn btn-sm btn-comment" value="发表评论"></a>
+				</div>
+			</div>
+		</form>
+		<input type="button" class="bt-comment-show" value="评论">
+	</div>
+	<div class="comment-list-container">
+		<a id="comments"></a>
+		<div class="comment-list-box">
+		</div>
+		<div id="commentPage" class="pagination-box d-none"></div>
+		<div class="opt-box text-center">
+			<div class="btn btn-sm btn-link-blue" id="btnMoreComment"></div>
+		</div>
+	</div>
+</div>            <div class="recommend-tit-mod">相关推荐</div>
+            <div class="recommend-box insert-baidu-box">
+                <div class="recommend-item-box clearfix" style="display:none"></div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/turbo_zone/article/details/83795018"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-2.control\"}","dist_request_id":"1621077340472_41493","index":"2","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/turbo_zone/article/details/83795018"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/turbo_zone/article/details/83795018" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-2.control\"}","dist_request_id":"1621077340472_41493","index":"2","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/turbo_zone/article/details/83795018"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.control'>
+					<em>Mybatis</em>中<em>TypeHandler</em><em>的</em>底层实现
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/turbo_zone" target="_blank"><span class="blog-title">turbo_zone的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">11-06</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					326
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/turbo_zone/article/details/83795018" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-2.control\"}","dist_request_id":"1621077340472_41493","index":"2","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/turbo_zone/article/details/83795018"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.control'>
+				<div class="desc ellipsis-online ellipsis-online-1"><em>TypeHandler</em><em>的</em><em>用法</em>
+<em>TypeHandler</em>是<em>Mybatis</em>提供<em>的</em>一个用于用户自定义处理数据库类型<em>和</em>java类型之间相互映射<em>的</em>一种工具，它可以实现jdbcType到javaType<em>的</em>自动转换。
+要实现自定义<em>的</em><em>TypeHandler</em>首先需要继承Base<em>TypeHandler</em>，然后在类上添加@MappedTypes
+@MappedTypes({String.class})
+public MyT...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/chutan5573/article/details/100683784"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-3.control\"}","dist_request_id":"1621077340472_41493","index":"3","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/chutan5573/article/details/100683784"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/chutan5573/article/details/100683784" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-3.control\"}","dist_request_id":"1621077340472_41493","index":"3","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/chutan5573/article/details/100683784"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control'>
+					[<em>Mybatis</em>] <em>TypeHandler</em><em>的</em>简单应用及源码分析
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/chutan5573" target="_blank"><span class="blog-title">chutan5573的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">06-03</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					37
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/chutan5573/article/details/100683784" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-3.control\"}","dist_request_id":"1621077340472_41493","index":"3","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/chutan5573/article/details/100683784"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control'>
+				<div class="desc ellipsis-online ellipsis-online-1"><em>TypeHandler</em>s
+
+无论是 <em>MyBatis</em> 在预处理语句（PreparedStatement）中设置一个参数时，还是从结果集中取出一个值时， 都会用类型处理器将获取<em>的</em>值以合适<em>的</em>方式转换成 Java 类型。
+
+下面是常见<em>的</em>一些对应类型:
+
+以BigDecimal<em>TypeHandler</em>看一...</div>
+			</a>
+		</div>
+	</div>
+</div>
+		<dl id="recommend-item-box-tow" class="recommend-item-box type_blog clearfix">
+			
+		</dl>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/hchhan/article/details/81113817"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-4.control\"}","dist_request_id":"1621077340472_41493","index":"4","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/hchhan/article/details/81113817"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/hchhan/article/details/81113817" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-4.control\"}","dist_request_id":"1621077340472_41493","index":"4","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/hchhan/article/details/81113817"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-4.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-4.control'>
+					<em>MyBatis</em>之<em>TypeHandler</em>
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/hchhan" target="_blank"><span class="blog-title">hchhan的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">07-19</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					1446
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/hchhan/article/details/81113817" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-4.control\"}","dist_request_id":"1621077340472_41493","index":"4","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/hchhan/article/details/81113817"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-4.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-4.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">&nbsp; &nbsp; 转载自：http://www.cnblogs.com/yulinfeng/p/5991170.html&nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp; &nbsp;在大学写web应用<em>的</em>时候经常会遇到这么个问题，当我要插入一条数据，某个数据是Date类型，数据库中却是VARCHAR类型，这个时候可能会傻乎乎<em>的</em>先把这个数据自己手动转换成String类型再插入到数据库中，其实大可不必。<em>MyBatis</em>为我们提供了更好<em>的</em>方法即TypeH...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/qq_39198749/article/details/102742750"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-5.control\"}","dist_request_id":"1621077340472_41493","index":"5","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/qq_39198749/article/details/102742750"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/qq_39198749/article/details/102742750" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-5.control\"}","dist_request_id":"1621077340472_41493","index":"5","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/qq_39198749/article/details/102742750"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control'>
+					<em>使用</em><em>Mybatis</em><em>的</em><em>TypeHandler</em>实现字段<em>的</em>类型映射转换
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/qq_39198749" target="_blank"><span class="blog-title">qq_39198749的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">10-25</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					616
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/qq_39198749/article/details/102742750" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-5.control\"}","dist_request_id":"1621077340472_41493","index":"5","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/qq_39198749/article/details/102742750"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">1. <em>mybatis</em><em>的</em><em>TypeHandler</em>类型转换
+它<em>的</em>作用就是将java类型（javaType）转化为jdbc类型（jdbcType），或者将jdbc类型（jdbcType）转化为java类型（javaType）。
+2. 通过一个例子来了解<em>TypeHandler</em><em>的</em>实现机制
+将java字符数组String[]转化成数据库varchar类型。如：String[] interests = {&ldquo;mov...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/acm_lkl/article/details/78609341"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~default-6.control\"}","dist_request_id":"1621077340472_41493","index":"6","strategy":"2~default~BlogCommendFromBaidu~default","dest":"https://blog.csdn.net/acm_lkl/article/details/78609341"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/acm_lkl/article/details/78609341" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~default-6.control\"}","dist_request_id":"1621077340472_41493","index":"6","strategy":"2~default~BlogCommendFromBaidu~default","dest":"https://blog.csdn.net/acm_lkl/article/details/78609341"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-6.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-6.control'>
+					<em>mybatis</em> <em>TypeHandler</em>详解
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/acm_lkl" target="_blank"><span class="blog-title">荒野孤鹰</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">11-22</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					3260
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/acm_lkl/article/details/78609341" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~default-6.control\"}","dist_request_id":"1621077340472_41493","index":"6","strategy":"2~default~BlogCommendFromBaidu~default","dest":"https://blog.csdn.net/acm_lkl/article/details/78609341"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-6.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-6.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">1.<em>TypeHandler</em>概念 
+<em>TypeHandler</em>,类型转换器,在<em>mybatis</em>中用于实现java类型<em>和</em>JDBC类型<em>的</em>相互转换. 
+<em>mybatis</em><em>使用</em>prepareStatement来进行参数设置<em>的</em>时候,需要通过<em>typeHandler</em>将传入<em>的</em>java参数设置成合适<em>的</em>jdbc类型参数,这个过程实际上是通过 
+调用PrepareStatement不同<em>的</em>set方法实现<em>的</em>;在获取结果返回之后,也需要将</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/wenxueliu/article/details/89766354"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-7.control\"}","dist_request_id":"1621077340472_41493","index":"7","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/wenxueliu/article/details/89766354"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/wenxueliu/article/details/89766354" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-7.control\"}","dist_request_id":"1621077340472_41493","index":"7","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/wenxueliu/article/details/89766354"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-7.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-7.control'>
+					<em>mybatis</em>源码解析之 <em>TypeHandler</em>
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/wenxueliu" target="_blank"><span class="blog-title">wenxueliu的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">05-02</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					1397
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/wenxueliu/article/details/89766354" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-7.control\"}","dist_request_id":"1621077340472_41493","index":"7","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/wenxueliu/article/details/89766354"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-7.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-7.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">TypeHanler
+<em>MyBatis</em> 在预处理语句（PreparedStatement）中设置一个参数或者从结果集中取出一个值时，都会用类型处理器将获取<em>的</em>值以合适<em>的</em>方式转换成 Java 类型。<em>Mybatis</em>默认为我们实现了许多<em>TypeHandler</em>, 当我们没有配置指定<em>TypeHandler</em>时，<em>Mybatis</em>会根据参数或者返回结果<em>的</em>不同，默认为我们选择合适<em>的</em><em>TypeHandler</em>处理。
+在MyBa...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/qq_16513911/article/details/90730805"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-9.control\"}","dist_request_id":"1621077340472_41493","index":"9","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/qq_16513911/article/details/90730805"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/qq_16513911/article/details/90730805" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-9.control\"}","dist_request_id":"1621077340472_41493","index":"9","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/qq_16513911/article/details/90730805"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-9.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-9.control'>
+					Spring boot <em>mybatis</em> <em>typehandler</em> 自定义参数处理,去除插入更新查询重复<em>typehandler</em>指定,删除<em>typehandler</em>
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/qq_16513911" target="_blank"><span class="blog-title">Say no to the bugs</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">06-01</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					2815
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/qq_16513911/article/details/90730805" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-9.control\"}","dist_request_id":"1621077340472_41493","index":"9","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/qq_16513911/article/details/90730805"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-9.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-9.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">数据库编码格式是latin1,而java项目代码都是UTF-8
+
+导致所有String字段都需要转码,目前项目中方法是所有实体类<em>的</em>Set方法都包了一层转码
+
+
+public void setMemberShortName(String memberShortName) {
+    this.memberShortName = Code.StrCode(memberShortName);
+  }
+
+...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/Frame_M/article/details/89257995"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-10.control\"}","dist_request_id":"1621077340472_41493","index":"10","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/Frame_M/article/details/89257995"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/Frame_M/article/details/89257995" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-10.control\"}","dist_request_id":"1621077340472_41493","index":"10","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/Frame_M/article/details/89257995"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-10.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-10.control'>
+					基于SpringBoot自定义实现<em>Mybatis</em>-<em>TypeHandler</em>
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/Frame_M" target="_blank"><span class="blog-title">Frame_M的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">04-12</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					2854
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/Frame_M/article/details/89257995" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-10.control\"}","dist_request_id":"1621077340472_41493","index":"10","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/Frame_M/article/details/89257995"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-10.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-10.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">需求：
+在程序中<em>使用</em>枚举(enum) 来表示一些状态或选项，而在数据库中<em>使用</em>数字来存储。这样做<em>的</em>好处是在程序中<em>使用</em>enum更直观<em>的</em>可以知道每个值代表<em>的</em>状态及含义。
+
+分析：
+Enum<em>TypeHandler</em>与EnumOrdinal<em>TypeHandler</em>是已经有<em>的</em>两类<em>TypeHandler</em>
+
+两者之间<em>的</em>区别：
+Enum<em>TypeHandler</em>存入数据库<em>的</em>是枚举<em>的</em>name，EnumOrdinalTypeH...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/shang_xs/article/details/86656173"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-11.control\"}","dist_request_id":"1621077340472_41493","index":"11","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/shang_xs/article/details/86656173"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/shang_xs/article/details/86656173" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-11.control\"}","dist_request_id":"1621077340472_41493","index":"11","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/shang_xs/article/details/86656173"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-11.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-11.control'>
+					<em>MyBatis</em>深入理解<em>和</em><em>使用</em>-<em>TypeHandler</em>
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/shang_xs" target="_blank"><span class="blog-title">java界的小学生</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">01-26</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					6727
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/shang_xs/article/details/86656173" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-11.control\"}","dist_request_id":"1621077340472_41493","index":"11","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/shang_xs/article/details/86656173"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-11.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-11.control'>
+				<div class="desc ellipsis-online ellipsis-online-1"><em>MyBatis</em>深入理解<em>和</em><em>使用</em>-<em>TypeHandler</em>
+
+<em>MyBatis</em>流程图：
+
+
+
+
+
+<em>使用</em><em>mybatis</em>
+
+xml
+
+
+Genreator 生成代码
+
+
+引入pom文件
+
+GenreatorConfig.xml
+
+去掉注释 suppressAllComments
+
+执行mvn <em>mybatis</em>-generator.
+
+
+
+Annotation
+
+
+写POJO<em>和</em>一个Mapper用@Selec...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/wuli2496/article/details/108394138"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-12.control\"}","dist_request_id":"1621077340472_41493","index":"12","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/wuli2496/article/details/108394138"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/wuli2496/article/details/108394138" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-12.control\"}","dist_request_id":"1621077340472_41493","index":"12","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/wuli2496/article/details/108394138"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-12.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-12.control'>
+					<em>mybatis</em>中<em>的</em><em>TypeHandler</em>设计与实现
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/wuli2496" target="_blank"><span class="blog-title">多看多听多总结</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">09-03</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					46
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/wuli2496/article/details/108394138" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-12.control\"}","dist_request_id":"1621077340472_41493","index":"12","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/wuli2496/article/details/108394138"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-12.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-12.control'>
+				<div class="desc ellipsis-online ellipsis-online-1"><em>TypeHandler</em>主要是用在从java数据写入数据库时，从数据库中读取数据时<em>的</em>从java到jdbc类型之间<em>的</em>转换。
+
+其类层次图为
+
+
+</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_30082211/article/details/112833969"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-13.control\"}","dist_request_id":"1621077340472_41493","index":"13","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_30082211/article/details/112833969"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_30082211/article/details/112833969" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-13.control\"}","dist_request_id":"1621077340472_41493","index":"13","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_30082211/article/details/112833969"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-13.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-13.control'>
+					list <em>mybatis</em> 接收 类型_<em>Mybatis</em> <em>TypeHandler</em>（类型处理器）转换参数到SQL<em>和</em>转换SQL查询结果到Java类...
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_30082211" target="_blank"><span class="blog-title">weixin_30082211的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">01-12</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					49
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_30082211/article/details/112833969" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-13.control\"}","dist_request_id":"1621077340472_41493","index":"13","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_30082211/article/details/112833969"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-13.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-13.control'>
+				<div class="desc ellipsis-online ellipsis-online-1"><em>TypeHandler</em>介绍<em>TypeHandler</em><em>的</em>实际运用<em>TypeHandler</em>作用原理<em>TypeHandler</em>介绍在预处理语句(PreparedStatement)中设置一个参数时，或者从结果集中取出一个值时， 都会用<em>TypeHandler</em>将获取<em>的</em>值以合适<em>的</em>方式设置到PreparedStatement，或者转换成Java类型。可以重写<em>TypeHandler</em>或创建自己<em>的</em><em>TypeHandler</em>来处理不...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_38308374/article/details/113827825"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-14.control\"}","dist_request_id":"1621077340472_41493","index":"14","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_38308374/article/details/113827825"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_38308374/article/details/113827825" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-14.control\"}","dist_request_id":"1621077340472_41493","index":"14","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_38308374/article/details/113827825"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-14.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-14.control'>
+					<em>mybatis</em>解析-<em>TypeHandler</em>作用详解
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_38308374" target="_blank"><span class="blog-title">weixin_38308374的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">02-19</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					161
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_38308374/article/details/113827825" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-14.control\"}","dist_request_id":"1621077340472_41493","index":"14","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_38308374/article/details/113827825"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-14.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-14.control'>
+				<div class="desc ellipsis-online ellipsis-online-1"><em>TypeHandler</em>被称作类型处理器，<em>MyBatis</em>在设置预处理语句（PreparedStatement）中<em>的</em>参数或从结果集中取出一个值时，都会用类型处理器将Java对象转化为数据库支持<em>的</em>类型或者将获取到数据库值以合适<em>的</em>方式转换成 Java类型。
+<em>mybatis</em>提供了31个默认<em>的</em>类型处理器，它们都位于org.apache.ibatis.type包下，这些默认<em>的</em>处理器能够满足我们大部分场景<em>的</em>需求。
+本文接下来首先介绍<em>TypeHandler</em>接口<em>的</em>定义，之后介绍其在<em>mybatis</em>中如何<em>使用</em>，最后介绍一些my</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_other clearfix" data-url="https://plugin.csdn.net/?from=blog_detail"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.534984.control\"}","dist_request_id":"1621077340472_41493","index":"15","strategy":"11_534984_RCMD","dest":"https://plugin.csdn.net/?from=blog_detail"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://plugin.csdn.net/?from=blog_detail" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.534984.control\"}","dist_request_id":"1621077340472_41493","index":"15","strategy":"11_534984_RCMD","dest":"https://plugin.csdn.net/?from=blog_detail"}'  data-report-query='utm_medium=distribute.pc_relevant.534984.control&depth_1-utm_source=distribute.pc_relevant.534984.control'>
+					CSDN开发者助手，常用网站自动整合，多种工具一键调用
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info display-flex">
+					<span class="info-block"></span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://plugin.csdn.net/?from=blog_detail" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.534984.control\"}","dist_request_id":"1621077340472_41493","index":"15","strategy":"11_534984_RCMD","dest":"https://plugin.csdn.net/?from=blog_detail"}'  data-report-query='utm_medium=distribute.pc_relevant.534984.control&depth_1-utm_source=distribute.pc_relevant.534984.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">CSDN开发者助手由CSDN官方开发，集成一键呼出搜索、万能快捷工具、个性化新标签页<em>和</em>官方免广告四大功能。帮助您提升10倍开发效率！</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_42500684/article/details/112194308"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-16.control\"}","dist_request_id":"1621077340472_41493","index":"16","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_42500684/article/details/112194308"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_42500684/article/details/112194308" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-16.control\"}","dist_request_id":"1621077340472_41493","index":"16","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_42500684/article/details/112194308"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-16.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-16.control'>
+					<em>mybatis</em> update 不为空<em>的</em>_面试官：<em>Mybatis</em>中<em>的</em><em>TypeHandler</em>你用过吗？
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_42500684" target="_blank"><span class="blog-title">weixin_42500684的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">12-30</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					56
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_42500684/article/details/112194308" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-16.control\"}","dist_request_id":"1621077340472_41493","index":"16","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_42500684/article/details/112194308"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-16.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-16.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">前言相信大家用<em>Mybatis</em>这个框架至少一年以上了吧，有没有思考过这样一个问题：数据库有自己<em>的</em>数据类型，Java有自己<em>的</em>数据类型，那么<em>Mybatis</em>是如何把数据库中<em>的</em>类型<em>和</em>Java<em>的</em>数据类型对应<em>的</em>呢？本篇文章就来讲讲<em>Mybatis</em>中<em>的</em>黑匣子<em>TypeHandler</em>（类型处理器），说它是黑匣子一点都不为过，总是在默默<em>的</em>奉献着，但是不为人知。环境配置本篇文章讲<em>的</em>一切内容都是基于<em>Mybatis</em>3.5<em>和</em>Sp...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_43184769/article/details/91126687"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-17.control\"}","dist_request_id":"1621077340472_41493","index":"17","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_43184769/article/details/91126687"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_43184769/article/details/91126687" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-17.control\"}","dist_request_id":"1621077340472_41493","index":"17","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_43184769/article/details/91126687"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-17.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-17.control'>
+					<em>MyBatis</em>原理分析（通俗易懂）
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_43184769" target="_blank"><span class="blog-title">Coder Wang</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">06-07</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					10万+
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_43184769/article/details/91126687" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-17.control\"}","dist_request_id":"1621077340472_41493","index":"17","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/weixin_43184769/article/details/91126687"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-17.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-17.control'>
+				<div class="desc ellipsis-online ellipsis-online-1"><em>MyBatis</em>原理分析<em>MyBatis</em>工作流程简述原生<em>MyBatis</em>原理分析初始化工作解析配置文件配置类方式执行SQLSqlSession API方式接口方式
+真正掌握一个框架源码分析是少不了<em>的</em>~
+
+在讲解整合Spring<em>的</em>原理之前理解原生<em>的</em><em>MyBatis</em>执行原理是非常有必要<em>的</em>
+<em>MyBatis</em>工作流程简述
+传统工作模式：
+public static void main(String[] args) ...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://louluan.blog.csdn.net/article/details/40422941"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-18.control\"}","dist_request_id":"1621077340472_41493","index":"18","strategy":"2~default~OPENSEARCH~default","dest":"https://louluan.blog.csdn.net/article/details/40422941"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://louluan.blog.csdn.net/article/details/40422941" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-18.control\"}","dist_request_id":"1621077340472_41493","index":"18","strategy":"2~default~OPENSEARCH~default","dest":"https://louluan.blog.csdn.net/article/details/40422941"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-18.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-18.control'>
+					《深入理解<em>mybatis</em>原理》  <em>MyBatis</em><em>的</em>架构设计以及实例分析
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/u010349169" target="_blank"><span class="blog-title">我的程序人生(亦山札记)</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">11-04</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					15万+
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://louluan.blog.csdn.net/article/details/40422941" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-18.control\"}","dist_request_id":"1621077340472_41493","index":"18","strategy":"2~default~OPENSEARCH~default","dest":"https://louluan.blog.csdn.net/article/details/40422941"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-18.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-18.control'>
+				<div class="desc ellipsis-online ellipsis-online-1"><em>MyBatis</em>是目前非常流行<em>的</em>ORM框架，它<em>的</em>功能很强大，然而其实现却比较简单、优雅。本文主要讲述<em>MyBatis</em><em>的</em>架构设计思路，并且讨论<em>MyBatis</em><em>的</em>几个核心部件，然后结合一个select查询实例，深入代码，来探究<em>MyBatis</em><em>的</em>实现。</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/zhenghuangyu/article/details/85226035"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-19.control\"}","dist_request_id":"1621077340472_41493","index":"19","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/zhenghuangyu/article/details/85226035"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/zhenghuangyu/article/details/85226035" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-19.control\"}","dist_request_id":"1621077340472_41493","index":"19","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/zhenghuangyu/article/details/85226035"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-19.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-19.control'>
+					<em>mybatis</em>启动过程分析 <em>typehandler</em>
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/zhenghuangyu" target="_blank"><span class="blog-title">zhenghuangyu的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">12-23</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					302
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/zhenghuangyu/article/details/85226035" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-19.control\"}","dist_request_id":"1621077340472_41493","index":"19","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/zhenghuangyu/article/details/85226035"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-19.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-19.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">本节介绍<em>typehandler</em><em>的</em>解析，在<em>mybatis</em>中<em>typehandler</em>主要是用于类型转换<em>的</em>比如数据库中是varchar2而Java bean中是string 或者 integer等，需要<em>使用</em><em>typehandler</em>，typehander<em>的</em>解析<em>使用</em>如下<em>的</em>方法
+
+配置typehander可以<em>使用</em>package包扫描<em>的</em>方式也可以挨个配置
+&amp;amp;lt;configuration&amp;amp;gt;
+    &amp;amp;lt;...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/qq_33865863/article/details/101359969"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-20.control\"}","dist_request_id":"1621077340472_41493","index":"20","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/qq_33865863/article/details/101359969"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/qq_33865863/article/details/101359969" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-20.control\"}","dist_request_id":"1621077340472_41493","index":"20","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/qq_33865863/article/details/101359969"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-20.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-20.control'>
+					<em>Mybatis</em>类型转换器（<em>typeHandler</em>）
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/qq_33865863" target="_blank"><span class="blog-title">qq_33865863的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">09-25</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					251
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/qq_33865863/article/details/101359969" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~OPENSEARCH~default-20.control\"}","dist_request_id":"1621077340472_41493","index":"20","strategy":"2~default~OPENSEARCH~default","dest":"https://blog.csdn.net/qq_33865863/article/details/101359969"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-20.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EOPENSEARCH%7Edefault-20.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">1.简介
+&ensp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在JDBC中，需要在PreparedStatement对象中设置那些已经预编译过<em>的</em>SQL语句参数。 执行SQL后，会通过ResultSet对象获取得到数据库<em>的</em>数据，而这些<em>MyBatis</em>是根据数据<em>的</em>类型通过<em>typeHandler</em>来实现<em>的</em>。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在<em>typeHandler</em>中，分...</div>
+			</a>
+		</div>
+	</div>
+</div>
+            </div>
+            <div class="template-box">
+                <span>©️2020 CSDN</span>
+                <span>皮肤主题: 书香水墨</span>
+                <span> 设计师:CSDN官方博客</span>
+                <span>
+                    <a href="https://blog.csdn.net/" class="back-home c-blue c-blue-hover c-blue-focus">返回首页</a>
+                </span>
+            </div>
+<div class="blog-footer-bottom" style="margin-top:10px;"></div>
+<script src="https://g.csdnimg.cn/common/csdn-footer/csdn-footer.js" data-isfootertrack="false" type="text/javascript"></script>
+<script type="text/javascript">
+    window.csdn.csdnFooter.options = {
+        el: '.blog-footer-bottom',
+        type: 2
+    }
+</script>        </main>
+<aside class="blog_container_aside">
+	<div id="asideProfile" class="aside-box">
+    <div class="profile-intro d-flex">
+        <div class="avatar-box d-flex justify-content-center flex-column">
+            <a href="https://blog.csdn.net/weixin_43975771" data-report-click='{"mod":"popu_379","spm":"1001.2101.3001.4121","dest":"https://blog.csdn.net/weixin_43975771","ab":"new"}'>
+                <img src="https://profile.csdnimg.cn/8/5/7/3_weixin_43975771" class="avatar_pic">
+            </a>
+        </div>
+        <div class="user-info d-flex flex-column profile-intro-name-box">
+            <div class="profile-intro-name-boxTop">
+                <a href="https://blog.csdn.net/weixin_43975771" class="" id="uid" title="不积跬步，无以致千里" data-report-click='{"mod":"popu_379","spm":"1001.2101.3001.4122","dest":"https://blog.csdn.net/weixin_43975771","ab":"new"}'>
+                    <span class="name " username="weixin_43975771">不积跬步，无以致千里</span>
+                </a>
+                <span>
+                </span>
+                <span class="flag expert-blog">
+                <span class="bubble">CSDN认证博客专家</span>
+                </span>
+                <span class="flag company-blog">
+                <span class="bubble">CSDN认证企业博客</span>
+                </span>
+            </div>
+            <div class="profile-intro-name-boxFooter">
+                <span class="personal-home-page personal-home-years">码龄2年</span>
+                    <span class="personal-home-page">
+                    <a class="personal-home-certification" href="https://i.csdn.net/#/uc/profile?utm_source=14998968" target="_blank" title="暂无认证">
+                    <img src="https://csdnimg.cn/identity/nocErtification.png" alt="">
+                    暂无认证
+                    </a>
+                    </span>
+            </div>
+        </div>
+    </div>
+    <div class="data-info d-flex item-tiling">
+        <dl class="text-center" title="90">
+            <a href="https://blog.csdn.net/weixin_43975771" data-report-click='{"mod":"1598321000_001","spm":"1001.2101.3001.4310"}' data-report-query="t=1">  
+                <dt><span class="count">90</span></dt>
+                <dd class="font">原创</dd>
+            </a>
+        </dl>
+        <dl class="text-center" data-report-click='{"mod":"1598321000_002","spm":"1001.2101.3001.4311"}' title="3062">
+            <a href="https://blog.csdn.net/rank/list/weekly" target="_blank">
+                <dt><span class="count">3062</span></dt>
+                <dd class="font">周排名</dd>
+            </a>
+        </dl>
+        <dl class="text-center" title="114248">
+            <a href="https://blog.csdn.net/rank/list/total" data-report-click='{"mod":"1598321000_003","spm":"1001.2101.3001.4312"}' target="_blank">
+                <dt><span class="count">11万+</span></dt>
+                <dd class="font">总排名</dd>
+            </a>
+        </dl>
+        <dl class="text-center" style="min-width:58px" title="15725">  
+            <dt><span class="count">1万+</span></dt>
+            <dd>访问</dd>
+        </dl>
+        <dl class="text-center" title="4级,点击查看等级说明">
+            <dt><a href="https://blog.csdn.net/blogdevteam/article/details/103478461" target="_blank">
+                <img class="level" src="https://csdnimg.cn/identity/blog4.png">
+            </a>
+            </dt>
+            <dd>等级</dd>
+        </dl>
+    </div>
+    <div class="item-rank"></div>
+    <div class="data-info d-flex item-tiling">
+        <dl class="text-center" title="1028">
+            <dt><span class="count">1028</span></dt>
+            <dd>积分</dd>
+        </dl>
+         <dl class="text-center" id="fanBox" title="15">
+            <dt><span class="count" id="fan">15</span></dt>
+            <dd>粉丝</dd>
+        </dl>
+        <dl class="text-center" title="14">
+            <dt><span class="count">14</span></dt>
+            <dd>获赞</dd>
+        </dl>
+        <dl class="text-center" title="25">
+            <dt><span class="count">25</span></dt>
+            <dd>评论</dd>
+        </dl>
+        <dl class="text-center" title="34">
+            <dt><span class="count">34</span></dt>
+            <dd>收藏</dd>
+        </dl>
+    </div>
+    <div class="aside-box-footer" data-report-view='{"spm":"3001.4296"}'>
+        <div class="badge-box d-flex">
+            <div class="badge d-flex">
+                <div class="icon-badge" title="新人勋章">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/blinknewcomer@240.png" alt="新人勋章">
+                    </div>
+                </div>
+                <div class="icon-badge" title="签到新秀">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/qiandao10@240.png" alt="签到新秀">
+                    </div>
+                </div>
+                <div class="icon-badge" title="阅读者勋章Lv3">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/yuedu30@240.png" alt="阅读者勋章Lv3">
+                    </div>
+                </div>
+                <div class="icon-badge" title="持之以恒">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/chizhiyiheng@240.png" alt="持之以恒">
+                    </div>
+                </div>
+                <div class="icon-badge" title="1024勋章">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/1024@240.png" alt="1024勋章">
+                    </div>
+                </div>
+                <div class="icon-badge" title="勤写标兵Lv3">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/qixiebiaobing3@240.png" alt="勤写标兵Lv3">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="profile-intro-name-boxOpration">
+        <div class="opt-letter-watch-box">
+        <a class="bt-button personal-letter" href="https://im.csdn.net/chat/weixin_43975771" target="_blank" rel="noopener">私信</a>
+        </div>
+        <div class="opt-letter-watch-box"> 
+            <a class="personal-watch bt-button" id="btnAttent" >关注</a>  
+        </div>
+    </div>
+</div>
+<div id="asideSearchArticle" class="aside-box">
+	<div class="aside-content search-comter">
+    <div class="aside-search aside-search-blog">         
+        <input type="text" class="input-serch-blog" name="" autocomplete="off" value="" id="search-blog-words" placeholder="搜博主文章">
+        <a class="btn-search-blog">
+                    <img src="//csdnimg.cn/cdn/content-toolbar/csdn-sou.png?v=1587021042">
+        </a>
+    </div>
+    </div>
+</div>
+
+
+<div id="asideHotArticle" class="aside-box">
+	<h3 class="aside-title">热门文章</h3>
+	<div class="aside-content">
+		<ul class="hotArticle-list">
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/97630828" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/97630828","ab":"new"}'>
+				tps 、qps、bps、Bps的含义
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">4311</span>
+                </a>
+			</li>
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/113099180" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/113099180","ab":"new"}'>
+				线程池的核心线程数 设置大小与cpu 的关系
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">963</span>
+                </a>
+			</li>
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/105028750" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/105028750","ab":"new"}'>
+				时空时序数据库 TSDB的用法
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">688</span>
+                </a>
+			</li>
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/103306930" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/103306930","ab":"new"}'>
+				索引什么情况下会失效及注意事项
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">597</span>
+                </a>
+			</li>
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/106744836" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/106744836","ab":"new"}'>
+				GDB图形数据库/Tinkerpop gremlin使用总结
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">471</span>
+                </a>
+			</li>
+		</ul>
+	</div>
+</div>
+<div id="asideCategory" class="aside-box flexible-box">
+    <h3 class="aside-title">分类专栏</h3>
+    <div class="aside-content">
+        <ul>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9971643.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9971643.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20190918135101160.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">数据库</span>
+                    </span>
+                    <span class="count float-right">11篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10505512.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10505512.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756919.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">架构</span>
+                    </span>
+                    <span class="count float-right">1篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10570875.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10570875.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756780.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">scala</span>
+                    </span>
+                    <span class="count float-right">3篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10303159.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10303159.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756724.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">多线程 高并发</span>
+                    </span>
+                    <span class="count float-right">8篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10775654.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10775654.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756913.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">常用开发框架</span>
+                    </span>
+                    <span class="count float-right">3篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10281951.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10281951.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756927.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">中间件</span>
+                    </span>
+                    <span class="count float-right">3篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10734857.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10734857.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756754.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">spring循环依赖</span>
+                    </span>
+                    <span class="count float-right">2篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9807877.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9807877.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756754.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">Python</span>
+                    </span>
+                    <span class="count float-right">2篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9594245.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9594245.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756925.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">springcould 开发</span>
+                    </span>
+                    <span class="count float-right">1篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9098425.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9098425.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756925.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">大数据开发</span>
+                    </span>
+                    <span class="count float-right">17篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9079738.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9079738.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756738.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">java开发日常总结</span>
+                    </span>
+                    <span class="count float-right">39篇</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <p class="text-center">
+        <a class="flexible-btn" data-fbox="aside-archive"><img class="look-more" src="https://csdnimg.cn/release/blogv2/dist/pc/img/arrowDownWhite.png" alt=""></a>
+    </p>
+</div>
+<div id="asideNewComments" class="aside-box">
+    <h3 class="aside-title">最新评论</h3>
+    <div class="aside-content">
+        <ul class="newcomment-list">
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/116308584#comments_16437215" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116308584#comments_16437215","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116308584#comments_16437215","ab":"new"}'>kafka单机版环境搭建</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/weixin_39032019" class="user-name" target="_blank">明月十四桥: </a>
+                    <span class="code-comments">非常有用，感谢大佬的整理，期待后续大作</span>
+                </p>
+            </li>
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/115705948#comments_16397376" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/115705948#comments_16397376","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/115705948#comments_16397376","ab":"new"}'>mybatis查询一张表的部分字段，没有指定的字段返回为null的场景</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/yuerliang" class="user-name" target="_blank">A-Liang: </a>
+                    <span class="code-comments">初学后端小白，能看懂，引出另外一个问题，值为null的字段不返回。
+[code=plain]
+[
+		{
+			&quot;recrumentDate&quot;: &quot;2020-05-12T22:30:00.000+00:00&quot;,
+			&quot;memId&quot;: 5
+		},
+		{
+			&quot;recrumentDate&quot;: &quot;2020-05-12T22:30:00.000+00:00&quot;,
+			&quot;mobile&quot;: &quot;12367890909&quot;,
+			&quot;name&quot;: &quot;赵四&quot;,
+			&quot;memId&quot;: 6
+		}
+]
+
+[/code]</span>
+                </p>
+            </li>
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/116496928#comments_16321375" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116496928#comments_16321375","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116496928#comments_16321375","ab":"new"}'>flink sql 使用</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/kimol_justdo" class="user-name" target="_blank">不正经的kimol君: </a>
+                    <span class="code-comments">快进我的收藏夹</span>
+                </p>
+            </li>
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/114383227#comments_16318728" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/114383227#comments_16318728","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/114383227#comments_16318728","ab":"new"}'>SQL规约的意义</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/weixin_39032019" class="user-name" target="_blank">明月十四桥: </a>
+                    <span class="code-comments">非常有用，感谢大佬的整理，期待后续大作</span>
+                </p>
+            </li>
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/116532790#comments_16316194" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116532790#comments_16316194","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116532790#comments_16316194","ab":"new"}'>clickhouse的mysql引擎的实现</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/weixin_43975771" class="user-name" target="_blank">不积跬步，无以致千里: </a>
+                    <span class="code-comments">一起加油,拥抱开源<img src="https://g.csdnimg.cn/static/face/emoji/012.png" alt='表情包' ><img src="https://g.csdnimg.cn/static/face/emoji/012.png" alt='表情包' ></span>
+                </p>
+            </li>
+        </ul>
+    </div>
+</div>
+<div id="asideArchive" class="aside-box" style="display:block!important; width:300px;">
+    <h3 class="aside-title">最新文章</h3>
+    <div class="aside-content">
+        <ul class="inf_list clearfix">
+            <li class="clearfix">
+            <a href="https://blog.csdn.net/weixin_43975771/article/details/116532790" target="_blank" data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/weixin_43975771/article/details/116532790","ab":"new"}' data-report-view='{"mod":"popu_382","dest":"https://blog.csdn.net/weixin_43975771/article/details/116532790","ab":"new"}'>clickhouse的mysql引擎的实现</a>
+            </li>
+            <li class="clearfix">
+            <a href="https://blog.csdn.net/weixin_43975771/article/details/116496928" target="_blank" data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/weixin_43975771/article/details/116496928","ab":"new"}' data-report-view='{"mod":"popu_382","dest":"https://blog.csdn.net/weixin_43975771/article/details/116496928","ab":"new"}'>flink sql 使用</a>
+            </li>
+            <li class="clearfix">
+            <a href="https://blog.csdn.net/weixin_43975771/article/details/116461469" target="_blank" data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/weixin_43975771/article/details/116461469","ab":"new"}' data-report-view='{"mod":"popu_382","dest":"https://blog.csdn.net/weixin_43975771/article/details/116461469","ab":"new"}'>kafka生产者和消费者测试指令</a>
+            </li>
+        </ul>
+        <div class="archive-bar"></div>
+        <div class="archive-box">
+                <div class="archive-title">2021</div> 
+                <div class="archive-content">
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/05" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/05"}'>
+                        <span class="time">05月</span>
+                        <span class="count">3篇</span>
+                        </a>
+                    </div>
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/04" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/04"}'>
+                        <span class="time">04月</span>
+                        <span class="count">12篇</span>
+                        </a>
+                    </div>
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/03" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/03"}'>
+                        <span class="time">03月</span>
+                        <span class="count">9篇</span>
+                        </a>
+                    </div>
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/02" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/02"}'>
+                        <span class="time">02月</span>
+                        <span class="count">5篇</span>
+                        </a>
+                    </div>
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/01" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/01"}'>
+                        <span class="time">01月</span>
+                        <span class="count">12篇</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="archive-list-item"><a href="https://blog.csdn.net/weixin_43975771/article/month/2020/12" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":""}'><span class="year">2020年</span><span class="num">34篇</span></a></div>
+                <div class="archive-list-item"><a href="https://blog.csdn.net/weixin_43975771/article/month/2019/12" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":""}'><span class="year">2019年</span><span class="num">16篇</span></a></div>
+        </div>
+    </div>
+</div>
+	<div id="footerRightAds" class="isShowFooterAds">
+		<div class="aside-box">
+			<div id="kp_box_57" data-pid="57"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- PC-博客详情页-左下视窗（300*600） -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-1076724771190722"
+     data-ad-slot="1173711872"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script><img class="pre-img-lasy" data-src="https://kunyu.csdn.net/1.png?p=57&a=2488&c=0&k=&spm=1001.2101.3001.5001&d=1&t=3&u=5dd8d0b4feee4b39ac895464aff60bf6" style="display: block;width: 0px;height: 0px;"></div>
+		</div>
+	</div>
+    <!-- 详情页显示目录 -->
+<!--文章目录-->
+<div id="asidedirectory" class="aside-box">
+    <div class='groupfile' id="directory">
+        <h3 class="aside-title">目录</h3>
+        <div class="align-items-stretch group_item">
+            <div class="pos-box">
+            <div class="scroll-box">
+                <div class="toc-box"></div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+</aside>
+<script>
+	$("a.flexible-btn").click(function(){
+		$(this).parents('div.aside-box').removeClass('flexible-box');
+		$(this).parents("p.text-center").remove();
+	})
+</script>
+<script type="text/javascript"  src="https://g.csdnimg.cn/user-tooltip/2.4/user-tooltip.js"></script>
+<script type="text/javascript"  src="https://g.csdnimg.cn/user-medal/1.0.6/user-medal.js"></script>    </div>
+<div class="recommend-right  align-items-stretch clearfix" id="rightAside" data-type="recommend">
+    <aside class="recommend-right_aside">
+        <div id="recommend-right" >
+                        <div class='flex-column aside-box groupfile' id="groupfile">
+                <div class="groupfile-div">
+                <h3 class="aside-title">目录</h3>
+                <div class="align-items-stretch group_item">
+                    <div class="pos-box">
+                        <div class="scroll-box">
+                            <div class="toc-box"></div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+                <div id="recommendAdBox">
+                    <div id="kp_box_479" data-pid="479"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- PC-博客详情页-右侧视窗300*600 -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-1076724771190722"
+     data-ad-slot="8441704093"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script><img class="pre-img-lasy" data-src="https://kunyu.csdn.net/1.png?p=479&a=2487&c=0&k=&spm=1001.2101.3001.4834&d=1&t=3&u=f84b3d8023c44c78a535288c0b00a11a" style="display: block;width: 0px;height: 0px;"></div>
+                </div>
+            <div class='aside-box kind_person d-flex flex-column'>
+                    <h3 class="aside-title">分类专栏</h3>
+                    <div class="align-items-stretch kindof_item" id="kind_person_column">
+                        <div class="aside-content">
+                            <ul>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9971643.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9971643.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20190918135101160.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">数据库</span>
+                                        </span>
+                                        <span class="count float-right">11篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10505512.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10505512.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756919.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">架构</span>
+                                        </span>
+                                        <span class="count float-right">1篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10570875.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10570875.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756780.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">scala</span>
+                                        </span>
+                                        <span class="count float-right">3篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10303159.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10303159.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756724.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">多线程 高并发</span>
+                                        </span>
+                                        <span class="count float-right">8篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10775654.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10775654.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756913.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">常用开发框架</span>
+                                        </span>
+                                        <span class="count float-right">3篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10281951.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10281951.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756927.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">中间件</span>
+                                        </span>
+                                        <span class="count float-right">3篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10734857.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10734857.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756754.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">spring循环依赖</span>
+                                        </span>
+                                        <span class="count float-right">2篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9807877.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9807877.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756754.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">Python</span>
+                                        </span>
+                                        <span class="count float-right">2篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9594245.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9594245.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756925.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">springcould 开发</span>
+                                        </span>
+                                        <span class="count float-right">1篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9098425.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9098425.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756925.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">大数据开发</span>
+                                        </span>
+                                        <span class="count float-right">17篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9079738.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9079738.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756738.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">java开发日常总结</span>
+                                        </span>
+                                        <span class="count float-right">39篇</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+</div>
+<div class="mask-dark"></div>
+<script type="text/javascript">
+    var timert = setInterval(function(){
+      sideToolbar = $(".csdn-side-toolbar");
+      if (sideToolbar.length > 0) {
+        sideToolbar.css('cssText','bottom:64px !important;')
+        clearInterval(timert);
+      }
+    }, 200);
+</script>
+<script>
+    var articleId = 116275367;
+    var commentscount = 0;
+    var curentUrl = "https://blog.csdn.net/weixin_43975771/article/details/116275367";
+    var myUrl = "https://my.csdn.net/";
+    var highlight = ["typehandler","用法","mybatis","mybatis","的","typehandler","使用","和","实现原理"];//高亮数组
+    var isRecommendModule = true;
+    var isBaiduPre = true;
+    var baiduCount = 2;
+    var share_card_url = "https://blog.csdn.net/weixin_43975771/article/shareArticleCardPage?article_id=116275367"
+	var articleType = 1;
+    var baiduKey = "Mybatis的TypeHandler使用和实现原理";
+    var userNewReport = false;
+    var needInsertBaidu = true;
+    var recommendRegularDomainArr = ["blog.csdn.net/.+/article/details/","download.csdn.net/download/","edu.csdn.net/course/detail/","ask.csdn.net/questions/","bbs.csdn.net/topics/","www.csdn.net/gather_.+/"]
+    var codeStyle = "";
+    var baiduSearchType = "title";
+    var canRead = true;
+    var blogMoveHomeArticle = false;
+    var showPcWindowAd = false;
+    var showSearchText = "";
+    var linkPage = true;
+    var articleSource = 1;
+    var articleReport = '{"pid": "blog", "spm":"1001.2101"}';
+    var isShowToQuestion = false;
+</script>
+<script src="https://csdnimg.cn/public/sandalstrap/1.4/js/sandalstrap.min.js"></script>
+<div class="skin-boxshadow"></div>
+<div style="display:none;">
+	<img src="" onerror='setTimeout(function(){if(!/(csdn.net|iteye.com|baiducontent.com|googleusercontent.com|360webcache.com|sogoucdn.com|bingj.com|baidu.com)$/.test(window.location.hostname)){window.location.href="\x68\x74\x74\x70\x73\x3a\x2f\x2f\x77\x77\x77\x2e\x63\x73\x64\x6e\x2e\x6e\x65\x74"}},3000);'>
+</div>
+</body>
+<script src="https://csdnimg.cn/release/blogv2/dist/components/js/pc_wap_highlight-db1e81323a.min.js" type="text/javascript"></script>
+<script src="https://csdnimg.cn/release/blogv2/dist/components/js/pc_wap_common-906586e915.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/codesnippet/lib/highlight/styles/atom-one-light.css">
+<script>
+ // 全局声明
+ if (window.csdn === undefined) {
+      window.csdn = {};
+    }
+    window.csdn.sideToolbar = {
+        options: {
+            report:{
+                isShow: true,
+            },
+            qr: {
+                isShow: false,
+            },
+            guide: {
+                isShow: true
+            }
+        }
+    }
+    $(function(){
+        $(document).on('click',"a.option-box[data-type='report']",function() {
+            window.csdn.userLogin.loadAjax(function(res){
+                if(userNewReport){
+                    showReportNew(false,articleTitles);
+                }else{
+                    showReport(false,articleTitles);
+                }
+            })
+        });
+    })
+</script>
+    <script src="https://g.csdnimg.cn/baidu-search/1.0.9/baidu-search.js"  type="text/javascript"></script>
+<script src="https://csdnimg.cn/release/download/old_static/js/qrcode.js"></script>
+<script src="https://csdnimg.cn/release/blogv2/dist/pc/js/common-d56939e7f0.min.js" type="text/javascript"></script>
+<script src="https://csdnimg.cn/release/blogv2/dist/pc/js/detail-a3145084a7.min.js" type="text/javascript"></script>
+<script src="https://g.csdnimg.cn/user-ordercart/1.0.6/user-ordercart.js" type="text/javascript"></script>
+<script src="https://csdnimg.cn/release/blogv2/dist/pc/js/column-78261cfea6.min.js" type="text/javascript"></script>
+<script src="https://g.csdnimg.cn/side-toolbar/3.0/side-toolbar.js" type="text/javascript"></script>
+<script src="https://g.csdnimg.cn/common/shop-window-v2/shop-window.js" type="text/javascript"></script>
+<script>
+    var shopUserName = username;
+    ;$(function(){
+        window.csdn.shop.show({
+            userName: shopUserName,
+            topEl: $("#csdn-shop-window-top"),
+            bottomEl: $("#csdn-shop-window"),
+            callBack: function(res){
+                if(!res.top){
+                    $("#blogColumnPayAdvert").css({"display":"block"})
+                    $("#csdn-shop-window-top").css({"display":"none"})
+                }
+            }
+        })
+    })
+</script>
+<script src="https://g.csdnimg.cn/copyright/1.0.3/copyright.js" type="text/javascript"></script>
+<script>
+    $(".MathJax").remove();
+    if ($('div.markdown_views pre.prettyprint code.hljs').length > 0) {
+        $('div.markdown_views')[0].className = 'markdown_views';
+    }
+</script>
+<script type="text/javascript" src="https://csdnimg.cn/release/blog_mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+            "HTML-CSS": {
+                    linebreaks: { automatic: true, width: "94%container" },
+                    imageFont: null
+            },
+            tex2jax: {
+                preview: "none",
+                ignoreClass:"title-article"
+            },
+            mml2jax: {
+                preview: 'none'
+            }
+    });
+</script>
+<script type="text/javascript" crossorigin src="https://g.csdnimg.cn/user-login/3.0.0/user-login.js"></script>
+<script type="text/javascript" crossorigin src="https://g.csdnimg.cn/login-box/1.1.4/login-box.js"></script></html>

@@ -1,0 +1,522 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="1. Security Group全部打开，这是最基本的，但是很多人容易忘记 其实遇到过无数这种场景了，Debug了半天网络问题，各种手段都用上了，最后发现安全组竟然没有打开。 2. 通过界面查看虚拟" />
+    <meta property="og:description" content="1. Security Group全部打开，这是最基本的，但是很多人容易忘记 其实遇到过无数这种场景了，Debug了半天网络问题，各种手段都用上了，最后发现安全组竟然没有打开。 2. 通过界面查看虚拟" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>当发现你的OpenStack虚拟机网络有问题，不妨先试一下这16个步骤 - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2018-03-09 09:01';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class = "postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/8536247.html">
+    <span>当发现你的OpenStack虚拟机网络有问题，不妨先试一下这16个步骤</span>
+    
+
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<div id="js_content" class="rich_media_content ">
+<p><strong><span style="font-size: 20px">1. Security Group全部打开，这是最基本的，但是很多人容易忘记</span></strong></p>
+<p>&nbsp;</p>
+<p>其实遇到过无数这种场景了，Debug了半天网络问题，各种手段都用上了，最后发现安全组竟然没有打开。</p>
+<p>&nbsp;</p>
+<p>&nbsp;<img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309205641704-1954780231.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 20px">2. 通过界面查看虚拟机的log，也可以在compute节点上查看console.log文件，看看里面是否有DHCP获取IP成功的日志</span></strong></p>
+<p>&nbsp;</p>
+<p>在界面上可以看控制台日志</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309205704861-714223154.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>在compute节点上可以查看</p>
+<p>&nbsp;</p>
+<p>/var/lib/nova/instances/6323a941-de10-4ed3-9e2f-1b2b25e79b66/console.log</p>
+<p>&nbsp;</p>
+<p>如果没有日志，则说明image有问题</p>
+<p>&nbsp;</p>
+<p>在grub里面</p>
+<p>linux /boot/vmlinuz-3.2.0-49-virtual root=UUID=6d2231e4-0975-4f35-a94f-56738c1a8150 ro console=ttyS0</p>
+<p>&nbsp;</p>
+<p>GRUB_CMDLINE_LINUX_DEFAULT="console=ttyS0“</p>
+<p>&nbsp;</p>
+<p>update-grub</p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 20px">3. 如果虚拟机连不上DHCP Server，则需要准备一个不使用metadata server，而是用用户名密码可以登录的image</span></strong></p>
+<p>&nbsp;</p>
+<p>这种Image很好做，自己动手做一个就可以了，启动镜像后去掉cloud-init相关配置，然后设置一个默认的用户名密码。</p>
+<p>&nbsp;</p>
+<p style="line-height: 90%; margin-top: 10pt; margin-bottom: 0; margin-left: 0; text-indent: 0; direction: ltr; unicode-bidi: embed; word-break: normal"><strong><span style="font-size: 20px">4. 通过VNC登录</span></strong></p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309205719163-1420630705.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 20px">5. 如果VNC登录不进去，说明VNC配置的有问题，方法一重新配置VNC</span></strong></p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309205733966-1402778393.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>VNC Proxy的功能：</p>
+<ul class="list-paddingleft-2" style="list-style-type: disc">
+<li>
+<p>将公网(public network)和私网(private network)隔离</p>
+</li>
+<li>
+<p>VNC client运行在公网上，VNCServer运行在私网上，VNC Proxy作为中间的桥梁将二者连接起来</p>
+</li>
+<li>
+<p>VNC Proxy通过token对VNC Client进行验证</p>
+</li>
+<li>
+<p>VNC Proxy不仅仅使得私网的访问更加安全，而且将具体的VNC Server的实现分离，可以支持不同Hypervisor的VNC Server但不影响用户体验</p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p>VNC Proxy的部署</p>
+<ul class="list-paddingleft-2" style="list-style-type: disc">
+<li>
+<p>在Controller节点上部署nova-consoleauth 进程，用于Token验证</p>
+</li>
+<li>
+<p>在Controller节点上部署nova-novncproxy 服务，用户的VNC Client会直接连接这个服务</p>
+</li>
+<li>
+<p>Controller节点一般有两张网卡，连接到两个网络，一张用于外部访问，我们称为public network，或者API network，这张网卡的IP地址是外网IP，如图中172.24.1.1，另外一张网卡用于openstack各个模块之间的通信，称为management network，一般是内网IP，如图中10.10.10.2</p>
+</li>
+<li>
+<p>在Compute节点上部署nova-compute，在nova.conf文件中有下面的配置</p>
+</li>
+<li>
+<p>vnc_enabled=True</p>
+</li>
+<li>
+<p>vncserver_listen=0.0.0.0 //VNC Server的监听地址</p>
+</li>
+<li>
+<p>vncserver_proxyclient_address=10.10.10.2 //nova vnc proxy是通过内网IP来访问vnc server的，所以nova-compute会告知vnc proxy用这个IP来连接我。</p>
+</li>
+<li>
+<p>novncproxy_base_url=http://172.24.1.1:6080/vnc_auto.html //这个url是返回给客户的url，因而里面的IP是外网IP</p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p>VNC Proxy的运行过程：</p>
+<ol class="list-paddingleft-2" style="list-style-type: decimal">
+<li>
+<p>一个用户试图从浏览器里面打开连接到虚拟机的VNC Client</p>
+</li>
+<li>
+<p>浏览器向nova-api发送请求，要求返回访问vnc的url</p>
+</li>
+<li>
+<p>nova-api调用nova-compute的get vnc console方法，要求返回连接VNC的信息</p>
+</li>
+<li>
+<p>nova-compute调用libvirt的get vnc console函数</p>
+</li>
+<li>
+<p>libvirt会通过解析虚拟机运行的/etc/libvirt/qemu/instance-0000000c.xml文件来获得VNC Server的信息</p>
+</li>
+<li>
+<p>libvirt将host, port等信息以json格式返回给nova-compute</p>
+</li>
+<li>
+<p>nova-compute会随机生成一个UUID作为Token</p>
+</li>
+<li>
+<p>nova-compute将libvirt返回的信息以及配置文件中的信息综合成connect_info返回给nova-api</p>
+</li>
+<li>
+<p>nova-api会调用nova-consoleauth的authorize_console函数</p>
+</li>
+<li>
+<p>nova-consoleauth会将instance –&gt; token, token –&gt; connect_info的信息cache起来</p>
+</li>
+<li>
+<p>nova-api将connect_info中的access url信息返回给浏览器：http://172.24.1.1:6080/vnc_auto.html?token=7efaee3f-eada-4731-a87c-e173cbd25e98&amp;title=helloworld%289169fdb2-5b74-46b1-9803-60d2926bd97c%29</p>
+</li>
+<li>
+<p>浏览器会试图打开这个链接</p>
+</li>
+<li>
+<p>这个链接会将请求发送给nova-novncproxy</p>
+</li>
+<li>
+<p>nova-novncproxy调用nova-consoleauth的check_token函数</p>
+</li>
+<li>
+<p>nova-consoleauth验证了这个token，将这个instance对应的connect_info返回给nova-novncproxy</p>
+</li>
+<li>
+<p>nova-novncproxy通过connect_info中的host, port等信息，连接compute节点上的VNC Server，从而开始了proxy的工作</p>
+</li>
+</ol>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 20px">6. 如果VNC登录不进去，还有一个方法，使用自己的VNC Client，通过compute物理节点的IP地址登陆</span></strong></p>
+<p style="line-height: 90%; margin-top: 10pt; margin-bottom: 0; margin-left: 0; text-indent: 0; direction: ltr; unicode-bidi: embed; word-break: normal">qemu-system-x86_64 有参数 -vnc 0.0.0.0:5</p>
+<p>&nbsp;</p>
+<p>就可以通过compute node的ip地址进入</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309205754949-1437242290.png" alt=""></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>7. 通过ovs-vsctl show和brctl来查看，各个网卡和bridge之间关系是否正确，tunnel之间是否能够通，网卡是否都处于up的状态</strong></span></p>
+<p><span style="font-size: 20px"><strong>&nbsp;</strong></span></p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309205805313-1989406640.jpg" alt=""></p>
+<p><span style="font-size: 20px">&nbsp;</span></p>
+<p><strong><span style="font-size: 20px">8. 如果从虚拟机的虚拟网卡到DHCP Server的网卡一路都是配置正确的，则需要查看br-tun上ovs-ofctl dumpflows查看flows规则，是否对包的改写正确，是否有正确的规则</span></strong></p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 20px">9. 通过VNC登录进去后，就可以通过命令行运行dhclient，来重启连接DHCP Server, 从compute节点上的网卡和bridge，一个个进行tcpdump，看到底哪个网卡或者bridge没有收到包，收到的包里面的VLAN ID等是否正确</span></strong></p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 20px">10. 如果VM能从DHCP Server获得IP，则好事成了一半，接下来换一个有cloud-init的image，看metadata server能够连接成功，能够注入key，也是通过console.log来看</span></strong></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>11. 如果metadata server不能连接成功，就需要顺着metadata server的整个流程，一个一个模块看，看每个模块的log，端口是否正确，是否收到请求，也可以在VM里面用curl来模拟metadata server的请求</strong></span></p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309205850730-341978494.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>openstack里的metadata，是提供一个机制给用户，可以设定每一个instance 的参数。比如你想给instance设置某个属性，比如主机名。</p>
+<p>&nbsp;</p>
+<p>Instance访问metadata server http://169.254.169.254</p>
+<p>&nbsp;</p>
+<p>metadata的一个重要应用，是设置每个instance的ssh公钥。</p>
+<p>&nbsp;</p>
+<p>获取metadata的api接口是：</p>
+<p>&nbsp;</p>
+<p>http://169.254.169.254/latest/meta-data/public-keys/0/openssh-key&nbsp;</p>
+<p>&nbsp;</p>
+<p>这个IP地址，在 openstack 是不存在的。为什么可以获取到metadata呢？</p>
+<p>&nbsp;</p>
+<p>这是由于Amazon的原因，最早metadata是亚马逊提出来的，参见：http://docs.amazonwebservices.com/AWSEC2/latest/UserGuide/AESDG-chapter-instancedata.html</p>
+<p>&nbsp;</p>
+<p>后来很多人给亚马逊定制了一些操作系统的镜像，比如 ubuntu, fedora, centos 等等，而且将里面获取 metadta 的api地址也写死了。所以opentack为了兼容，保留了这个地址169.254.169.254。</p>
+<p>&nbsp;</p>
+<p>然后通过iptables nat映射到真实的api上：</p>
+<p>&nbsp;</p>
+<p>iptables -A nova-network-PREROUTING -d 169.254.169.254/32 -p tcp -m tcp --dport 80 -j DNAT --to-destination 16.158.166.197:8775&nbsp;</p>
+<p>&nbsp;</p>
+<p>nova如何区分到底是哪个虚拟机请求metadata？采取的方法是在HTTP头部识别是哪个虚拟机。</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309205924030-664825920.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>一个虚拟机访问169.254.169.254的流程如下：</p>
+<p>&nbsp;</p>
+<p>(1) 虚拟机发出请求</p>
+<p>&nbsp;</p>
+<ul class="list-paddingleft-2" style="list-style-type: disc">
+<li>
+<p>虚拟机启动时会访问169.254.169.254</p>
+</li>
+<li>
+<p>数据包会直接发送到虚拟机的默认网关172.71.71.1</p>
+</li>
+<li>
+<p>默认网关在network node上，qr-XXXXX</p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p>(2) namespace中的iptables</p>
+<p>&nbsp;</p>
+<ul class="list-paddingleft-2" style="list-style-type: disc">
+<li>
+<p>因为使用了namespace，在network node上每个namespace里都会有相应的iptables规则和网络设备。</p>
+</li>
+<li>
+<p>iptables规则中，会把目的地址169.254.169.254的数据包，重定向到本地端口9697</p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p>ip netns exec qrouter-5a74908c-712c-485c-aa9f-6c1e8b57e3e1 iptables -t nat -nvL</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309205943936-1033278559.png" alt=""></p>
+<p>&nbsp;</p>
+<p>(3) namespace-metadata-proxy</p>
+<p>&nbsp;</p>
+<p>启用namespace场景下，对于每一个router，都会创建这样一个进程。该进程监听9697端口，其主要功能：</p>
+<p>&nbsp;</p>
+<p>1、向请求头部添加X-Forwarded-For和X-Neutron-Router-ID，分别表示虚拟机的fixedIP和router的ID</p>
+<p>2、将请求代理至Unix domain socket（/var/lib/neutron/metadata_proxy）</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309210000994-1794970992.png" alt=""></p>
+<p>&nbsp;</p>
+<p>(4) Neutron-metadata-agent</p>
+<p>&nbsp;</p>
+<ul class="list-paddingleft-2" style="list-style-type: disc">
+<li>
+<p>network node上的metadata agent监听/var/lib/neutron/metadata_proxy：</p>
+</li>
+<li>
+<p>该进程的功能是，根据请求头部的X-Forwarded-For和X-Neutron-Router-ID参数，向Neutron service查询虚拟机ID，然后向Nova Metadata服务发送请求（默认端口8775），消息头：X-Forwarded-For，X-Instance-ID、X-Instance- ID-Signature分别表示虚拟机的fixedIP，虚拟机ID和虚拟机ID的签名。</p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309210017627-1458856443.png" alt=""></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>12. 如果metadata server能够连接成功，key成功注入，下一步需要从namespace里面看是否能够ping通，能够ssh</strong></span></p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309210030823-244644073.png" alt=""></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>13. 如果namespace里面能够成功，则在network节点上，ping floating ip和ssh，是否能够成功，如果不成功，看br-ex的网卡是否添加正确，是否配置了ip，路由表是否正确，namespace里面floating ip的iptables规则是否添加正确</strong></span></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>14. 在network节点上能够ssh到floating ip，则需要从其他节点上ssh，如果不成功，可能br-ex的网址配置有问题，很可能是br-ex添加的物理网卡不是混合状态，也可能是路由配置有问题，对于floating ip所在的网段，不指向network节点<br></strong></span></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>15.
+ 如果floating ip能够成功，则需要进去VM里面运行apt-get 
+update，如果不可以，看能否ping通openstack里面的gateway(10.0.0.1)，然后看能否ping通物理网络环境的gateway(16.158.XXX.1)</strong></span></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>16. 看DNS Server是否配置正确，是否能够ping通，如果能，apt-get update运行成功</strong></span></p>
+<p>&nbsp;</p>
+<p>欢迎关注微信公众号</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180309210149530-1400978915.jpg" alt=""></p>
+
+
+
+                </div>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2018-03-09 21:01</span>&nbsp;
+<a href="https://www.cnblogs.com/popsuper1982/">popsuper1982</a>&nbsp;
+阅读(<span id="post_view_count">4809</span>)&nbsp;
+评论(<span id="post_comment_count">1</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=8536247" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(8536247);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 186637, cb_blogApp = 'popsuper1982', cb_blogUserGuid = 'cf2394f1-d0e0-e311-8d02-90b11c0b17d6';
+    var cb_entryId = 8536247, cb_entryCreatedDate = '2018-03-09 21:01', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjt-47HdVxqpAye5YeBlh4pkuJP4NGvoe_bEFdMVV_EyselRS6qqo63orCTg1Lhp30cdLIApw93tg1FMOByUQ7hFfE7fyRvMR9bmwXkP8-RK6jjQGP6waUYSyAZUdEuKCAs" />
+</body>
+</html>

@@ -1,0 +1,15 @@
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\bin\Debug\netcoreapp3.1\20210423homework.exe
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\bin\Debug\netcoreapp3.1\20210423homework.deps.json
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\bin\Debug\netcoreapp3.1\20210423homework.runtimeconfig.json
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\bin\Debug\netcoreapp3.1\20210423homework.runtimeconfig.dev.json
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\bin\Debug\netcoreapp3.1\20210423homework.dll
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\bin\Debug\netcoreapp3.1\20210423homework.pdb
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\obj\Debug\netcoreapp3.1\20210423homework.csprojAssemblyReference.cache
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\obj\Debug\netcoreapp3.1\_20210423homework.Form1.resources
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\obj\Debug\netcoreapp3.1\20210423homework.csproj.GenerateResource.cache
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\obj\Debug\netcoreapp3.1\20210423homework.AssemblyInfoInputs.cache
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\obj\Debug\netcoreapp3.1\20210423homework.AssemblyInfo.cs
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\obj\Debug\netcoreapp3.1\20210423homework.csproj.CoreCompileInputs.cache
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\obj\Debug\netcoreapp3.1\20210423homework.dll
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\obj\Debug\netcoreapp3.1\20210423homework.pdb
+D:\Study\大学资料\C#软件构造\DotNetHomework_\20210423homework\20210423homework\obj\Debug\netcoreapp3.1\20210423homework.genruntimeconfig.cache

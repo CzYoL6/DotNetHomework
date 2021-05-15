@@ -1,0 +1,655 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    
+    
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>随笔列表第7页 - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		
+
+
+
+<div id="homepage_top_pager" class="topicListFooter">
+    
+
+<div class="pager">
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=6">上一页</a>
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=1">1</a>
+    ···
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=3">3</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=4">4</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=5">5</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=6">6</a>
+    7
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=8">8</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=9">9</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=10">10</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=11">11</a>
+    ···
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=16">16</a>
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=8">下一页</a>
+</div>
+</div>
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2014/08/24.html">2014年8月24日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/3932330.html">
+    <span>
+        别以为真懂Openstack: 虚拟机创建的50个步骤和100个知识点(4)
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：六、Libvirt对于Libvirt，在启动虚拟机之前，首先需要define虚拟机，是一个XML格式的文件列出所有的Instance# virsh list Id Name State---------------------------------------------------- 10 in...        <a href="https://www.cnblogs.com/popsuper1982/p/3932330.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2014-08-24 03:10
+popsuper1982
+<span data-post-id="3932330" class="post-view-count">阅读(8555)</span> 
+<span data-post-id="3932330" class="post-comment-count">评论(4)</span> 
+<span data-post-id="3932330" class="post-digg-count">推荐(2)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=3932330" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2014/08/23.html">2014年8月23日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/3931783.html">
+    <span>
+        别以为真懂Openstack: 虚拟机创建的50个步骤和100个知识点(3)
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：四、Nova-compute步骤17：nova-compute接收到请求后，通过Resource Tracker将创建虚拟机所需要的资源声明占用步骤18：调用Neutron API配置Network，虚拟机处于Networking的状态需要注意的是，这一步虽然是配置Network，但是主要是数据结构...        <a href="https://www.cnblogs.com/popsuper1982/p/3931783.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2014-08-23 21:32
+popsuper1982
+<span data-post-id="3931783" class="post-view-count">阅读(13461)</span> 
+<span data-post-id="3931783" class="post-comment-count">评论(0)</span> 
+<span data-post-id="3931783" class="post-digg-count">推荐(3)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=3931783" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2014/08/22.html">2014年8月22日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/3930350.html">
+    <span>
+        别以为真懂Openstack: 虚拟机创建的50个步骤和100个知识点(2)
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：二、nova-api步骤3：nova-api接收请求nova-api接收请求，也不是随便怎么来都接收的，而是需要设定rate limits，默认的实现是在ratelimit的middleware里面实现的。然而有时候，我们希望实现distributed rate-limiting，从而Turnsti...        <a href="https://www.cnblogs.com/popsuper1982/p/3930350.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2014-08-22 22:29
+popsuper1982
+<span data-post-id="3930350" class="post-view-count">阅读(14096)</span> 
+<span data-post-id="3930350" class="post-comment-count">评论(2)</span> 
+<span data-post-id="3930350" class="post-digg-count">推荐(9)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=3930350" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2014/08/21.html">2014年8月21日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/3927390.html">
+    <span>
+        别以为真懂Openstack: 虚拟机创建的50个步骤和100个知识点(1)
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：还是先上图吧，无图无真相别以为真懂Openstack！先别着急骂我，我也没有说我真懂Openstack我其实很想弄懂Openstack，然而从哪里下手呢？作为程序员，第一个想法当然是代码，Code Talks，什么都可以忽悠，代码是实实在在的，何况原来也深入读过Lucene, Hadoop的源代码，...        <a href="https://www.cnblogs.com/popsuper1982/p/3927390.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2014-08-21 15:57
+popsuper1982
+<span data-post-id="3927390" class="post-view-count">阅读(25555)</span> 
+<span data-post-id="3927390" class="post-comment-count">评论(8)</span> 
+<span data-post-id="3927390" class="post-digg-count">推荐(14)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=3927390" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2014/08/03.html">2014年8月3日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/3887611.html">
+    <span>
+        High Availability手册(3): 配置
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：各种配置在命令行状态下，多用crm进行 Global Cluster Options 这个类型是全局配置，主要包含下面两个： no-quorum-policy quorum的意思是最低法定人数，pacemaker能够继续工作所需要的最少的active的node的个数，这个数是(num of nodes)/2 + 1 如果不能达到法定人数的时候行为如何呢？ ignore表示继续运行，如果是两个Nod...        <a href="https://www.cnblogs.com/popsuper1982/p/3887611.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2014-08-03 20:16
+popsuper1982
+<span data-post-id="3887611" class="post-view-count">阅读(2562)</span> 
+<span data-post-id="3887611" class="post-comment-count">评论(0)</span> 
+<span data-post-id="3887611" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=3887611" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2014/07/29.html">2014年7月29日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/3875536.html">
+    <span>
+        High Availability手册(2): 架构
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：最底层是通信层corosync/openais 负责cluster中node之间的通信 上一层是Resource Allocation Layer，包含下面的组件： CRM Cluster Resouce Manager 是总管，对于resource做的任何操作都是通过它。每个机器上都有一个CRM。 CIB Cluster Information Base CIB由CRM管理，是在内存中的XM...        <a href="https://www.cnblogs.com/popsuper1982/p/3875536.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2014-07-29 15:01
+popsuper1982
+<span data-post-id="3875536" class="post-view-count">阅读(1304)</span> 
+<span data-post-id="3875536" class="post-comment-count">评论(0)</span> 
+<span data-post-id="3875536" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=3875536" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+            <div class="postSeparator"></div>
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/3875403.html">
+    <span>
+        High Availability手册(1): 环境
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：三台KVM虚拟机 首先我们得有一个pacemaker的环境，需要三台机器，如果没有那么多物理机器，可以用kvm虚拟机 创建一个bridge ovs-vsctl add-br ubuntu_br ifconfig ubuntu_br 192.168.100.1/24 在Host上设置NAT，并且enable ip forwarding # sysctl -pnet.ipv4.ip_forward =...        <a href="https://www.cnblogs.com/popsuper1982/p/3875403.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2014-07-29 14:10
+popsuper1982
+<span data-post-id="3875403" class="post-view-count">阅读(2047)</span> 
+<span data-post-id="3875403" class="post-comment-count">评论(0)</span> 
+<span data-post-id="3875403" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=3875403" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2014/07/26.html">2014年7月26日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/3870804.html">
+    <span>
+        Data Center(5): 实例
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：我们来分析从外网访问内网的服务的具体过程： 首先我们看DNS和Load Balancer是怎么工作的。 客户端要访问我们的系统，发送了一个https请求，https://nova.mycompany.com 客户端的local resolver查看本地的缓存，是否能找到域名nova.mycompany.com 如果不能找到，则发送一个递归查询到本地的DNS服务器 本地的DNS服务器查看它的缓存，...        <a href="https://www.cnblogs.com/popsuper1982/p/3870804.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2014-07-26 23:48
+popsuper1982
+<span data-post-id="3870804" class="post-view-count">阅读(357)</span> 
+<span data-post-id="3870804" class="post-comment-count">评论(0)</span> 
+<span data-post-id="3870804" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=3870804" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2014/07/25.html">2014年7月25日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/3868895.html">
+    <span>
+        Data Center手册(4)：设计
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：基础架构 拓扑图 Switching Path L3 routing at aggregation layer L2 switching at access layer L3 switch融合了三种功能： RP, router processor, 处理路由协议 SP, switch processor, 处理L2协议 ASIC, Application-specific integrated...        <a href="https://www.cnblogs.com/popsuper1982/p/3868895.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2014-07-25 20:17
+popsuper1982
+<span data-post-id="3868895" class="post-view-count">阅读(609)</span> 
+<span data-post-id="3868895" class="post-comment-count">评论(0)</span> 
+<span data-post-id="3868895" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=3868895" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+		
+
+
+<div class="day">
+    <div class="dayTitle">
+        <a href="https://www.cnblogs.com/popsuper1982/archive/2014/07/24.html">2014年7月24日</a>
+    </div>
+
+        <div class="postTitle">
+            
+
+<a class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/3866661.html">
+    <span>
+        Data Center手册(3): Load Balancer
+    </span>
+    
+
+
+
+</a>
+
+        </div>
+        <div class="postCon">
+
+    <div class="c_b_p_desc">
+摘要：Load Balancer的类型 DNS Round-Robin 这是一种很常见的分流的方式，具体配置如下： name server有一个zone文件，对于同一个domain，有多个IP www.example.com IN A 192.0.2.80 www.example.com IN A 192.0.2.50 当有客户端请求www.example.com的时候，返回所有的IP，但是顺序则需...        <a href="https://www.cnblogs.com/popsuper1982/p/3866661.html" class="c_b_p_desc_readmore">阅读全文</a>
+    </div>
+</div>
+        <div class="clear"></div>
+        <div class="postDesc">posted @ 2014-07-24 22:37
+popsuper1982
+<span data-post-id="3866661" class="post-view-count">阅读(727)</span> 
+<span data-post-id="3866661" class="post-comment-count">评论(0)</span> 
+<span data-post-id="3866661" class="post-digg-count">推荐(0)</span> 
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=3866661" rel="nofollow">
+    编辑
+</a>
+</div>
+        <div class="clear"></div>
+</div>
+
+
+
+<div class="topicListFooter">
+    <div id="nav_next_page">
+        
+
+    </div>    
+</div>
+
+
+<div id="homepage_bottom_pager" class="topicListFooter">
+    
+
+<div class="pager">
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=6">上一页</a>
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=1">1</a>
+    ···
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=3">3</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=4">4</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=5">5</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=6">6</a>
+    7
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=8">8</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=9">9</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=10">10</a>
+        <a href="https://www.cnblogs.com/popsuper1982/default.html?page=11">11</a>
+    ···
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=16">16</a>
+    <a href="https://www.cnblogs.com/popsuper1982/default.html?page=8">下一页</a>
+</div>
+</div>
+
+
+
+<script>
+    updatePostStats(
+        $(".post-view-count").map(function () { return this.dataset.postId }).get(),
+        function(id, count) { $(".post-view-count[data-post-id=" + id + "]").text("阅读(" + count + ")") },
+        function(id, count) { $(".post-comment-count[data-post-id=" + id + "]").text("评论(" + count + ")") },
+        function(id, count) { $(".post-digg-count[data-post-id=" + id + "]").text("推荐(" + count + ")") });
+</script>
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjvZLxBDEvLUrOyFdOJ4YQVe2URu-Z-IX4lnDh_4FRNNltluKjl8BH0Y4LwG63nCPGZIK5_HFb1Umlb9frLL7xHqhRjaygh7mRGGgd1ZAa-cCzGURraKuRCSMFTy3hX9UUI" />
+</body>
+</html>

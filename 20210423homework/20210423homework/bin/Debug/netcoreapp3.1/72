@@ -1,0 +1,1854 @@
+﻿
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <link rel="canonical" href="https://blog.csdn.net/weixin_43975771/article/details/115975918"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="renderer" content="webkit"/>
+    <meta name="force-rendering" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="report" content='{"pid": "blog", "spm":"1001.2101"}'>
+    <meta name="referrer" content="always">
+    <meta http-equiv="Cache-Control" content="no-siteapp" /><link rel="alternate" media="handheld" href="#" />
+    <meta name="shenma-site-verification" content="5a59773ab8077d4a62bf469ab966a63b_1497598848">
+    <meta name="applicable-device" content="pc">
+    <link  href="https://g.csdnimg.cn/static/logo/favicon32.ico"  rel="shortcut icon" type="image/x-icon" />
+    <title>flink本地版环境搭建和踩坑总结_不积跬步，无以致千里的博客-CSDN博客</title>
+    <script>
+      (function(){ 
+        var el = document.createElement("script"); 
+        el.src = "https://s3a.pstatp.com/toutiao/push.js?1abfa13dfe74d72d41d83c86d240de427e7cac50c51ead53b2e79d40c7952a23ed7716d05b4a0f683a653eab3e214672511de2457e74e99286eb2c33f4428830"; 
+        el.id = "ttzz"; 
+        var s = document.getElementsByTagName("script")[0]; 
+        s.parentNode.insertBefore(el, s);
+      })(window)
+    </script>
+        <meta name="keywords" content="flink本地版环境搭建和踩坑总结">
+        <meta name="csdn-baidu-search"  content='{"autorun":true,"install":true,"keyword":"flink本地版环境搭建和踩坑总结"}'>
+    <meta name="description" content="前言最近要搭建一个大数据实时计算平台，架构选型是选的 flink,这里先搭建一个单机版的flink.先感受一下。环境准备VMware 16 + centos7  + xhsell + xftp (开发所用到的工具和容器)此处省略这些工具的下载和安装教程。1.flink的下载我选择的是官网最新的版本wget https://mirrors.bfsu.edu.cn/apache/flink/flink-1.12.2/flink-1.12.2-bin-scala_2.11.tgz解压 tar -">
+    <script src="//g.csdnimg.cn/tingyun/1.8.5/blog.js" type='text/javascript'></script>
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/css/detail_enter-b70b7f940c.min.css">
+        <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/themesSkin/skin-ink/skin-ink-a11cfdaac3.min.css">
+    <script src="https://csdnimg.cn/public/common/libs/jquery/jquery-1.9.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var isCorporate = false;//注释删除enterprise
+        var username =  "weixin_43975771";
+        var skinImg = "white";
+        var blog_address = "https://blog.csdn.net/weixin_43975771";
+        var currentUserName = "";
+        var isOwner = false;
+        var loginUrl = "http://passport.csdn.net/account/login?from=https://blog.csdn.net/weixin_43975771/article/details/115975918";
+        var blogUrl = "https://blog.csdn.net/";
+        var avatar = "https://profile.csdnimg.cn/8/5/7/3_weixin_43975771";
+        var articleTitle = "flink本地版环境搭建和踩坑总结";
+        var articleDesc = "前言最近要搭建一个大数据实时计算平台，架构选型是选的 flink,这里先搭建一个单机版的flink.先感受一下。环境准备VMware 16 + centos7  + xhsell + xftp (开发所用到的工具和容器)此处省略这些工具的下载和安装教程。1.flink的下载我选择的是官网最新的版本wget https://mirrors.bfsu.edu.cn/apache/flink/flink-1.12.2/flink-1.12.2-bin-scala_2.11.tgz解压 tar -";
+        var articleTitles = "flink本地版环境搭建和踩坑总结_不积跬步，无以致千里的博客-CSDN博客";
+        var nickName = "不积跬步，无以致千里";
+        var articleDetailUrl = "https://blog.csdn.net/weixin_43975771/article/details/115975918";
+        if(window.location.host.split('.').length == 3) {
+            blog_address = blogUrl + username;
+        }
+        var skinStatus = "White";
+        var blogStaticHost = "https://csdnimg.cn/release/blogv2/"
+    </script>
+    <script src="https://g.csdnimg.cn/??fixed-sidebar/1.1.6/fixed-sidebar.js" type="text/javascript"></script>
+    <script src='//g.csdnimg.cn/common/csdn-report/report.js' type='text/javascript'></script>
+    <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/public/sandalstrap/1.4/css/sandalstrap.min.css">
+    <style>
+        .MathJax, .MathJax_Message, .MathJax_Preview{
+            display: none
+        }
+    </style>
+    <script src="https://dup.baidustatic.com/js/ds.js"></script>
+</head>
+<body class="nodata " style="">
+        <script>
+            var toolbarSearchExt = '{"landingWord":[],"queryWord":"","tag":["flink","flink环境搭建"],"title":"flink本地版环境搭建和踩坑总结"}';
+        </script>
+    <script src="https://g.csdnimg.cn/common/csdn-toolbar/csdn-toolbar.js" type="text/javascript"></script>
+    <script>
+    (function(){
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        }
+        else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+    </script>
+<link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/pc/css/blog_code-01256533b5.min.css">
+<link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/chart-3456820cac.css" />
+<div class="main_father clearfix d-flex justify-content-center" style="height:100%;"> 
+    <div class="container clearfix" id="mainBox">
+        <main>
+<script type="text/javascript">
+    var blogSensitiveWords = "";
+    function getQueryString(name) {   
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)"); //构造一个含有目标参数的正则表达式对象  
+      var r = window.location.search.substr(1).match(reg);  //匹配目标参数
+      if( r != null ) return decodeURIComponent( r[2] ); return '';   
+    }
+    function stripscript(s){ 
+      var pattern = new RegExp("[`~!@#$^&*()=|{}':;',\\[\\].<>/?~！@#￥……&*（）——|{}【】‘；：”“'。，、？%]") 
+      var rs = ""; 
+      for (var i = 0; i < s.length; i++) { 
+        rs = rs+s.substr(i, 1).replace(pattern, ''); 
+      } 
+      return rs; 
+    }
+    var blogHotWords = stripscript(getQueryString('utm_term')).length > 1 ? stripscript(getQueryString('utm_term')) : ''
+</script>
+<div class="blog-content-box">
+    <div class="article-header-box">
+        <div class="article-header">
+            <div class="article-title-box">
+                <h1 class="title-article" id="articleContentId">flink本地版环境搭建和踩坑总结</h1>
+            </div>
+            <div class="article-info-box">
+                <div class="article-bar-top">
+                    <img class="article-type-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/original.png" alt="">
+                    <div class="bar-content">
+                    <a class="follow-nickName " href="https://blog.csdn.net/weixin_43975771" target="_blank" rel="noopener">不积跬步，无以致千里</a>
+                    <span class="time">2021-04-21 20:26:09</span>
+                    <img class="article-read-img article-heard-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/articleReadEyes.png" alt="">
+                    <span class="read-count">49</span>
+                    <a id="blog_detail_zk_collection" class="un-collection" data-report-click='{"mod":"popu_823","spm":"1001.2101.3001.4232","ab":"new"}'>
+                        <img class="article-collect-img article-heard-img un-collect-status isdefault" style="display:inline-block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollect.png" alt="">
+                        <img class="article-collect-img article-heard-img collect-status isactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive.png" alt="">
+                        <span class="name">收藏</span>
+                        <span class="get-collection">
+                            1
+                        </span>
+                    </a>
+                    </div>
+                </div>
+                <div class="blog-tags-box">
+                    <div class="tags-box artic-tag-box">
+                            <span class="label">分类专栏：</span>
+                                <a class="tag-link" href="https://blog.csdn.net/weixin_43975771/category_9098425.html" target="_blank" rel="noopener">大数据开发</a>
+                            <span class="label">文章标签：</span>
+                                <a data-report-click='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"flink","ab":"new"}' class="tag-link" href="https://www.csdn.net/tags/MtTaEg0sMzMwNjAtYmxvZwO0O0OO0O0O.html" target="_blank" rel="noopener">flink</a>
+                                <a data-report-click='{"mod":"popu_626","spm":"1001.2101.3001.4223","strategy":"flink环境搭建","ab":"new"}' class="tag-link" href="https://www.csdn.net/tags/MtjaIgxsNTc0NDEtYmxvZwO0O0OO0O0O.html" target="_blank" rel="noopener">flink环境搭建</a>
+                    </div>
+                </div>
+                <div class="slide-content-box">
+                    <div class="article-copyright">
+                        <div class="creativecommons">
+                            版权声明：本文为博主原创文章，遵循<a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener"> CC 4.0 BY-SA </a>版权协议，转载请附上原文出处链接和本声明。
+                        </div>
+                        <div class="article-source-link">
+                            本文链接：<a href="https://blog.csdn.net/weixin_43975771/article/details/115975918" target="_blank">https://blog.csdn.net/weixin_43975771/article/details/115975918</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="operating">
+                    <a class="href-article-edit slide-toggle">版权</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="csdn-shop-window-top" class="csdn-shop-window-common" style="margin-top:18px;padding:0"></div>
+    <article class="baidu_pl">
+        <div id="article_content" class="article_content clearfix">
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-b5506197d8.css">
+                <div id="content_views" class="markdown_views prism-atom-one-dark">
+                    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                        <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path>
+                    </svg>
+                    <h3><a id="_0"></a>前言</h3> 
+<p>最近要搭建一个大数据实时计算平台&#xff0c;架构选型是选的 flink,这里先搭建一个单机版的flink.先感受一下。</p> 
+<h3><a id="_3"></a>环境准备</h3> 
+<p>VMware 16 &#43; centos7 &#43; xhsell &#43; xftp (开发所用到的工具和容器)<br /> 此处省略这些工具的下载和安装教程。</p> 
+<h4><a id="1flink_7"></a>1.flink的下载</h4> 
+<p>我选择的是官网最新的版本<br /> wget https://mirrors.bfsu.edu.cn/apache/flink/flink-1.12.2/flink-1.12.2-bin-scala_2.11.tgz<br /> <img src="https://img-blog.csdnimg.cn/20210421200621391.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzk3NTc3MQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /><br /> 解压 tar -zxf link-1.12.2-bin-scala_2.11.tgz</p> 
+<p>这部分是挺顺利的&#xff0c;按部就班下载和解压就行了。</p> 
+<p>flink 的运行 要以来 Java 运行环境&#xff0c;所以 需要安装 jdk.<br /> 在官网下载 jdk, 这是我的安装路径。<br /> <img src="https://img-blog.csdnimg.cn/20210421201124484.png" alt="在这里插入图片描述" /></p> 
+<pre><code class="prism language-c">当时遇到一个坑是&#xff0c;配置环境没找到Java路径&#xff0c;
+原因是我在 usr下 建了一个Java 文件&#xff0c;但是 在 <span class="token operator">/</span>user<span class="token operator">/</span>local<span class="token operator">/</span>java 
+这里也有个路径&#xff0c;倒之冲突&#xff0c;一直配置不成功。删除一个就解决了。
+还有就是注意安装的 jdk 版本要跟自己的系统保持一致。<span class="token number">64</span>位系统的就要选择<span class="token number">64</span>的jdk<span class="token punctuation">.</span>
+</code></pre> 
+<p>配置Java 的路径<br /> 在 vi /etc/profile<br /> 最后加入</p> 
+<pre><code class="prism language-c"><span class="token macro property">#java environment</span>
+export JAVA_HOME<span class="token operator">&#61;</span><span class="token operator">/</span>usr<span class="token operator">/</span>local<span class="token operator">/</span>java<span class="token operator">/</span>jdk1<span class="token punctuation">.</span><span class="token number">8.0</span>_291
+export CLASSPATH<span class="token operator">&#61;</span><span class="token punctuation">.</span><span class="token punctuation">:</span>$JAVA_HOME<span class="token operator">/</span>jre<span class="token operator">/</span>lib<span class="token operator">/</span>rt<span class="token punctuation">.</span>jar<span class="token punctuation">:</span>$JAVA_HOME<span class="token operator">/</span>lib<span class="token operator">/</span>dt<span class="token punctuation">.</span>jar<span class="token punctuation">:</span>$JAVA_HOME<span class="token operator">/</span>lib<span class="token operator">/</span>tools<span class="token punctuation">.</span>jar
+export PATH<span class="token operator">&#61;</span>$PATH<span class="token punctuation">:</span>$JAVA_HOME<span class="token operator">/</span>bin
+
+</code></pre> 
+<p>source /etc/profile 使配置生效。<br /> 即可。</p> 
+<h4><a id="2flink__httplocalhost8081_40"></a>2.flink 运行起来&#xff0c;却页面不能访问 http://localhost:8081/</h4> 
+<p><img src="https://img-blog.csdnimg.cn/20210421201951252.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzk3NTc3MQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /><br /> 这中情况是原因有我找了很久&#xff0c;最终我总结两点<br /> 第一点&#xff1a; 关闭防火墙 windows 和 虚拟机的防火墙我都关闭了。<br /> 第二点&#xff1a; 这个跟自己的选择的虚拟机访问网络的方式有关&#xff0c;我的选择的是转换模式&#xff0c;不是桥接。所以我访问的ip 不是 localhost:8081<br /> 我要访问的是 我虚拟机的ip再加端口号。<br /> http://192.168.208.130:8081/#/overview<br /> 这样就可以了。</p> 
+<p><img src="https://img-blog.csdnimg.cn/20210421202503114.png?x-oss-process&#61;image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80Mzk3NTc3MQ&#61;&#61;,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" /><br /> 看到这页面&#xff0c;满满的成就感。</p>
+                </div>
+                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-d7a94ec6ab.css" rel="stylesheet">
+                <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-f1c5feb645.css" rel="stylesheet">
+        </div>
+    </article>
+</div>
+            <div id="csdn-shop-window" class="csdn-shop-window-common"></div>
+<div class="more-toolbox" id="toolBarBox">
+    <span id="fixedBar"></span>
+    <div class="left-toolbox">
+        <ul class="toolbox-list ">
+            <li class="tool-item tool-item-size tool-active is-like" id="is-like"><a>
+            <img style="display:none;" id="is-like-imgactive-animation-like" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUpactive.png" alt="">
+            <img class="isactive" style="display:none" id="is-like-imgactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUpactive.png" alt="">
+            <img class="isdefault" style="display:block" id="is-like-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarThumbUp.png" alt="">   
+            <span class="name" id="is-like-span">点赞</span>
+            <span id="spanCount" class="count">
+                    3
+            </span>
+            </a></li>
+            <li class="tool-item tool-item-size tool-active tool-item-comment">
+                <a href="#commentBox">
+                    <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarComment.png" alt="">
+                    <img class="isactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCommentactive.png" style="display:none;" alt="">
+                    <span class="name">评论</span>
+                    <span class="count">
+                        2
+                    </span>
+                </a>
+            </li>
+            <li class="tool-item tool-item-size tool-active tool-QRcode" id="tool-share">
+                <a href="javascript:;" data-report-click='{"mod":"1582594662_002","spm":"1001.2101.3001.4129","ab":"new"}'>
+                    <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarShare.png" alt="">
+                    <img class="isactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarShareactive.png" style="display:none;" alt="">
+                    <span class="name">分享</span>
+                </a>
+                <div class="QRcode" id="tool-QRcode" style="left:-92%;">
+                    <span id="QRcode-close">x</span>
+                    <p class="title">
+                    海报分享
+                    </p>
+                    <div id='shareCode'></div>
+                    <p>
+                    扫一扫，分享海报
+                    </p>
+                </div>
+            </li>
+            <li class="tool-item tool-item-size tool-active is-collection ">
+                <a href="javascript:;" data-report-click='{"mod":"popu_824","spm":"1001.2101.3001.4130","ab":"new"}'>
+                    <img style="display:none" id="is-collection-img-collection" class="animation-dom active-animation" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive.png" alt="">
+                    <img class="isdefault" id="is-collection-img" style="display:block" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollect.png" alt="">
+                    <img class="isactive" id="is-collection-imgactive" style="display:none" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarCollectionActive.png" alt="">
+                    <span class="name" id="is-collection">收藏</span>
+                    <span class="count get-collection" id="get-collection">
+                        1
+                    </span>
+                </a>
+            </li>
+            <li class="tool-item tool-item-size tool-active tool-reward">
+                <a  id="toolreward" data-report-click='{"mod":"popu_830","spm":"1001.2101.3001.4237","dest":"","ab":"new"}'>
+                    <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarReward.png" alt="">
+                    <img class="isactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarRewardactive.png" style="display:none;" alt="">
+                    <span class="name">打赏</span>
+                </a>
+<div id="reward" class="reward-box">
+	<p class="rewad-title">打赏<span class="reward-close"><svg t="1567152543821" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10924" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12"><defs><style type="text/css"></style></defs><path d="M512 438.378667L806.506667 143.893333a52.032 52.032 0 1 1 73.6 73.621334L585.621333 512l294.485334 294.485333a52.074667 52.074667 0 0 1-73.6 73.642667L512 585.621333 217.514667 880.128a52.053333 52.053333 0 1 1-73.621334-73.642667L438.378667 512 143.893333 217.514667a52.053333 52.053333 0 1 1 73.621334-73.621334L512 438.378667z" fill="" p-id="10925"></path></svg></span></p>
+	<dl>
+		<dd>
+		<a href="https://blog.csdn.net/weixin_43975771" data-report-click='{"mod":"popu_379","dest":"https://blog.csdn.net/weixin_43975771","ab":"new"}'>
+			<img src="https://profile.csdnimg.cn/8/5/7/3_weixin_43975771" class="avatar_pic">
+		</a>
+		</dd>
+		<dt>
+			<p class="blog-name">不积跬步，无以致千里</p>
+			<p class="blog-discript">你的鼓励将是我创作的最大动力</p>
+		</dt>
+	</dl>
+	<div class="change-bt-box">
+		<span class="reward-bt reward-bt-coin">C币</span>
+		<span class="reward-bt-space"></span>
+		<span class="reward-bt reward-bt-money reward-bt-active">余额</span>
+	</div>
+	<div class="money-box">
+			<span class="choose_money choosed" data-id="2">2C币</span>
+			<span class="choose_money " data-id="4">4C币</span>
+			<span class="choose_money " data-id="6">6C币</span>
+			<span class="choose_money " data-id="10">10C币</span>
+			<span class="choose_money " data-id="20">20C币</span>
+			<span class="choose_money " data-id="50">50C币</span>
+	</div>
+	<div class="sure-box">
+		<p class="is-have-money"><a class="reward-sure">确定</a></p>
+	</div>
+</div>
+            </li>
+            <li class="tool-item tool-item-size tool-active tool-more">
+              <a class="article-report">
+                <img class="isdefault" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarReport.png" alt="">
+                <img class="isactive" src="https://csdnimg.cn/release/blogv2/dist/pc/img/tobarReportactive.png" style="display:none;" alt="">
+                <span class="name">举报</span>
+              </a>
+            </li>
+            <li class="tool-item">
+                    <a class="tool-attend tool-bt-button tool-bt-attend" href="javascript:;" data-report-view='{"mod":"1592215036_002","spm":"1001.2101.3001.4232","extend1":"关注"}'>关注</a>
+                <a class="tool-item-follow active-animation" style="display:none;">关注</a>
+            </li>
+            <li class="tool-item">
+                    <p class="company active" id="health-companies" href="javascript:;" >一键三连</p>
+            </li>
+        </ul>
+    </div>  
+</div>
+<script type=text/javascript crossorigin src="https://csdnimg.cn/release/phoenix/production/qrcode-7c90a92189.min.js"></script>
+<script src="//g.csdnimg.cn/??sharewx/1.2.1/sharewx.js" type="text/javascript"></script>
+<script type="text/javascript" crossorigin src="https://g.csdnimg.cn/collection-box/2.0.4/collection-box.js"></script>
+                <div id="dmp_ad_58" style="width:100%;overflow-x:hidden"><div id="kp_box_58" data-pid="58"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-format="fluid"
+     data-ad-layout-key="-gi-21+3s-18+2p"
+     data-ad-client="ca-pub-1076724771190722"
+     data-ad-slot="5869798804"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script><img class="pre-img-lasy" data-src="https://kunyu.csdn.net/1.png?p=58&a=3778&c=0&k=&spm=1001.2101.3001.5002&d=1&t=3&u=fce37c7388704ac9a2c7e8879e716b4f" style="display: block;width: 0px;height: 0px;"></div></div>
+            <div class="second-recommend-box recommend-box">
+<div class="recommend-item-box type_download clearfix" data-url="http://download.csdn.net/download/m0_52957036/14070230"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-download-2~default~BlogCommendFromMachineLearnPai2~default-1.control\"}","dist_request_id":"1621077342815_41418","index":"1","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"http://download.csdn.net/download/m0_52957036/14070230"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="http://download.csdn.net/download/m0_52957036/14070230" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-download-2~default~BlogCommendFromMachineLearnPai2~default-1.control\"}","dist_request_id":"1621077342815_41418","index":"1","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"http://download.csdn.net/download/m0_52957036/14070230"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control&depth_1-utm_source=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control'>
+					2020年新<em>版</em>JAVA外文文献+翻译.docx
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info display-flex">
+					<span class="info-block">08-09</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="http://download.csdn.net/download/m0_52957036/14070230" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-download-2~default~BlogCommendFromMachineLearnPai2~default-1.control\"}","dist_request_id":"1621077342815_41418","index":"1","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"http://download.csdn.net/download/m0_52957036/14070230"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control&depth_1-utm_source=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-1.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">Java and the Internet If Java is, in fact, yet another computer programming Ianguage, you may question why it is so important and why it is being promoted as a revolutionary step in computer programmi</div>
+			</a>
+		</div>
+	</div>
+</div>
+            </div>
+<a id="commentBox" name="commentBox"></a>
+<div class="comment-box">
+	<div class="comment-edit-box d-flex">
+		<a id="commentsedit"></a>
+		<div class="user-img">
+			<a href="javascript:void(0);" >
+				<img class="show_loginbox" src="https://g.csdnimg.cn/static/user-img/anonymous-User-img.png">
+			</a>
+		</div>
+		<form id="commentform">
+			<img class="comment-sofa-flag" src="https://csdnimg.cn/release/blogv2/dist/pc/img/commentFlag@2x.png">
+      <textarea class="comment-content" name="comment_content" id="comment_content" placeholder="优质评论可以帮助作者获得更高权重" maxlength="1000"></textarea>
+			<div class="comment-emoticon"><img class="comment-emoticon-img" data-url="https://csdnimg.cn/release/blogv2/dist/pc/img/" src="https://csdnimg.cn/release/blogv2/dist/pc/img/emoticon.png" alt="表情包"></div> 
+      <span class="comment-emoticon-tip">插入表情</span>
+      <div class="comment-emoticon-box">
+        <div class="comment-emoticon-img-box">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:001.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/001.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:002.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/002.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:003.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/003.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:004.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/004.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:005.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/005.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:006.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/006.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:007.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/007.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:008.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/008.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:009.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/009.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:010.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/010.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:011.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/011.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:012.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/012.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:013.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/013.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:014.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/014.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:015.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/015.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:016.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/016.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:017.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/017.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:018.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/018.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:019.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/019.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:020.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/020.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:021.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/021.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:022.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/022.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:023.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/023.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:024.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/024.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:025.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/025.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:026.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/026.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:027.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/027.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:028.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/028.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:029.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/029.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:030.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/030.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:031.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/031.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:032.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/032.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:033.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/033.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:034.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/034.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:035.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/035.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:036.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/036.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:037.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/037.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:038.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/038.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:039.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/039.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:040.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/040.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:041.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/041.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:042.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/042.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:043.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/043.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:044.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/044.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:045.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/045.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:046.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/046.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:047.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/047.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:048.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/048.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:049.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/049.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:050.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/050.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:051.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/051.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:052.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/052.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:053.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/053.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:054.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/054.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:055.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/055.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:056.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/056.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:057.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/057.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:058.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/058.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:059.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/059.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:060.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/060.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:061.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/061.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:062.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/062.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:063.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/063.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:064.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/064.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:065.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/065.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:066.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/066.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:067.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/067.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:068.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/068.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:069.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/069.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:070.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/070.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:071.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/071.png">
+            <img class="emoticon-monkey-img" data-emoticon="[face]emoji:072.png[/face]" src="https://g.csdnimg.cn/static/face/emoji/072.png">
+        </div>
+      </div>
+      <div class="opt-box">
+				<div id="ubbtools" class="add_code">
+					<a href="#insertcode" code="code" target="_self"><i class="icon iconfont icon-daima"></i></a>
+				</div>
+				<input type="hidden" id="comment_replyId" name="comment_replyId">
+				<input type="hidden" id="article_id" name="article_id" value="115975918">
+				<input type="hidden" id="comment_userId" name="comment_userId" value="">
+				<input type="hidden" id="commentId" name="commentId" value="">
+				<div class="dropdown" id="myDrap">
+					<a class="dropdown-face d-flex align-items-center" data-toggle="dropdown" role="button"
+						aria-haspopup="true" aria-expanded="false">
+						<div class="txt-selected text-truncate">添加代码片</div>
+						<svg class="icon d-block" width="200px" height="100.00px" viewBox="0 0 2048 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path  d="M597.33333292 298.666667h853.333334L1023.99999992 725.333333 597.33333292 298.666667z"  /></svg>
+					</a>
+					<ul class="dropdown-menu" id="commentCode" aria-labelledby="drop4">
+						<li><a data-code="html">HTML/XML</a></li>
+						<li><a data-code="objc">objective-c</a></li>
+						<li><a data-code="ruby">Ruby</a></li>
+						<li><a data-code="php">PHP</a></li>
+						<li><a data-code="csharp">C</a></li>
+						<li><a data-code="cpp">C++</a></li>
+						<li><a data-code="javascript">JavaScript</a></li>
+						<li><a data-code="python">Python</a></li>
+						<li><a data-code="java">Java</a></li>
+						<li><a data-code="css">CSS</a></li>
+						<li><a data-code="sql">SQL</a></li>
+						<li><a data-code="plain">其它</a></li>
+					</ul>
+				</div>
+				<div class="right-box" id="rightBox" data-type="2">
+							<span id="tip_comment" class="tip">还能输入<em>1000</em>个字符</span>
+							<a data-report-click='{"mod":"1582594662_003","spm":"1001.2101.3001.4227","ab":"new"}'><input type="submit"
+									class="btn btn-sm btn-comment" value="发表评论"></a>
+				</div>
+			</div>
+		</form>
+		<input type="button" class="bt-comment-show" value="评论">
+	</div>
+	<div class="comment-list-container">
+		<a id="comments"></a>
+		<div class="comment-list-box">
+		</div>
+		<div id="commentPage" class="pagination-box d-none"></div>
+		<div class="opt-box text-center">
+			<div class="btn btn-sm btn-link-blue" id="btnMoreComment"></div>
+		</div>
+	</div>
+</div>            <div class="recommend-tit-mod">相关推荐</div>
+            <div class="recommend-box insert-baidu-box">
+                <div class="recommend-item-box clearfix" style="display:none"></div>
+<div class="recommend-item-box type_download clearfix" data-url="http://download.csdn.net/download/weixin_38606076/15448255"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-download-2~default~BlogCommendFromMachineLearnPai2~default-2.control\"}","dist_request_id":"1621077342815_41418","index":"2","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"http://download.csdn.net/download/weixin_38606076/15448255"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="http://download.csdn.net/download/weixin_38606076/15448255" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-download-2~default~BlogCommendFromMachineLearnPai2~default-2.control\"}","dist_request_id":"1621077342815_41418","index":"2","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"http://download.csdn.net/download/weixin_38606076/15448255"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.control&depth_1-utm_source=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.control'>
+					用<em>Flink</em>取代SparkStreaming，知乎实时数仓架构演进
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info display-flex">
+					<span class="info-block">02-24</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="http://download.csdn.net/download/weixin_38606076/15448255" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-download-2~default~BlogCommendFromMachineLearnPai2~default-2.control\"}","dist_request_id":"1621077342815_41418","index":"2","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"http://download.csdn.net/download/weixin_38606076/15448255"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.control&depth_1-utm_source=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-2.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">&ldquo;数据智能&rdquo;(DataIntelligence)有一个必须且基础的环节，就是数据仓库的建设，同时，数据仓库也是公司数据发展到一定规模后必然会提供的一种基础服务。从智能商业的角度来讲，数据的结果代表了用户的反馈，获取结果的及时性就显得尤为重要，快速的获取数据反馈能够帮助公司更快的做出决策，更好的进行产品迭代，实时数仓在这一过程中起到了不可替代的作用。本文主要讲述知乎的实时数仓实践以及架构的演进，这包括以下几个方面实时数仓1.0<em>版</em>本，主题：ETL逻辑实时化，技术方案：SparkStreaming。实时数仓2.0<em>版</em>本，主题：数据分层，指标计算实时化，技术方案：<em>Flink</em>Streaming。实时数仓未</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_download clearfix" data-url="http://download.csdn.net/download/VBcom/12520559"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-download-2~default~BlogCommendFromMachineLearnPai2~default-3.control\"}","dist_request_id":"1621077342815_41418","index":"3","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"http://download.csdn.net/download/VBcom/12520559"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="http://download.csdn.net/download/VBcom/12520559" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-download-2~default~BlogCommendFromMachineLearnPai2~default-3.control\"}","dist_request_id":"1621077342815_41418","index":"3","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"http://download.csdn.net/download/VBcom/12520559"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control'>
+					DirectX修复工具V4.0增强<em>版</em>
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info display-flex">
+					<span class="info-block">06-13</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="http://download.csdn.net/download/VBcom/12520559" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-download-2~default~BlogCommendFromMachineLearnPai2~default-3.control\"}","dist_request_id":"1621077342815_41418","index":"3","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"http://download.csdn.net/download/VBcom/12520559"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-3.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">    DirectX修复工具(DirectX Repair)是一款系统级工具软件，简便易用。本程序为绿色<em>版</em>，无需安装，可直接运行。
+
+    本程序的主要功能是检测当前系统的DirectX状态，如果发现异常则进行修复。程序主要针对0xc000007b问题设计，可以完美修复该问题。本程序中包含了最新<em>版</em>的DirectX redist(Jun2010)，并且全部DX文件都有Microsoft的数字签名，安全放心。
+
+    本程序为了应对一般电脑用户的使用，采用了易用的一键式设计，只要点击主界面上的&ldquo;检测并修复&rdquo;按钮，程序就会自动完成校验、检测、下载、修复以及注册的全部功能，无需用户的介入，大大降低了使用难度。在常规修复过程中，程序还会自动检测DirectX加速状态，在异常时给予用户相应提示。
+
+    本程序适用于多个操作系统，如Windows XP（需先安装.NET 2.0，详情请参阅&ldquo;致Windows XP用户.txt&rdquo;文件）、Windows Vista、Windows 7、Windows 8、Windows 8.1、Windows 8.1 Update、Windows 10，同时兼容32位操作系统<em>和</em>64位操作系统。本程序会根据系统的不同，自动调整任务模式，无需用户进行设置。
+
+    本程序的V4.0<em>版</em>分为标准<em>版</em>、增强<em>版</em>以及在线修复<em>版</em>。所有<em>版</em>本都支持修复DirectX的功能，而增强<em>版</em>则额外支持修复c++的功能。在线修复<em>版</em>功能与标准<em>版</em>相同，但其所需的数据包需要在修复时自动下载。各个<em>版</em>本之间，主程序完全相同，只是其配套使用的数据包不同。因此，标准<em>版</em><em>和</em>在线修复<em>版</em>可以通过补全扩展包的形式成为增强<em>版</em>。本程序自V3.5<em>版</em>起，自带扩展功能。只要在主界面的&ldquo;工具&rdquo;菜单下打开&ldquo;选项&rdquo;对话框，找到&ldquo;扩展&rdquo;标签，点击其中的&ldquo;开始扩展&rdquo;按钮即可。扩展过程需要Internet连接，扩展成功后新的数据包可自动生效。扩展用时根据网络速度不同而不同，最快仅需数秒，最慢需要数分钟，烦请耐心等待。如扩展失败，可点击&ldquo;扩展&rdquo;界面左上角小锁图标切换为加密连接，即可很大程度上避免因防火墙或其他原因导致的连接失败。
+
+    本程序自V2.0<em>版</em>起采用全新的底层程序架构，使用了异步多线程编程技术，使得检测、下载、修复单独进行，互不干扰，快速如飞。新程序更改了自我校验方式，因此使用新<em>版</em>本的程序时不会再出现自我校验失败的错误；但并非取消自我校验，因此程序安全性与之前<em>版</em>本相同，并未降低。
+
+    程序有更新系统c++功能。由于绝大多数软件运行时需要c++的支持，并且c++的异常也会导致0xc000007b错误，因此程序在检测修复的同时，也会根据需要更新系统中的c++组件。自V3.2<em>版</em>本开始使用了全新的c++扩展包，可以大幅提高工业软件修复成功的概率。修复c++的功能仅限于增强<em>版</em>，标准<em>版</em>及在线修复<em>版</em>在系统c++异常时（非丢失时）会提示用户使用增强<em>版</em>进行修复。除常规修复外，新<em>版</em>程序还支持C++强力修复功能。当常规修复无效时，可以到本程序的选项界面内开启强力修复功能，可大幅提高修复成功率。请注意，请仅在常规修复无效时再使用此功能。
+
+    程序有两种窗口样式。正常模式即默认样式，适合绝大多数用户使用。另有一种简约模式，此时窗口将只显示最基本的内容，修复会自动进行，修复完成10秒钟后会自动退出。该窗口样式可以使修复工作变得更加简单快速，同时方便其他软件、游戏将本程序内嵌，即可进行无需人工参与的快速修复。开启简约模式的方法是：打开程序所在目录下的&ldquo;Settings.ini&rdquo;文件（如果没有可以自己创建），将其中的&ldquo;FormStyle&rdquo;一项的值改为&ldquo;Simple&rdquo;并保存即可。
+
+    新<em>版</em>程序支持命令行运行模式。在命令行中调用本程序，可以在路径后直接添加命令进行相应的设置。常见的命令有7类，分别是设置语言的命令、设置窗口模式的命令，设置安全级别的命令、开启强力修复的命令、设置c++修复模式的命令、控制Direct加速的命令、显示<em>版</em>权信息的命令。具体命令名称可以通过&ldquo;/help&rdquo;或&ldquo;/?&rdquo;进行查询。
+
+    程序有高级筛选功能，开启该功能后用户可以自主选择要修复的文件，避免了其他不必要的修复工作。同时，也支持通过文件进行辅助筛选，只要在程序目录下建立&ldquo;Filter.dat&rdquo;文件，其中的每一行写一个需要修复文件的序号即可。该功能仅针对高级用户使用，并且必须在正常窗口模式下才有效（简约模式时无效）。
+
+    本程序有自动记录日志功能，可以记录每一次检测修复结果，方便在出现问题时，及时分析<em>和</em>查找原因，以便找到解决办法。
+
+    程序的&ldquo;选项&rdquo;对话框中包含了7项高级功能。点击&quot;常规&rdquo;选项卡可以调整程序的基本运行情况，包括日志记录、安全级别控制、调试模式开启等。只有开启调试模式后才能在C</div>
+			</a>
+		</div>
+	</div>
+</div>
+		<dl id="recommend-item-box-tow" class="recommend-item-box type_blog clearfix">
+			
+		</dl>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/x976269167/article/details/105700963"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~default-4.control\"}","dist_request_id":"1621077342815_41418","index":"4","strategy":"2~default~BlogCommendFromBaidu~default","dest":"https://blog.csdn.net/x976269167/article/details/105700963"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/x976269167/article/details/105700963" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~default-4.control\"}","dist_request_id":"1621077342815_41418","index":"4","strategy":"2~default~BlogCommendFromBaidu~default","dest":"https://blog.csdn.net/x976269167/article/details/105700963"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-4.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-4.control'>
+					<em>Flink</em>在Windows<em>本地</em>安装部署
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/x976269167" target="_blank"><span class="blog-title">x976269167的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">04-23</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					3417
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/x976269167/article/details/105700963" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromBaidu~default-4.control\"}","dist_request_id":"1621077342815_41418","index":"4","strategy":"2~default~BlogCommendFromBaidu~default","dest":"https://blog.csdn.net/x976269167/article/details/105700963"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-4.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromBaidu%7Edefault-4.control'>
+				<div class="desc ellipsis-online ellipsis-online-1"><em>Flink</em>运行需要先安装JDK 8
+
+1、登录网站下载<em>Flink</em>
+
+网址：https://<em>flink</em>.apache.org/downloads.html
+
+
+
+
+
+2、下载完成后，解压
+
+
+
+
+
+3、打开cmd，进入上图中的bin目录下，运行命令
+
+
+start-cluster.bat
+
+
+
+
+4、运行完成后，打开浏览器，输入地址
+
+
+http://localhost:8081/.
+
+
+
+
+...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/baidu_26507163/article/details/109855751"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-5.control\"}","dist_request_id":"1621077342815_41418","index":"5","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/baidu_26507163/article/details/109855751"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/baidu_26507163/article/details/109855751" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-5.control\"}","dist_request_id":"1621077342815_41418","index":"5","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/baidu_26507163/article/details/109855751"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control'>
+					搭建<em>flink</em>任务管理ververica平台<em>踩</em><em>坑</em>记录
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/baidu_26507163" target="_blank"><span class="blog-title">baidu_26507163的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">11-20</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					223
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/baidu_26507163/article/details/109855751" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-5.control\"}","dist_request_id":"1621077342815_41418","index":"5","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/baidu_26507163/article/details/109855751"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-5.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">搭建<em>flink</em>任务管理ververica平台<em>踩</em><em>坑</em>记录<em>坑</em>点描述<em>flink</em><em>版</em>本使用内部镜像而非基于alibaba开源镜像合并自定义镜像与平台提供镜像差异Deployment固定使用Application模式部署，无法指定其他部署模式
+<em>坑</em>点描述
+ververica平台是Ververica公司的针对<em>flink</em>商业产品。个人出于实践探索的目的，切实调研了一下该平台的功能。因为公司服务都部署在k8s环境中，所以搭建该平台使用了容器镜像的方式。过程中发现，这玩意上手是真不容易，<em>坑</em>比预想的多多了。<em>坑</em>点如下：
+<em>flink</em><em>版</em>本</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/qq_25702189/article/details/103491761"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-6.control\"}","dist_request_id":"1621077342815_41418","index":"6","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/qq_25702189/article/details/103491761"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/qq_25702189/article/details/103491761" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-6.control\"}","dist_request_id":"1621077342815_41418","index":"6","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/qq_25702189/article/details/103491761"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-6.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-6.control'>
+					<em>flink</em>源码<em>本地</em>部署以及<em>踩</em><em>坑</em>集合
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/qq_25702189" target="_blank"><span class="blog-title">qq_25702189的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">12-11</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					1099
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/qq_25702189/article/details/103491761" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-6.control\"}","dist_request_id":"1621077342815_41418","index":"6","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/qq_25702189/article/details/103491761"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-6.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-6.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">总体步骤3步
+
+1.下载源码
+
+2.打包代码
+
+3.启动<em>flink</em>集群
+
+第一步(下载源码)：
+
+在<em>flink</em>的github仓库下载源码链接如下：https://github.com/apache/<em>flink</em>
+
+第二步(打包代码)：
+
+在打包过程中我遇到两个问题
+
+1.由于该项目包含很多doc以及test代码，很多代码文件是没有如下的证书说明，会导致报错Too many files with un...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/xiaolegeaizy/article/details/111032927"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-7.control\"}","dist_request_id":"1621077342815_41418","index":"7","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/xiaolegeaizy/article/details/111032927"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/xiaolegeaizy/article/details/111032927" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-7.control\"}","dist_request_id":"1621077342815_41418","index":"7","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/xiaolegeaizy/article/details/111032927"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-7.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-7.control'>
+					<em>flink</em>x local模式<em>踩</em><em>坑</em>记录
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/xiaolegeaizy" target="_blank"><span class="blog-title">xiaolegeaizy的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">12-11</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					234
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/xiaolegeaizy/article/details/111032927" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-7.control\"}","dist_request_id":"1621077342815_41418","index":"7","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/xiaolegeaizy/article/details/111032927"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-7.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-7.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">1、下载源码，首次下载idea编译会报错，
+
+
+编译找不到DB2、达梦、gbase、ojdbc8等驱动包
+
+
+
+解决办法：在$<em>FLINK</em>X_HOME/jars目录下有这些驱动包，可以手动安装，也可以使用插件提供的脚本安装：
+
+```bash
+## windows平台
+./install_jars.bat
+
+## unix平台
+./install_jars.sh
+```
+
+
+
+
+编译打包：mvn clean package -Dmaven.test.skip=true
+
+
+2、把编译后的三个文件加bin/li</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_course clearfix" data-url="https://edu.csdn.net/course/detail/29149"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-course-2~default~BlogCommendFromMachineLearnPai2~default-8.control\"}","dist_request_id":"1621077342815_41418","index":"8","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://edu.csdn.net/course/detail/29149"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://edu.csdn.net/course/detail/29149" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-course-2~default~BlogCommendFromMachineLearnPai2~default-8.control\"}","dist_request_id":"1621077342815_41418","index":"8","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://edu.csdn.net/course/detail/29149"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-8.control&depth_1-utm_source=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-8.control'>
+					零基础Python自动化办公(漫画<em>版</em>)
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info display-flex">
+					<span class="info-block">05-22</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://edu.csdn.net/course/detail/29149" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-course-2~default~BlogCommendFromMachineLearnPai2~default-8.control\"}","dist_request_id":"1621077342815_41418","index":"8","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://edu.csdn.net/course/detail/29149"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-8.control&depth_1-utm_source=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-8.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">&lt;p&gt;
+	时间被重复工作挤满？永远处理不完的文档与报表？工作效率低&nbsp; 总被领导批评教育？
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;img src=&quot;https://img-bss.csdn.net/202005220845047302.png&quot; alt=&quot;&quot; /&gt;&lt;img src=&quot;https://img-bss.csdn.net/202005220845161029.png&quot; alt=&quot;&quot; /&gt;&lt;img src=&quot;https://img-bss.csdn.net/202005220848082799.png&quot; alt=&quot;&quot; /&gt;&lt;img src=&quot;https://img-bss.csdn.net/202005220848213214.png&quot; alt=&quot;&quot; /&gt;
+&lt;/p&gt;</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_course clearfix" data-url="https://edu.csdn.net/course/detail/2777"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-course-2~default~BlogCommendFromMachineLearnPai2~default-9.control\"}","dist_request_id":"1621077342815_41418","index":"9","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://edu.csdn.net/course/detail/2777"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://edu.csdn.net/course/detail/2777" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-course-2~default~BlogCommendFromMachineLearnPai2~default-9.control\"}","dist_request_id":"1621077342815_41418","index":"9","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://edu.csdn.net/course/detail/2777"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-9.control&depth_1-utm_source=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-9.control'>
+					H.264/AVC视频编解码技术详解
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info display-flex">
+					<span class="info-block">07-29</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://edu.csdn.net/course/detail/2777" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-course-2~default~BlogCommendFromMachineLearnPai2~default-9.control\"}","dist_request_id":"1621077342815_41418","index":"9","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://edu.csdn.net/course/detail/2777"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-9.control&depth_1-utm_source=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-9.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">H.264/AVC是目前业界应用为广泛的视频压缩编码标准，包含了先进而且较为成熟的视频编码技术。本课程将从原理、标准<em>和</em>实现等多个角度，详细讲述了H.264/AVC视频编码标准的整体架构与技术细节，不但讲解了H.264/AVC标准协议文档中的内容，还通过实际的H.264码流分析/解码程序的开发来帮助观众更深入地理解H.264编码标准的原理。</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/elinor333/article/details/111278468"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-10.control\"}","dist_request_id":"1621077342815_41418","index":"10","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/elinor333/article/details/111278468"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/elinor333/article/details/111278468" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-10.control\"}","dist_request_id":"1621077342815_41418","index":"10","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/elinor333/article/details/111278468"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-10.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-10.control'>
+					[<em>Flink</em>]<em>踩</em><em>坑</em><em>和</em>解决：搭建第一个WordCount程序
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/elinor333" target="_blank"><span class="blog-title">elinor333的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">12-16</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					59
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/elinor333/article/details/111278468" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-10.control\"}","dist_request_id":"1621077342815_41418","index":"10","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/elinor333/article/details/111278468"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-10.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-10.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">完整教程地址：http://wuchong.me/blog/2018/11/07/5-minutes-build-first-<em>flink</em>-application/
+5分钟从零构建第一个 <em>Flink</em> 应用
+环境
+Windows 10 + idea
+步骤记录
+
+确认java<em>和</em>maven环境
+构建maven项目，在cmd中输入
+mvn archetype:generate -DarchetypeGroupId=org.apache.<em>flink</em> -DarchetypeArtifactId=<em>flink</em>-quickst</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/Jack_Roy/article/details/104331246"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-11.control\"}","dist_request_id":"1621077342815_41418","index":"11","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/Jack_Roy/article/details/104331246"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/Jack_Roy/article/details/104331246" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-11.control\"}","dist_request_id":"1621077342815_41418","index":"11","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/Jack_Roy/article/details/104331246"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-11.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-11.control'>
+					【大数据入门笔记系列】第五节  SpringBoot集成hadoop开发环境（复杂<em>版</em>的WordCount）
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/Jack_Roy" target="_blank"><span class="blog-title">Jack_Roy的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">02-17</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					1万+
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/Jack_Roy/article/details/104331246" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-11.control\"}","dist_request_id":"1621077342815_41418","index":"11","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/Jack_Roy/article/details/104331246"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-11.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-11.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">【大数据入门笔记系列】第五节  SpringBoot集成hadoop开发环境（复杂<em>版</em>的WordCount）前言环境清单创建SpringBoot项目创建包创建yml编写代码
+前言
+本来是想直接扒一扒MapReduce的工作原理，但是觉得只是图解或者文字描述，没有Demo的运行体验总是无趣的，一遍走下来也没有什么成就感，因此还是要撸一撸代码的。
+那么谈到MapReduce的工作原理，我们的Demo首选...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_34290096/article/details/94641756"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-12.control\"}","dist_request_id":"1621077342815_41418","index":"12","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_34290096/article/details/94641756"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_34290096/article/details/94641756" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-12.control\"}","dist_request_id":"1621077342815_41418","index":"12","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_34290096/article/details/94641756"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-12.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-12.control'>
+					spark<em>总结</em>
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_34290096" target="_blank"><span class="blog-title">weixin_34290096的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">06-21</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					93
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_34290096/article/details/94641756" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-12.control\"}","dist_request_id":"1621077342815_41418","index":"12","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_34290096/article/details/94641756"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-12.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-12.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">foreachRDD作用于DStream中每一个时间间隔的RDD;foreachPartition作用于每一个时间间隔的RDD中的每一个partition;foreach作用于每一个时间间隔的RDD中的每一个元素;######################################################################推荐系统中的矩阵分解技术http://www....</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_33738982/article/details/92246008"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-13.control\"}","dist_request_id":"1621077342815_41418","index":"13","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_33738982/article/details/92246008"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_33738982/article/details/92246008" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-13.control\"}","dist_request_id":"1621077342815_41418","index":"13","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_33738982/article/details/92246008"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-13.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-13.control'>
+					携程实时计算平台架构与实践丨DataPipeline
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_33738982" target="_blank"><span class="blog-title">weixin_33738982的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">11-21</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					175
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_33738982/article/details/92246008" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendFromMachineLearnPai2~default-13.control\"}","dist_request_id":"1621077342815_41418","index":"13","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"https://blog.csdn.net/weixin_33738982/article/details/92246008"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-13.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-13.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">文 | 潘国庆 携程大数据平台实时计算平台负责人本文主要从携程大数据平台概况、架构设计及实现、在实现当中<em>踩</em><em>坑</em>及填<em>坑</em>的过程、实时计算领域详细的应用场景，以及未来规划五个方面阐述携程实时计算平台架构与实践，希望对需要构建实时数据平台的公司<em>和</em>同学有所借鉴。一、携程大数据平台之总体架构携程大数据平台结构分为三层：应用层：开发平台Zeus（分为调度系统、Datax数据传输系统、主数据系...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_course clearfix" data-url="https://edu.csdn.net/combo/detail/1703"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-course-2~default~BlogCommendHotData~default-14.control\"}","dist_request_id":"1621077342815_41418","index":"14","strategy":"2~default~BlogCommendHotData~default","dest":"https://edu.csdn.net/combo/detail/1703"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://edu.csdn.net/combo/detail/1703" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-course-2~default~BlogCommendHotData~default-14.control\"}","dist_request_id":"1621077342815_41418","index":"14","strategy":"2~default~BlogCommendHotData~default","dest":"https://edu.csdn.net/combo/detail/1703"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendHotData%7Edefault-14.control&depth_1-utm_source=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendHotData%7Edefault-14.control'>
+					小白零基础入门MySQL数据库
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info display-flex">
+					<span class="info-block">05-25</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://edu.csdn.net/combo/detail/1703" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-course-2~default~BlogCommendHotData~default-14.control\"}","dist_request_id":"1621077342815_41418","index":"14","strategy":"2~default~BlogCommendHotData~default","dest":"https://edu.csdn.net/combo/detail/1703"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendHotData%7Edefault-14.control&depth_1-utm_source=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendHotData%7Edefault-14.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">我们从 SQL &ldquo;入门+高级功能&rdquo;<em>和</em>&ldquo;实战+性能优化&rdquo;出发，分 7 章、100 余个知识点，一步步让你精通SQL实战。
+入门+高级功能：从基础增删改查语法（DQL、DCL、索引）、到进阶语法等等，带你一次搞定。
+实战+性能优化：每个知识点都有配套练习项目，在你学习知识的通过能通过实战加深对应用的理解，同时也会教会你如何编写高性能的 SQL 语句，在面对大量数据查询时也能快速的得出结果。</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_other clearfix" data-url="https://plugin.csdn.net/?from=blog_detail"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.534984.control\"}","dist_request_id":"1621077342815_41418","index":"15","strategy":"11_534984_RCMD","dest":"https://plugin.csdn.net/?from=blog_detail"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://plugin.csdn.net/?from=blog_detail" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.534984.control\"}","dist_request_id":"1621077342815_41418","index":"15","strategy":"11_534984_RCMD","dest":"https://plugin.csdn.net/?from=blog_detail"}'  data-report-query='utm_medium=distribute.pc_relevant.534984.control&depth_1-utm_source=distribute.pc_relevant.534984.control'>
+					CSDN开发者助手，常用网站自动整合，多种工具一键调用
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info display-flex">
+					<span class="info-block"></span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://plugin.csdn.net/?from=blog_detail" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.534984.control\"}","dist_request_id":"1621077342815_41418","index":"15","strategy":"11_534984_RCMD","dest":"https://plugin.csdn.net/?from=blog_detail"}'  data-report-query='utm_medium=distribute.pc_relevant.534984.control&depth_1-utm_source=distribute.pc_relevant.534984.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">CSDN开发者助手由CSDN官方开发，集成一键呼出搜索、万能快捷工具、个性化新标签页<em>和</em>官方免广告四大功能。帮助您提升10倍开发效率！</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://keafmd.blog.csdn.net/article/details/116591000"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendHotData~default-16.control\"}","dist_request_id":"1621077342815_41418","index":"16","strategy":"2~default~BlogCommendHotData~default","dest":"https://keafmd.blog.csdn.net/article/details/116591000"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://keafmd.blog.csdn.net/article/details/116591000" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendHotData~default-16.control\"}","dist_request_id":"1621077342815_41418","index":"16","strategy":"2~default~BlogCommendHotData~default","dest":"https://keafmd.blog.csdn.net/article/details/116591000"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendHotData%7Edefault-16.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendHotData%7Edefault-16.control'>
+					日常Java练习题（每天进步一点点系列）
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_43883917" target="_blank"><span class="blog-title">『愚』的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">05-10</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					7272
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://keafmd.blog.csdn.net/article/details/116591000" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendHotData~default-16.control\"}","dist_request_id":"1621077342815_41418","index":"16","strategy":"2~default~BlogCommendHotData~default","dest":"https://keafmd.blog.csdn.net/article/details/116591000"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendHotData%7Edefault-16.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendHotData%7Edefault-16.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">1、
+
+以上部分题解来自牛客评论区，感谢评论区大佬的解释。
+
+
+每天进步一点点！
+不进则退！
+
+看完如果对你有帮助，感谢点赞支持！
+如果你是电脑端，看到右下角的 &ldquo;一键三连&rdquo; 了吗，没错点它[哈哈]
+
+加油！
+共同努力！
+Keafmd
+
+...</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_course clearfix" data-url="https://edu.csdn.net/course/detail/29134"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-course-2~default~BlogCommendHotData~default-17.control\"}","dist_request_id":"1621077342815_41418","index":"17","strategy":"2~default~BlogCommendHotData~default","dest":"https://edu.csdn.net/course/detail/29134"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://edu.csdn.net/course/detail/29134" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-course-2~default~BlogCommendHotData~default-17.control\"}","dist_request_id":"1621077342815_41418","index":"17","strategy":"2~default~BlogCommendHotData~default","dest":"https://edu.csdn.net/course/detail/29134"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendHotData%7Edefault-17.control&depth_1-utm_source=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendHotData%7Edefault-17.control'>
+					高性能MySQL实战课
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info display-flex">
+					<span class="info-block">05-21</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://edu.csdn.net/course/detail/29134" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-course-2~default~BlogCommendHotData~default-17.control\"}","dist_request_id":"1621077342815_41418","index":"17","strategy":"2~default~BlogCommendHotData~default","dest":"https://edu.csdn.net/course/detail/29134"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendHotData%7Edefault-17.control&depth_1-utm_source=distribute.pc_relevant.none-task-course-2%7Edefault%7EBlogCommendHotData%7Edefault-17.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">&lt;p&gt;
+	&lt;span style=&quot;font-size:14px;color:#E53333;&quot;&gt;限时福利1：&lt;/span&gt;&lt;span style=&quot;font-size:14px;&quot;&gt;购课进答疑群专享柳峰（刘运强）老师答疑服务&lt;/span&gt;
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;br /&gt;
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;br /&gt;
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;span style=&quot;font-size:14px;color:#337FE5;&quot;&gt;&lt;strong&gt;为什么需要掌握高性能的MySQL实战？&lt;/strong&gt;&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;span&gt;&lt;span style=&quot;font-size:14px;&quot;&gt;&lt;br /&gt;
+&lt;/span&gt;&lt;/span&gt; &lt;span style=&quot;font-size:14px;&quot;&gt;由于互联网产品用户量大、高并发请求场景多，因此对MySQL的性能、可用性、扩展性都提出了很高的要求。使用MySQL解决大量数据以及高并发请求已经是程序员的必备技能，也是衡量一个程序员能力<em>和</em>薪资的标准之一。&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;br /&gt;
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;为了让大家快速系统了解高性能MySQL核心知识全貌，我为你<em>总结</em>了&lt;/span&gt;&lt;span style=&quot;font-size:14px;&quot;&gt;「高性能 MySQL 知识框架图」&lt;/span&gt;&lt;span style=&quot;font-size:14px;&quot;&gt;,帮你梳理学习重点，建议收藏！&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;br /&gt;
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;img alt=&quot;&quot; src=&quot;https://img-bss.csdnimg.cn/202006031401338860.png&quot; /&gt; 
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;br /&gt;
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;span style=&quot;font-size:14px;color:#337FE5;&quot;&gt;&lt;strong&gt;【课程设计】&lt;/strong&gt;&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;&lt;br /&gt;
+&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;课程分为四大篇章，将为你建立完整的 MySQL 知识体系，同时将重点讲解 MySQL 底层运行原理、数据库的性能调优、高并发、海量业务处理、面试解析等。&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;&lt;br /&gt;
+&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p style=&quot;text-align:justify;&quot;&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;&lt;strong&gt;一、性能优化篇：&lt;/strong&gt;&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p style=&quot;text-align:justify;&quot;&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;主要包括经典 MySQL 问题剖析、索引底层原理<em>和</em>事务与锁机制。通过深入理解 MySQL 的索引结构 B+Tree ，学员能够从根本上弄懂为什么有些 SQL 走索引、有些不走索引，从而彻底掌握索引的使用<em>和</em>优化技巧，能够避开很多实战中遇到的&ldquo;<em>坑</em>&rdquo;。&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p style=&quot;text-align:justify;&quot;&gt;
+	&lt;br /&gt;
+&lt;/p&gt;
+&lt;p style=&quot;text-align:justify;&quot;&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;&lt;strong&gt;二、MySQL 8.0新特性篇：&lt;/strong&gt;&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p style=&quot;text-align:justify;&quot;&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;主要包括窗口函数<em>和</em>通用表表达式。企业中的许多报表统计需求，如果不采用窗口函数，用普通的 SQL 语句是很难实现的。&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p style=&quot;text-align:justify;&quot;&gt;
+	&lt;br /&gt;
+&lt;/p&gt;
+&lt;p style=&quot;text-align:justify;&quot;&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;&lt;strong&gt;三、高性能架构篇：&lt;/strong&gt;&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p style=&quot;text-align:justify;&quot;&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;主要包括主从复制<em>和</em>读写分离。在企业的生产环境中，很少采用单台MySQL节点的情况，因为一旦单个节点发生故障，整个系统都不可用，后果往往不堪设想，因此掌握高可用架构的实现是非常有必要的。&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p style=&quot;text-align:justify;&quot;&gt;
+	&lt;br /&gt;
+&lt;/p&gt;
+&lt;p style=&quot;text-align:justify;&quot;&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;&lt;strong&gt;四、面试篇：&lt;/strong&gt;&lt;/span&gt; 
+&lt;/p&gt;
+&lt;p style=&quot;text-align:justify;&quot;&gt;
+	&lt;span style=&quot;font-size:14px;&quot;&gt;程序员获得工作的第一步，就是高效的准备面试，面试篇主要从知识点回顾<em>总结</em>的角度出发，结合程序员面试高频MySQL问题精讲精练，帮助程序员吊打面试官，获得心仪的工作机会。&lt;/span&gt; 
+&lt;/p&gt;</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_blog clearfix" data-url="https://blog.csdn.net/weixin_45851945/article/details/114287877"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendHotData~default-18.control\"}","dist_request_id":"1621077342815_41418","index":"18","strategy":"2~default~BlogCommendHotData~default","dest":"https://blog.csdn.net/weixin_45851945/article/details/114287877"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="https://blog.csdn.net/weixin_45851945/article/details/114287877" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendHotData~default-18.control\"}","dist_request_id":"1621077342815_41418","index":"18","strategy":"2~default~BlogCommendHotData~default","dest":"https://blog.csdn.net/weixin_45851945/article/details/114287877"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendHotData%7Edefault-18.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendHotData%7Edefault-18.control'>
+					MySQL 有这一篇就够（呕心狂敲37k字，只为博君一点赞！！！）
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info">
+					<a href="https://blog.csdn.net/weixin_45851945" target="_blank"><span class="blog-title">老赖的小弟的博客</span></a>
+				</div>
+				<div class="info display-flex">
+					<span class="info-block time">03-03</span>
+					<span class="info-block read"><img class="read-img" src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					4万+
+					</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="https://blog.csdn.net/weixin_45851945/article/details/114287877" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-2~default~BlogCommendHotData~default-18.control\"}","dist_request_id":"1621077342815_41418","index":"18","strategy":"2~default~BlogCommendHotData~default","dest":"https://blog.csdn.net/weixin_45851945/article/details/114287877"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendHotData%7Edefault-18.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-2%7Edefault%7EBlogCommendHotData%7Edefault-18.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">文章目录前言一、SQL简述1.SQL的概述2.SQL的优点3.SQL的分类二、数据库的三大范式三、数据库的数据类型1.整数类型2.浮点数类型<em>和</em>定点数类型九、MySQL数据表简单查询1.简单查询概述2.查询所有字段（方法不唯一只是举例）3.查询指定字段（sid、sname）4.常数的查询5.从查询结果中过滤重复数据6.算术运算符（举例加运算符）十、函数1.聚合函数1.1、count（）1.2、max（）1.3、min（）1.4、sum（）1.5、avg（）2.其他常用函数2.1、时间函数2.2、字符串函数2.</div>
+			</a>
+		</div>
+	</div>
+</div>
+<div class="recommend-item-box type_download clearfix" data-url="http://download.csdn.net/download/m0_52957036/13583244"  data-report-view='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-download-2~default~BlogCommendFromMachineLearnPai2~default-19.control\"}","dist_request_id":"1621077342815_41418","index":"19","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"http://download.csdn.net/download/m0_52957036/13583244"}'>
+	<div class="content-box">
+		<div class="content-blog display-flex">
+			<div class="title-box">
+				<a href="http://download.csdn.net/download/m0_52957036/13583244" class="tit ellipsis-online ellipsis-online-1" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-download-2~default~BlogCommendFromMachineLearnPai2~default-19.control\"}","dist_request_id":"1621077342815_41418","index":"19","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"http://download.csdn.net/download/m0_52957036/13583244"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-19.control&depth_1-utm_source=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-19.control'>
+					微信小程序开发图解案例教程第5章 微信小程序设计及问答.pptx
+				</a>
+			</div>
+			<div class="info-box display-flex">
+				<div class="info display-flex">
+					<span class="info-block">04-14</span>
+				</div>
+			</div>
+		</div>
+		<div class="desc-box">
+			<a href="http://download.csdn.net/download/m0_52957036/13583244" target="_blank"  data-report-click='{"ab":"new","mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-download-2~default~BlogCommendFromMachineLearnPai2~default-19.control\"}","dist_request_id":"1621077342815_41418","index":"19","strategy":"2~default~BlogCommendFromMachineLearnPai2~default","dest":"http://download.csdn.net/download/m0_52957036/13583244"}'  data-report-query='utm_medium=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-19.control&depth_1-utm_source=distribute.pc_relevant.none-task-download-2%7Edefault%7EBlogCommendFromMachineLearnPai2%7Edefault-19.control'>
+				<div class="desc ellipsis-online ellipsis-online-1">微信小程序开发图解案例教程第5章 微信小程序设计及问答.pptx</div>
+			</a>
+		</div>
+	</div>
+</div>
+            </div>
+            <div class="template-box">
+                <span>©️2020 CSDN</span>
+                <span>皮肤主题: 书香水墨</span>
+                <span> 设计师:CSDN官方博客</span>
+                <span>
+                    <a href="https://blog.csdn.net/" class="back-home c-blue c-blue-hover c-blue-focus">返回首页</a>
+                </span>
+            </div>
+<div class="blog-footer-bottom" style="margin-top:10px;"></div>
+<script src="https://g.csdnimg.cn/common/csdn-footer/csdn-footer.js" data-isfootertrack="false" type="text/javascript"></script>
+<script type="text/javascript">
+    window.csdn.csdnFooter.options = {
+        el: '.blog-footer-bottom',
+        type: 2
+    }
+</script>        </main>
+<aside class="blog_container_aside">
+	<div id="asideProfile" class="aside-box">
+    <div class="profile-intro d-flex">
+        <div class="avatar-box d-flex justify-content-center flex-column">
+            <a href="https://blog.csdn.net/weixin_43975771" data-report-click='{"mod":"popu_379","spm":"1001.2101.3001.4121","dest":"https://blog.csdn.net/weixin_43975771","ab":"new"}'>
+                <img src="https://profile.csdnimg.cn/8/5/7/3_weixin_43975771" class="avatar_pic">
+            </a>
+        </div>
+        <div class="user-info d-flex flex-column profile-intro-name-box">
+            <div class="profile-intro-name-boxTop">
+                <a href="https://blog.csdn.net/weixin_43975771" class="" id="uid" title="不积跬步，无以致千里" data-report-click='{"mod":"popu_379","spm":"1001.2101.3001.4122","dest":"https://blog.csdn.net/weixin_43975771","ab":"new"}'>
+                    <span class="name " username="weixin_43975771">不积跬步，无以致千里</span>
+                </a>
+                <span>
+                </span>
+                <span class="flag expert-blog">
+                <span class="bubble">CSDN认证博客专家</span>
+                </span>
+                <span class="flag company-blog">
+                <span class="bubble">CSDN认证企业博客</span>
+                </span>
+            </div>
+            <div class="profile-intro-name-boxFooter">
+                <span class="personal-home-page personal-home-years">码龄2年</span>
+                    <span class="personal-home-page">
+                    <a class="personal-home-certification" href="https://i.csdn.net/#/uc/profile?utm_source=14998968" target="_blank" title="暂无认证">
+                    <img src="https://csdnimg.cn/identity/nocErtification.png" alt="">
+                    暂无认证
+                    </a>
+                    </span>
+            </div>
+        </div>
+    </div>
+    <div class="data-info d-flex item-tiling">
+        <dl class="text-center" title="90">
+            <a href="https://blog.csdn.net/weixin_43975771" data-report-click='{"mod":"1598321000_001","spm":"1001.2101.3001.4310"}' data-report-query="t=1">  
+                <dt><span class="count">90</span></dt>
+                <dd class="font">原创</dd>
+            </a>
+        </dl>
+        <dl class="text-center" data-report-click='{"mod":"1598321000_002","spm":"1001.2101.3001.4311"}' title="3062">
+            <a href="https://blog.csdn.net/rank/list/weekly" target="_blank">
+                <dt><span class="count">3062</span></dt>
+                <dd class="font">周排名</dd>
+            </a>
+        </dl>
+        <dl class="text-center" title="114248">
+            <a href="https://blog.csdn.net/rank/list/total" data-report-click='{"mod":"1598321000_003","spm":"1001.2101.3001.4312"}' target="_blank">
+                <dt><span class="count">11万+</span></dt>
+                <dd class="font">总排名</dd>
+            </a>
+        </dl>
+        <dl class="text-center" style="min-width:58px" title="15728">  
+            <dt><span class="count">1万+</span></dt>
+            <dd>访问</dd>
+        </dl>
+        <dl class="text-center" title="4级,点击查看等级说明">
+            <dt><a href="https://blog.csdn.net/blogdevteam/article/details/103478461" target="_blank">
+                <img class="level" src="https://csdnimg.cn/identity/blog4.png">
+            </a>
+            </dt>
+            <dd>等级</dd>
+        </dl>
+    </div>
+    <div class="item-rank"></div>
+    <div class="data-info d-flex item-tiling">
+        <dl class="text-center" title="1028">
+            <dt><span class="count">1028</span></dt>
+            <dd>积分</dd>
+        </dl>
+         <dl class="text-center" id="fanBox" title="15">
+            <dt><span class="count" id="fan">15</span></dt>
+            <dd>粉丝</dd>
+        </dl>
+        <dl class="text-center" title="14">
+            <dt><span class="count">14</span></dt>
+            <dd>获赞</dd>
+        </dl>
+        <dl class="text-center" title="25">
+            <dt><span class="count">25</span></dt>
+            <dd>评论</dd>
+        </dl>
+        <dl class="text-center" title="34">
+            <dt><span class="count">34</span></dt>
+            <dd>收藏</dd>
+        </dl>
+    </div>
+    <div class="aside-box-footer" data-report-view='{"spm":"3001.4296"}'>
+        <div class="badge-box d-flex">
+            <div class="badge d-flex">
+                <div class="icon-badge" title="新人勋章">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/blinknewcomer@240.png" alt="新人勋章">
+                    </div>
+                </div>
+                <div class="icon-badge" title="签到新秀">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/qiandao10@240.png" alt="签到新秀">
+                    </div>
+                </div>
+                <div class="icon-badge" title="阅读者勋章Lv3">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/yuedu30@240.png" alt="阅读者勋章Lv3">
+                    </div>
+                </div>
+                <div class="icon-badge" title="持之以恒">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/chizhiyiheng@240.png" alt="持之以恒">
+                    </div>
+                </div>
+                <div class="icon-badge" title="1024勋章">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/1024@240.png" alt="1024勋章">
+                    </div>
+                </div>
+                <div class="icon-badge" title="勤写标兵Lv3">
+                    <div class="mouse-box">
+                        <img class="medal-img" data-report-click='{"spm":"3001.4296"}' src="https://csdnimg.cn/medal/qixiebiaobing3@240.png" alt="勤写标兵Lv3">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="profile-intro-name-boxOpration">
+        <div class="opt-letter-watch-box">
+        <a class="bt-button personal-letter" href="https://im.csdn.net/chat/weixin_43975771" target="_blank" rel="noopener">私信</a>
+        </div>
+        <div class="opt-letter-watch-box"> 
+            <a class="personal-watch bt-button" id="btnAttent" >关注</a>  
+        </div>
+    </div>
+</div>
+<div id="asideSearchArticle" class="aside-box">
+	<div class="aside-content search-comter">
+    <div class="aside-search aside-search-blog">         
+        <input type="text" class="input-serch-blog" name="" autocomplete="off" value="" id="search-blog-words" placeholder="搜博主文章">
+        <a class="btn-search-blog">
+                    <img src="//csdnimg.cn/cdn/content-toolbar/csdn-sou.png?v=1587021042">
+        </a>
+    </div>
+    </div>
+</div>
+
+
+<div id="asideHotArticle" class="aside-box">
+	<h3 class="aside-title">热门文章</h3>
+	<div class="aside-content">
+		<ul class="hotArticle-list">
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/97630828" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/97630828","ab":"new"}'>
+				tps 、qps、bps、Bps的含义
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">4311</span>
+                </a>
+			</li>
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/113099180" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/113099180","ab":"new"}'>
+				线程池的核心线程数 设置大小与cpu 的关系
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">963</span>
+                </a>
+			</li>
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/105028750" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/105028750","ab":"new"}'>
+				时空时序数据库 TSDB的用法
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">688</span>
+                </a>
+			</li>
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/103306930" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/103306930","ab":"new"}'>
+				索引什么情况下会失效及注意事项
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">597</span>
+                </a>
+			</li>
+			<li>
+				<a href="https://blog.csdn.net/weixin_43975771/article/details/106744836" target="_blank"  data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/weixin_43975771/article/details/106744836","ab":"new"}'>
+				GDB图形数据库/Tinkerpop gremlin使用总结
+					<img src="https://csdnimg.cn/release/blogv2/dist/pc/img/readCountWhite.png" alt="">
+					<span class="read">471</span>
+                </a>
+			</li>
+		</ul>
+	</div>
+</div>
+<div id="asideCategory" class="aside-box flexible-box">
+    <h3 class="aside-title">分类专栏</h3>
+    <div class="aside-content">
+        <ul>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9971643.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9971643.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20190918135101160.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">数据库</span>
+                    </span>
+                    <span class="count float-right">11篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10505512.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10505512.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756919.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">架构</span>
+                    </span>
+                    <span class="count float-right">1篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10570875.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10570875.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756780.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">scala</span>
+                    </span>
+                    <span class="count float-right">3篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10303159.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10303159.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756724.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">多线程 高并发</span>
+                    </span>
+                    <span class="count float-right">8篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10775654.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10775654.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756913.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">常用开发框架</span>
+                    </span>
+                    <span class="count float-right">3篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10281951.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10281951.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756927.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">中间件</span>
+                    </span>
+                    <span class="count float-right">3篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10734857.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10734857.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756754.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">spring循环依赖</span>
+                    </span>
+                    <span class="count float-right">2篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9807877.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9807877.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756754.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">Python</span>
+                    </span>
+                    <span class="count float-right">2篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9594245.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9594245.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756925.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">springcould 开发</span>
+                    </span>
+                    <span class="count float-right">1篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9098425.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9098425.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756925.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">大数据开发</span>
+                    </span>
+                    <span class="count float-right">17篇</span>
+                </a>
+            </li>
+            <li class="">
+                <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9079738.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9079738.html","ab":"new"}'>
+                    <img src="https://img-blog.csdnimg.cn/20201014180756738.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                    <span class="title oneline">
+                        <span class="text">java开发日常总结</span>
+                    </span>
+                    <span class="count float-right">39篇</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <p class="text-center">
+        <a class="flexible-btn" data-fbox="aside-archive"><img class="look-more" src="https://csdnimg.cn/release/blogv2/dist/pc/img/arrowDownWhite.png" alt=""></a>
+    </p>
+</div>
+<div id="asideNewComments" class="aside-box">
+    <h3 class="aside-title">最新评论</h3>
+    <div class="aside-content">
+        <ul class="newcomment-list">
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/116308584#comments_16437215" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116308584#comments_16437215","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116308584#comments_16437215","ab":"new"}'>kafka单机版环境搭建</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/weixin_39032019" class="user-name" target="_blank">明月十四桥: </a>
+                    <span class="code-comments">非常有用，感谢大佬的整理，期待后续大作</span>
+                </p>
+            </li>
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/115705948#comments_16397376" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/115705948#comments_16397376","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/115705948#comments_16397376","ab":"new"}'>mybatis查询一张表的部分字段，没有指定的字段返回为null的场景</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/yuerliang" class="user-name" target="_blank">A-Liang: </a>
+                    <span class="code-comments">初学后端小白，能看懂，引出另外一个问题，值为null的字段不返回。
+[code=plain]
+[
+		{
+			&quot;recrumentDate&quot;: &quot;2020-05-12T22:30:00.000+00:00&quot;,
+			&quot;memId&quot;: 5
+		},
+		{
+			&quot;recrumentDate&quot;: &quot;2020-05-12T22:30:00.000+00:00&quot;,
+			&quot;mobile&quot;: &quot;12367890909&quot;,
+			&quot;name&quot;: &quot;赵四&quot;,
+			&quot;memId&quot;: 6
+		}
+]
+
+[/code]</span>
+                </p>
+            </li>
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/116496928#comments_16321375" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116496928#comments_16321375","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116496928#comments_16321375","ab":"new"}'>flink sql 使用</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/kimol_justdo" class="user-name" target="_blank">不正经的kimol君: </a>
+                    <span class="code-comments">快进我的收藏夹</span>
+                </p>
+            </li>
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/114383227#comments_16318728" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/114383227#comments_16318728","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/114383227#comments_16318728","ab":"new"}'>SQL规约的意义</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/weixin_39032019" class="user-name" target="_blank">明月十四桥: </a>
+                    <span class="code-comments">非常有用，感谢大佬的整理，期待后续大作</span>
+                </p>
+            </li>
+            <li>
+                <a class="title text-truncate" target="_blank" href="https://blog.csdn.net/weixin_43975771/article/details/116532790#comments_16316194" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116532790#comments_16316194","ab":"new"}' data-report-view='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/weixin_43975771/article/details/116532790#comments_16316194","ab":"new"}'>clickhouse的mysql引擎的实现</a>
+                <p class="comment ellipsis">
+                    <a href="https://blog.csdn.net/weixin_43975771" class="user-name" target="_blank">不积跬步，无以致千里: </a>
+                    <span class="code-comments">一起加油,拥抱开源<img src="https://g.csdnimg.cn/static/face/emoji/012.png" alt='表情包' ><img src="https://g.csdnimg.cn/static/face/emoji/012.png" alt='表情包' ></span>
+                </p>
+            </li>
+        </ul>
+    </div>
+</div>
+<div id="asideArchive" class="aside-box" style="display:block!important; width:300px;">
+    <h3 class="aside-title">最新文章</h3>
+    <div class="aside-content">
+        <ul class="inf_list clearfix">
+            <li class="clearfix">
+            <a href="https://blog.csdn.net/weixin_43975771/article/details/116532790" target="_blank" data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/weixin_43975771/article/details/116532790","ab":"new"}' data-report-view='{"mod":"popu_382","dest":"https://blog.csdn.net/weixin_43975771/article/details/116532790","ab":"new"}'>clickhouse的mysql引擎的实现</a>
+            </li>
+            <li class="clearfix">
+            <a href="https://blog.csdn.net/weixin_43975771/article/details/116496928" target="_blank" data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/weixin_43975771/article/details/116496928","ab":"new"}' data-report-view='{"mod":"popu_382","dest":"https://blog.csdn.net/weixin_43975771/article/details/116496928","ab":"new"}'>flink sql 使用</a>
+            </li>
+            <li class="clearfix">
+            <a href="https://blog.csdn.net/weixin_43975771/article/details/116461469" target="_blank" data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/weixin_43975771/article/details/116461469","ab":"new"}' data-report-view='{"mod":"popu_382","dest":"https://blog.csdn.net/weixin_43975771/article/details/116461469","ab":"new"}'>kafka生产者和消费者测试指令</a>
+            </li>
+        </ul>
+        <div class="archive-bar"></div>
+        <div class="archive-box">
+                <div class="archive-title">2021</div> 
+                <div class="archive-content">
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/05" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/05"}'>
+                        <span class="time">05月</span>
+                        <span class="count">3篇</span>
+                        </a>
+                    </div>
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/04" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/04"}'>
+                        <span class="time">04月</span>
+                        <span class="count">12篇</span>
+                        </a>
+                    </div>
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/03" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/03"}'>
+                        <span class="time">03月</span>
+                        <span class="count">9篇</span>
+                        </a>
+                    </div>
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/02" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/02"}'>
+                        <span class="time">02月</span>
+                        <span class="count">5篇</span>
+                        </a>
+                    </div>
+                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/weixin_43975771/article/month/2021/01" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/weixin_43975771/article/month/2021/01"}'>
+                        <span class="time">01月</span>
+                        <span class="count">12篇</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="archive-list-item"><a href="https://blog.csdn.net/weixin_43975771/article/month/2020/12" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":""}'><span class="year">2020年</span><span class="num">34篇</span></a></div>
+                <div class="archive-list-item"><a href="https://blog.csdn.net/weixin_43975771/article/month/2019/12" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":""}'><span class="year">2019年</span><span class="num">16篇</span></a></div>
+        </div>
+    </div>
+</div>
+	<div id="footerRightAds" class="isShowFooterAds">
+		<div class="aside-box">
+			<div id="kp_box_57" data-pid="57"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- PC-博客详情页-左下视窗（300*600） -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-1076724771190722"
+     data-ad-slot="1173711872"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script><img class="pre-img-lasy" data-src="https://kunyu.csdn.net/1.png?p=57&a=2488&c=0&k=&spm=1001.2101.3001.5001&d=1&t=3&u=c9385a7eaa5647d185d15634e5e32484" style="display: block;width: 0px;height: 0px;"></div>
+		</div>
+	</div>
+    <!-- 详情页显示目录 -->
+<!--文章目录-->
+<div id="asidedirectory" class="aside-box">
+    <div class='groupfile' id="directory">
+        <h3 class="aside-title">目录</h3>
+        <div class="align-items-stretch group_item">
+            <div class="pos-box">
+            <div class="scroll-box">
+                <div class="toc-box"></div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+</aside>
+<script>
+	$("a.flexible-btn").click(function(){
+		$(this).parents('div.aside-box').removeClass('flexible-box');
+		$(this).parents("p.text-center").remove();
+	})
+</script>
+<script type="text/javascript"  src="https://g.csdnimg.cn/user-tooltip/2.4/user-tooltip.js"></script>
+<script type="text/javascript"  src="https://g.csdnimg.cn/user-medal/1.0.6/user-medal.js"></script>    </div>
+<div class="recommend-right  align-items-stretch clearfix" id="rightAside" data-type="recommend">
+    <aside class="recommend-right_aside">
+        <div id="recommend-right" >
+                        <div class='flex-column aside-box groupfile' id="groupfile">
+                <div class="groupfile-div">
+                <h3 class="aside-title">目录</h3>
+                <div class="align-items-stretch group_item">
+                    <div class="pos-box">
+                        <div class="scroll-box">
+                            <div class="toc-box"></div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+                <div id="recommendAdBox">
+                    <div id="kp_box_479" data-pid="479"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- PC-博客详情页-右侧视窗300*600 -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-1076724771190722"
+     data-ad-slot="8441704093"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script><img class="pre-img-lasy" data-src="https://kunyu.csdn.net/1.png?p=479&a=2487&c=0&k=&spm=1001.2101.3001.4834&d=1&t=3&u=d75bfcf5b2f54d6c829143021790b4c0" style="display: block;width: 0px;height: 0px;"></div>
+                </div>
+            <div class='aside-box kind_person d-flex flex-column'>
+                    <h3 class="aside-title">分类专栏</h3>
+                    <div class="align-items-stretch kindof_item" id="kind_person_column">
+                        <div class="aside-content">
+                            <ul>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9971643.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9971643.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20190918135101160.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">数据库</span>
+                                        </span>
+                                        <span class="count float-right">11篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10505512.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10505512.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756919.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">架构</span>
+                                        </span>
+                                        <span class="count float-right">1篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10570875.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10570875.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756780.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">scala</span>
+                                        </span>
+                                        <span class="count float-right">3篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10303159.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10303159.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756724.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">多线程 高并发</span>
+                                        </span>
+                                        <span class="count float-right">8篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10775654.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10775654.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756913.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">常用开发框架</span>
+                                        </span>
+                                        <span class="count float-right">3篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10281951.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10281951.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756927.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">中间件</span>
+                                        </span>
+                                        <span class="count float-right">3篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_10734857.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_10734857.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756754.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">spring循环依赖</span>
+                                        </span>
+                                        <span class="count float-right">2篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9807877.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9807877.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756754.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">Python</span>
+                                        </span>
+                                        <span class="count float-right">2篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9594245.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9594245.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756925.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">springcould 开发</span>
+                                        </span>
+                                        <span class="count float-right">1篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9098425.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9098425.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756925.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">大数据开发</span>
+                                        </span>
+                                        <span class="count float-right">17篇</span>
+                                    </a>
+                                </li>
+                                <li class="">
+                                    <a class="clearfix" target="_blank" href="https://blog.csdn.net/weixin_43975771/category_9079738.html" data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"pc付费专栏左侧入口","dest":"https://blog.csdn.net/weixin_43975771/category_9079738.html","ab":"new"}'>
+                                        <img src="https://img-blog.csdnimg.cn/20201014180756738.png?x-oss-process=image/resize,m_fixed,h_64,w_64" alt="" onerror="this.src='https://img-blog.csdnimg.cn/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'">
+                                        <span class="title oneline">
+                                            <span class="text">java开发日常总结</span>
+                                        </span>
+                                        <span class="count float-right">39篇</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </aside>
+</div>
+
+</div>
+<div class="mask-dark"></div>
+<script type="text/javascript">
+    var timert = setInterval(function(){
+      sideToolbar = $(".csdn-side-toolbar");
+      if (sideToolbar.length > 0) {
+        sideToolbar.css('cssText','bottom:64px !important;')
+        clearInterval(timert);
+      }
+    }, 200);
+</script>
+<script>
+    var articleId = 115975918;
+    var commentscount = 2;
+    var curentUrl = "https://blog.csdn.net/weixin_43975771/article/details/115975918";
+    var myUrl = "https://my.csdn.net/";
+    var highlight = ["flink","flink","环境搭建","flink","本地","版","环境搭建","和","踩","坑","总结"];//高亮数组
+    var isRecommendModule = true;
+    var isBaiduPre = true;
+    var baiduCount = 2;
+    var share_card_url = "https://blog.csdn.net/weixin_43975771/article/shareArticleCardPage?article_id=115975918"
+	var articleType = 1;
+    var baiduKey = "flink本地版环境搭建和踩坑总结";
+    var userNewReport = false;
+    var needInsertBaidu = true;
+    var recommendRegularDomainArr = ["blog.csdn.net/.+/article/details/","download.csdn.net/download/","edu.csdn.net/course/detail/","ask.csdn.net/questions/","bbs.csdn.net/topics/","www.csdn.net/gather_.+/"]
+    var codeStyle = "";
+    var baiduSearchType = "title";
+    var canRead = true;
+    var blogMoveHomeArticle = false;
+    var showPcWindowAd = false;
+    var showSearchText = "";
+    var linkPage = true;
+    var articleSource = 1;
+    var articleReport = '{"pid": "blog", "spm":"1001.2101"}';
+    var isShowToQuestion = false;
+</script>
+<script src="https://csdnimg.cn/public/sandalstrap/1.4/js/sandalstrap.min.js"></script>
+<div class="skin-boxshadow"></div>
+<div style="display:none;">
+	<img src="" onerror='setTimeout(function(){if(!/(csdn.net|iteye.com|baiducontent.com|googleusercontent.com|360webcache.com|sogoucdn.com|bingj.com|baidu.com)$/.test(window.location.hostname)){window.location.href="\x68\x74\x74\x70\x73\x3a\x2f\x2f\x77\x77\x77\x2e\x63\x73\x64\x6e\x2e\x6e\x65\x74"}},3000);'>
+</div>
+</body>
+<script src="https://csdnimg.cn/release/blogv2/dist/components/js/pc_wap_highlight-db1e81323a.min.js" type="text/javascript"></script>
+<script src="https://csdnimg.cn/release/blogv2/dist/components/js/pc_wap_common-906586e915.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/codesnippet/lib/highlight/styles/atom-one-light.css">
+<script>
+ // 全局声明
+ if (window.csdn === undefined) {
+      window.csdn = {};
+    }
+    window.csdn.sideToolbar = {
+        options: {
+            report:{
+                isShow: true,
+            },
+            qr: {
+                isShow: false,
+            },
+            guide: {
+                isShow: true
+            }
+        }
+    }
+    $(function(){
+        $(document).on('click',"a.option-box[data-type='report']",function() {
+            window.csdn.userLogin.loadAjax(function(res){
+                if(userNewReport){
+                    showReportNew(false,articleTitles);
+                }else{
+                    showReport(false,articleTitles);
+                }
+            })
+        });
+    })
+</script>
+    <script src="https://g.csdnimg.cn/baidu-search/1.0.9/baidu-search.js"  type="text/javascript"></script>
+<script src="https://csdnimg.cn/release/download/old_static/js/qrcode.js"></script>
+<script src="https://csdnimg.cn/release/blogv2/dist/pc/js/common-d56939e7f0.min.js" type="text/javascript"></script>
+<script src="https://csdnimg.cn/release/blogv2/dist/pc/js/detail-a3145084a7.min.js" type="text/javascript"></script>
+<script src="https://g.csdnimg.cn/user-ordercart/1.0.6/user-ordercart.js" type="text/javascript"></script>
+<script src="https://csdnimg.cn/release/blogv2/dist/pc/js/column-78261cfea6.min.js" type="text/javascript"></script>
+<script src="https://g.csdnimg.cn/side-toolbar/3.0/side-toolbar.js" type="text/javascript"></script>
+<script src="https://g.csdnimg.cn/common/shop-window-v2/shop-window.js" type="text/javascript"></script>
+<script>
+    var shopUserName = username;
+    ;$(function(){
+        window.csdn.shop.show({
+            userName: shopUserName,
+            topEl: $("#csdn-shop-window-top"),
+            bottomEl: $("#csdn-shop-window"),
+            callBack: function(res){
+                if(!res.top){
+                    $("#blogColumnPayAdvert").css({"display":"block"})
+                    $("#csdn-shop-window-top").css({"display":"none"})
+                }
+            }
+        })
+    })
+</script>
+<script src="https://g.csdnimg.cn/copyright/1.0.3/copyright.js" type="text/javascript"></script>
+<script>
+    $(".MathJax").remove();
+    if ($('div.markdown_views pre.prettyprint code.hljs').length > 0) {
+        $('div.markdown_views')[0].className = 'markdown_views';
+    }
+</script>
+<script type="text/javascript" src="https://csdnimg.cn/release/blog_mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+            "HTML-CSS": {
+                    linebreaks: { automatic: true, width: "94%container" },
+                    imageFont: null
+            },
+            tex2jax: {
+                preview: "none",
+                ignoreClass:"title-article"
+            },
+            mml2jax: {
+                preview: 'none'
+            }
+    });
+</script>
+<script type="text/javascript" crossorigin src="https://g.csdnimg.cn/user-login/3.0.0/user-login.js"></script>
+<script type="text/javascript" crossorigin src="https://g.csdnimg.cn/login-box/1.1.4/login-box.js"></script></html>

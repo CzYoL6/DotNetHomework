@@ -1,0 +1,485 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="看这篇文章之前，保证看过以下文章： 我是虚拟机内核我困惑？！ Qemu，KVM，Virsh傻傻的分不清 裸用KVM创建虚拟机，体验virtualbox为你做的10件事情 大家从OpenStack页面上" />
+    <meta property="og:description" content="看这篇文章之前，保证看过以下文章： 我是虚拟机内核我困惑？！ Qemu，KVM，Virsh傻傻的分不清 裸用KVM创建虚拟机，体验virtualbox为你做的10件事情 大家从OpenStack页面上" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>用OpenStack界面轻松创建虚拟机的你，看得懂虚拟机启动的这24个参数么？ - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2018-03-08 03:29';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class = "postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/8528758.html">
+    <span>用OpenStack界面轻松创建虚拟机的你，看得懂虚拟机启动的这24个参数么？</span>
+    
+
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<div id="js_content" class="rich_media_content ">
+<p>看这篇文章之前，保证看过以下文章：</p>
+<p><a href="http://mp.weixin.qq.com/s?__biz=MzI1NzYzODk4OQ==&amp;mid=2247483820&amp;idx=1&amp;sn=8a44b992491aea03e55eefb4815a1958&amp;chksm=ea15168edd629f98e622dcb94e64fbb4a75055da98d620e7c83071b5d6d428904fa5c8e9c4ad&amp;scene=21#wechat_redirect" target="_blank">我是虚拟机内核我困惑？！</a></p>
+<p><a href="http://mp.weixin.qq.com/s?__biz=MzI1NzYzODk4OQ==&amp;mid=2247483831&amp;idx=1&amp;sn=650c5965dcc837308652a7a6bb328754&amp;chksm=ea151695dd629f830a90a221e85c27197b775e38091934395289183701336ba363d77e2fd2ad&amp;scene=21#wechat_redirect" target="_blank">Qemu，KVM，Virsh傻傻的分不清</a></p>
+<p><a href="http://mp.weixin.qq.com/s?__biz=MzI1NzYzODk4OQ==&amp;mid=2247483858&amp;idx=1&amp;sn=74406c9f1369ba028f4cae6bf59cee78&amp;chksm=ea1516f0dd629fe6701815ec55bfe6f5e9717b23b7597edd4fd6da0379e4538404da11601fd1&amp;scene=21#wechat_redirect" target="_blank">裸用KVM创建虚拟机，体验virtualbox为你做的10件事情</a></p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>大家从OpenStack页面上，轻松一点就创建了一个虚拟机，但是当你登陆到一台物理机上ps查看的时候，却发现参数复杂之极。</p>
+<p>&nbsp;</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">qemu-system-x86_64</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-enable-kvm</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-name instance-00000024</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-machine pc-i440fx-trusty,accel=kvm,usb=off</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-cpu SandyBridge,+erms,+smep,+fsgsbase,+pdpe1gb,+rdrand,+f16c,+osxsave,+dca,+pcid,+pdcm,+xtpr,+tm2,+est,+smx,+vmx,+ds_cpl,+monitor,+dtes64,+pbe,+tm,+ht,+ss,+acpi,+ds,+vme</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-m 2048 -realtime mlock=off</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-smp 1,sockets=1,cores=1,threads=1</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-uuid 1f8e6f7e-5a70-4780-89c1-464dc0e7f308</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-smbios type=1,manufacturer=OpenStack Foundation,product=OpenStack Nova,version=2014.1,serial=80590690-87d2-e311-b1b0-a0481cabdfb4,uuid=1f8e6f7e-5a70-4780-89c1-464dc0e7f308</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-no-user-config</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-nodefaults</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-chardev socket,id=charmonitor,path=/var/lib/libvirt/qemu/instance-00000024.monitor,server,nowait</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-mon chardev=charmonitor,id=monitor,mode=control</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-rtc base=utc,driftfix=slew</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-global kvm-pit.lost_tick_policy=discard</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-no-hpet</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-no-shutdown</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-boot strict=on</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-device piix3-usb-uhci,id=usb,bus=pci.0,addr=0x1.0x2</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-drive file=/var/lib/nova/instances/1f8e6f7e-5a70-4780-89c1-464dc0e7f308/disk,if=none,id=drive-virtio-disk0,format=qcow2,cache=none</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x4,drive=drive-virtio-disk0,id=virtio-disk0,bootindex=1</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-netdev tap,fd=32,id=hostnet0,vhost=on,vhostfd=37</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-device virtio-net-pci,netdev=hostnet0,id=net0,mac=fa:16:3e:d1:2d:99,bus=pci.0,addr=0x3</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-chardev file,id=charserial0,path=/var/lib/nova/instances/1f8e6f7e-5a70-4780-89c1-464dc0e7f308/console.log</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-device isa-serial,chardev=charserial0,id=serial0</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-chardev pty,id=charserial1</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-device isa-serial,chardev=charserial1,id=serial1</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-device usb-tablet,id=input0</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-vnc 0.0.0.0:12</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-k en-us</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-device cirrus-vga,id=video0,bus=pci.0,addr=0x2</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">-device virtio-balloon-pci,id=balloon0,bus=pci.0,addr=0x5</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数一：-enable-kvm</strong></span></p>
+<p>启用硬件辅助虚拟化</p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 20px">参数二：-name instance-00000024</span></strong></p>
+<p>虚拟机的名称</p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 20px">参数三：-machine pc-i440fx-trusty,accel=kvm,usb=off&nbsp;</span></strong></p>
+<p>machine是什么呢，其实是计算机体系结构</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180308135354309-302045673.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>还记得大学学的这门课么？</p>
+<p>&nbsp;</p>
+<p>QEMU会模拟多种体系结构，常用的有：</p>
+<ul class="list-paddingleft-2" style="list-style-type: disc">
+<li>
+<p>普通PC机，也即x86的32位或者64位的体系结构</p>
+</li>
+<li>
+<p>MAC电脑PowerPC的体系结构</p>
+</li>
+<li>
+<p>Sun的体系结构</p>
+</li>
+<li>
+<p>MIPS的体系结构，精简指令集的</p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">如果使用KVM hardware-assisted virtualization，也即BIOS中VD-T是打开的，则参数中accel=kvm</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">如果不使用hardware-assisted virtualization，用的是纯模拟，则有参数accel = tcg，-no-kvm</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数四：-cpu SandyBridge,+erms,+smep,+fsgsbase,+pdpe1gb,+rdrand,+f16c,+osxsave,+dca,+pcid,+pdcm,+xtpr,+tm2,+est,+smx,+vmx,+ds_cpl,+monitor,+dtes64,+pbe,+tm,+ht,+ss,+acpi,+ds,+vme</strong></span></p>
+<p>&nbsp;</p>
+<p>设置CPU，SandyBridge是Intel处理器，后面的加号都是添加的CPU的参数，这些参数会显示在/proc/cpuinfo里面</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数五：-m 2048</strong></span></p>
+<p>这是内存</p>
+<p>&nbsp;</p>
+<p>guest真正运行态的占用的内存的大小，是用MemoryBallooning来调整-device virtio-balloon-pci,id=balloon0,bus=pci.0,addr=0x5</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数六：-smp 1,sockets=1,cores=1,threads=1</strong></span></p>
+<p>&nbsp;</p>
+<p>SMP是什么呢？全称Symmetrical Multi-Processing，名为对称多处理器</p>
+<p>&nbsp;</p>
+<p>指在一个计算机上汇集了一组处理器(多CPU)，多个CPU之间通过系统总线共享内存。</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180308135419166-561256204.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>但是这种方式也有缺点，就是所有的CPU访问内存都需要经过总线，所以总线就会成为瓶颈，导致CPU访问内存的速度变慢。</p>
+<p>&nbsp;</p>
+<p>为了解决这个问题，后来有了NUMA结构，全称为Non Uniform Memory Access Architecture</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180308135431343-1932680744.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>在NUMA结构下，每个CPU有直连的本地内存，访问本地的内存非常快，而且不用过系统总线，如果写程序的时候，能够保证每个CPU指令尽量访问本地的内存，可以大大提高性能。通过命令numactl可以查看NUMA架构。</p>
+<p>&nbsp;</p>
+<p>我们的参数中有-smp1,sockets=1,cores=1,threads=1</p>
+<p>&nbsp;</p>
+<p>qemu仿真了一个具有1个vcpu，一个socket，一个core，一个threads的处理器。</p>
+<p>&nbsp;</p>
+<p>socket,core, threads是什么概念呢。socket就是主板上插cpu的槽的数目，也即常说的“路”，core就是我们平时说的“核”，即双核，4核等，thread就是每个core的硬件线程数，即超线程。</p>
+<p>&nbsp;</p>
+<p>具体例子，某个服务器是：2路4核超线程(一般默认为2个线程)，通过cat /proc/cpuinfo看到的是2*4*2=16个processor，很多人也习惯成为16核了</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数七：-uuid 1f8e6f7e-5a70-4780-89c1-464dc0e7f308</strong></span></p>
+<p>&nbsp;</p>
+<p>给每个虚拟机设置一个UUID</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数八：</strong><strong style="font-size: 20px">-smbios type=1,manufacturer=OpenStack Foundation,product=OpenStack Nova,version=2014.1,serial=80590690-87d2-e311-b1b0-a0481cabdfb4,uuid=1f8e6f7e-5a70-4780-89c1-464dc0e7f308&nbsp;</strong></span></p>
+<p>&nbsp;</p>
+<p>SM BIOS全称System Management BIOS，用于表示x86体系结构的硬件信息。</p>
+<p>&nbsp;</p>
+<p>在unix系统上，可以使用命令dmidecode得到，SMBIOS的信息被分为多个table中，称为type。</p>
+<p>&nbsp;</p>
+<p>type0是BIOS信息</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180308152746919-628964066.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">type 1是系统信息</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180308152810026-287146284.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">type 2是主板信息</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180308152836551-1881646415.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>这个参数设置了type 1的信息</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数九：-chardev socket,id=charmonitor,path=/var/lib/libvirt/qemu/instance-00000024.monitor,server,nowait&nbsp;</strong></span></p>
+<p><span style="font-size: 20px"><strong>参数十：-mon chardev=charmonitor,id=monitor,mode=control</strong></span></p>
+<p>&nbsp;</p>
+<p>这两个参数是一对，都是指定qemu的monitor接口到一个文件的。</p>
+<p>&nbsp;</p>
+<p>用qemu启动的虚拟机本来就是带monitor的，本来通过monitor就是可以管理虚拟机的。</p>
+<p>&nbsp;</p>
+<p>访问qemu monitor console有两种方式：</p>
+<ul class="list-paddingleft-2" style="list-style-type: disc">
+<li>
+<p>用VNC连接到虚拟机, Ctrl+Alt+2进入，Ctrl+Alt+1返回普通console</p>
+</li>
+<li>
+<p>在 QEMU 启动的时候指定-monitor参数。比如-monitor stdio将允许使用标准输入作为monitor命令源</p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<p style="margin-top: 0; margin-bottom: 0; margin-left: 0; direction: ltr; unicode-bidi: embed; word-break: normal">qemu-system-x86_64 -enable-kvm-name ubuntutest&nbsp; -m 2048 -hda ubuntutest.qcow2 -vnc :19 -net nic,model=virtio -nettap,ifname=tap0,script=no,downscript=no -monitor stdio</p>
+<p>&nbsp;</p>
+<p>可以在monitor里面查看Block设备: 看到Image文件</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180308152859766-2043700430.png" alt=""></p>
+<p>查看Network</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180308152907763-1460928064.png" alt=""></p>
+<p>&nbsp;</p>
+<p>在这个命令中将monitor映射到一个文件，就是为了将来virsh console连接这个虚拟机的时候，可以从bash里面输入命令，输入的命令通过这个文件传入monitor，从而在monitor中执行这个命令。</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数十一：-rtc base=utc,driftfix=slew</strong></span></p>
+<p><span style="font-size: 20px"><strong>参数十二：-no-hpet</strong></span></p>
+<p>&nbsp;</p>
+<p>系统时间由参数-rtc指定 -rtc[base = utc | localtime |date] [, clock = host | vm] [, driftfix =none | slew]</p>
+<p>HighPrecision Event Timer (HPET)是可以更准确的设定时间的</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数十三：-device piix3-usb-uhci,id=usb,bus=pci.0,addr=0x1.0x2</strong></span></p>
+<p><span style="font-size: 20px"><strong>参数十四：-device usb-tablet,id=input0</strong></span></p>
+<p>&nbsp;</p>
+<p>USB的好处就是即插即用，参数-usb，可以模拟一个PCI UHCI USB控制器，通过tablet，鼠标可以在HOST和GUEST机器之间自由的切换</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数十五：-device cirrus-vga,id=video0,bus=pci.0,addr=0x2</strong></span></p>
+<p>&nbsp;</p>
+<p>显示器用参数-vga设置，默认为cirrus，它模拟了CL-GD5446PCI VGA card</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数十六，十七：有关网卡<br></strong></span></p>
+<p>&nbsp;</p>
+<p>使用-net参数和-device</p>
+<p>&nbsp;</p>
+<p>从HOST角度：-netdev tap,fd=32,id=<strong>hostnet0</strong>,vhost=on,vhostfd=37</p>
+<p>&nbsp;</p>
+<p>从GUEST角度：-device virtio-net-pci,netdev=<strong>hostnet0</strong>,id=net0,mac=fa:16:3e:d1:2d:99,bus=pci.0,addr=0x3</p>
+<p>&nbsp;</p>
+<p>有关网卡的virtio是半虚拟化的驱动，后面的文章会仔细说</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数十八，十九：有关硬盘<br></strong></span></p>
+<p>&nbsp;</p>
+<p>使用-hda -hdb</p>
+<p>使用-drive和-device</p>
+<p>&nbsp;</p>
+<p>从HOST角度：-drive file=/var/lib/nova/instances/1f8e6f7e-5a70-4780-89c1-464dc0e7f308/disk,if=none,id=<strong>drive-virtio-disk0</strong>,format=qcow2,cache=none</p>
+<p>&nbsp;</p>
+<p>从GUEST角度：-device virtio-blk-pci,scsi=off,bus=pci.0,addr=0x4,drive=<strong>drive-virtio-disk0</strong>,id=virtio-disk0,bootindex=1</p>
+<p>&nbsp;</p>
+<p style="white-space: normal">有关存储的virtio是半虚拟化的驱动，后面的文章会仔细说</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数二十，二十一：有关console的log<br></strong></span></p>
+<p>&nbsp;</p>
+<p>从HOST角度：-chardev file,id=<strong>charserial0</strong>,path=/var/lib/nova/instances/1f8e6f7e-5a70-4780-89c1-464dc0e7f308/console.log</p>
+<p>&nbsp;</p>
+<p>从GUEST角度：-device isa-serial,chardev=<strong>charserial0</strong>,id=serial0</p>
+<p>&nbsp;</p>
+<p>当然需要在image里面做如下的配置才能将boot log写入console</p>
+<p>&nbsp;</p>
+<p>/boot/grub/grub.cfg中有linux/boot/vmlinuz-3.2.0-49-virtual root=UUID=6d2231e4-0975-4f35-a94f-56738c1a8150 ro <strong>console=ttyS0</strong></p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数二十二，二十三：PTY</strong></span></p>
+<p>&nbsp;</p>
+<p>-chardev pty,id=<strong>charserial1</strong></p>
+<p>-device isa-serial,chardev=<strong>charserial1</strong>,id=serial1&nbsp;</p>
+<p>&nbsp;</p>
+<p><span style="font-size: 20px"><strong>参数二十四：VNC</strong></span></p>
+<p>&nbsp;</p>
+<p>-vnc0.0.0.0:12</p>
+<p>&nbsp;</p>
+<p>欢迎关注微信公众号</p>
+<p>&nbsp;</p>
+<p><img src="https://images2018.cnblogs.com/blog/635909/201803/635909-20180308153030160-295322287.jpg" alt=""></p>
+
+
+
+                </div>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2018-03-08 15:29</span>&nbsp;
+<a href="https://www.cnblogs.com/popsuper1982/">popsuper1982</a>&nbsp;
+阅读(<span id="post_view_count">2292</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=8528758" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(8528758);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 186637, cb_blogApp = 'popsuper1982', cb_blogUserGuid = 'cf2394f1-d0e0-e311-8d02-90b11c0b17d6';
+    var cb_entryId = 8528758, cb_entryCreatedDate = '2018-03-08 15:29', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjt2hSPA6cVUN4aPHMJmlrFbvpLUJDGyUfWCOVSbuD29zC_EbdeqJ_2srssSocYhdTHVVVrusGjF0FKwDO62AKeBpVxUWlsFQqrmNCOsKCRVMZe01F2zX3Kep2xK23aUws4" />
+</body>
+</html>

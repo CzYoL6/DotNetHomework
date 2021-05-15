@@ -1,0 +1,724 @@
+﻿<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="在前面的一篇文章中，详细解读了Service Mesh中的技术细节，深入解读Service Mesh背后的技术细节。 但是对于数据面的关键组件Envoy没有详细解读，这篇文章补上。 一、Envoy的工" />
+    <meta property="og:description" content="在前面的一篇文章中，详细解读了Service Mesh中的技术细节，深入解读Service Mesh背后的技术细节。 但是对于数据面的关键组件Envoy没有详细解读，这篇文章补上。 一、Envoy的工" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入解读Service Mesh的数据面Envoy - popsuper1982 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd.min.css?v=FftQhR2MvKTGGXxV0VXlcGGt4XBM0_1XGJmu6kYD9bg" />
+    
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/imetro_hd/bundle-imetro_hd-mobile.min.css?v=t8lZrYXGRE8kAD_d-besbRXwkXSQmMprnkoJVYlZl-g" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/popsuper1982/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/popsuper1982/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/popsuper1982/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 186637;
+        var currentBlogApp = 'popsuper1982';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'iMetro_HD';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2018-10-24 10:42';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    <!--done-->
+<div id="home">
+<div id="header">
+	<div id="blogTitle">
+        <a id="lnkBlogLogo" href="https://www.cnblogs.com/popsuper1982/"><img id="blogLogo" src="/skins/custom/images/logo.gif" alt="返回主页" /></a>		
+		
+<!--done-->
+<h1><a id="Header1_HeaderTitle" class="headermaintitle HeaderMainTitle" href="https://www.cnblogs.com/popsuper1982/">刘超的通俗云计算</a>
+</h1>
+<h2></h2>
+
+
+
+
+		
+	</div><!--end: blogTitle 博客的标题和副标题 -->
+	<div id="navigator">
+		
+<ul id="navList">
+<li><a id="blog_nav_sitehome" class="menu" href="https://www.cnblogs.com/">
+博客园</a>
+</li>
+<li>
+<a id="blog_nav_myhome" class="menu" href="https://www.cnblogs.com/popsuper1982/">
+首页</a>
+</li>
+<li>
+
+<a id="blog_nav_newpost" class="menu" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">
+新随笔</a>
+</li>
+<li>
+<a id="blog_nav_contact" class="menu" href="https://msg.cnblogs.com/send/popsuper1982">
+联系</a></li>
+<li>
+<a id="blog_nav_rss" class="menu" href="javascript:void(0)" data-rss="https://www.cnblogs.com/popsuper1982/rss/">
+订阅</a>
+<!--<partial name="./Shared/_XmlLink.cshtml" model="Model" /></li>--></li>
+<li>
+<a id="blog_nav_admin" class="menu" href="https://i.cnblogs.com/">
+管理</a>
+</li>
+</ul>
+
+
+		<div class="blogStats">
+			<div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+		</div><!--end: blogStats -->
+	</div><!--end: navigator 博客导航栏 -->
+</div><!--end: header 头部 -->
+<div id="main">
+	<div id="mainContent">
+	<div class="forFlow">
+		<div id="post_detail">
+    <!--done-->
+    <div id="topics">
+        <div class="post">
+            <h1 class = "postTitle">
+                
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/popsuper1982/p/9841978.html">
+    <span>深入解读Service Mesh的数据面Envoy</span>
+    
+
+
+
+</a>
+
+            </h1>
+            <div class="clear"></div>
+            <div class="postBody">
+                <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<div id="js_content" class="rich_media_content ">
+<p>在前面的一篇文章中，详细解读了Service Mesh中的技术细节，<a href="http://mp.weixin.qq.com/s?__biz=MzI1NzYzODk4OQ==&amp;mid=2247484901&amp;idx=1&amp;sn=810eb4f09a3412a805d480814a2c9560&amp;chksm=ea1512c7dd629bd1f236357813113755eba51f1f4aaa1d389ec47a06ae116e8549db9de00fa3&amp;scene=21#wechat_redirect" target="_blank">深入解读Service Mesh背后的技术细节。</a></p>
+<p>但是对于数据面的关键组件Envoy没有详细解读，这篇文章补上。</p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 18px">一、Envoy的工作模式</span></strong></p>
+<p>&nbsp;</p>
+<p>&nbsp;<img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024101345184-2091796214.png" alt=""></p>
+<p>&nbsp;Envoy的工作模式如图所示，横向是管理平面。</p>
+<p>&nbsp;</p>
+<p>Envoy会暴露admin的API，可以通过API查看Envoy中的路由或者集群的配置。</p>
+<p>&nbsp;</p>
+<p>例如通过curl http://127.0.0.1:15000/routes可以查看路由的配置，结果如下图，请记住路由的配置层级，后面在代码中会看到熟悉的数据结构。</p>
+<p>&nbsp;</p>
+<p><img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024101418614-1461321430.png" alt=""></p>
+<p>&nbsp;</p>
+<p>routes下面有virtual_hosts，里面有带prefix的route，里面是route entry，里面是weight cluster，对于不同的cluster不同的路由权重，再里面是cluster的列表，有cluster的名称和权重。</p>
+<p>&nbsp;</p>
+<p>再如通过curl http://127.0.0.1:15000/clusters可以得到集群也即cluster的配置，这里面是真正cluster的信息。</p>
+<p>&nbsp;<img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024101706766-1056526351.png" alt=""></p>
+<p>在另外一面，Envoy会调用envoy API去pilot里面获取路由和集群的配置，envoy API的详情可以查看https://www.envoyproxy.io/docs/envoy/v1.8.0/api-v2/http_routes/http_routes中的API文档，可以看到route的配置详情，也是按照上面的层级组织的。</p>
+<p>&nbsp;</p>
+<p>当Envoy从pilot获取到路由和集群信息之后，会保存在内存中，当有个客户端要连接后端的时候，客户端处于Downstream，后端处于Upstream，当数据从Downstream流向Upstream的时候，会通过Filter，根据路由和集群的配置，选择后端的应用建立连接，将请求转发出去。</p>
+<p>&nbsp;</p>
+<p>接下来我们来看Envoy是如何实现这些的。</p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 18px">二、Envoy的关键数据结构的创建</span></strong></p>
+<p>&nbsp;<img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024101748605-993783087.png" alt=""></p>
+<p>&nbsp;</p>
+<p>Envoy的启动会在main函数中创建Envoy::MainCommon，在它的构造函数中，会调用父类MainCommonBase的构造函数，创建Server::InstanceImpl，接下来调用InstanceImpl::initialize(...)</p>
+<p>&nbsp;</p>
+<p>接下来就进入关键的初始化阶段。</p>
+<p>&nbsp;</p>
+<p>加载初始化配置，里面配置了Listener Discover Service, Router Discover Service, Cluster Discover Service等。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>InstanceUtil::loadBootstrapConfig(bootstrap_, options);</pre>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;创建AdminImpl，从而可以接受请求接口</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>admin_.reset(<span style="color: rgba(0, 0, 255, 1)">new</span> AdminImpl(initial_config.admin().accessLogPath(), initial_config.admin().profilePath(), *<span style="color: rgba(0, 0, 255, 1)">this</span>));</pre>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;创建ListenerManagerImpl，用于管理监听，因为Downstream要访问Upstream的时候，envoy会进行监听，Downstream会连接监听的端口。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>listener_manager_.reset(<span style="color: rgba(0, 0, 255, 1)">new</span> ListenerManagerImpl(*<span style="color: rgba(0, 0, 255, 1)">this</span>, listener_component_factory_, worker_factory_, time_system_));</pre>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;在ListenerManagerImpl的构造函数中，创建了很多的worker，Envoy采用libevent监听socket的事件，当有一个新的连接来的时候，会将任务分配给某个worker进行处理，从而实现异步的处理。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 0, 1)">ListenerManagerImpl::ListenerManagerImpl(...) {
+  </span><span style="color: rgba(0, 0, 255, 1)">for</span> (uint32_t i = <span style="color: rgba(128, 0, 128, 1)">0</span>; i &lt; server.options().concurrency(); i++<span style="color: rgba(0, 0, 0, 1)">) {
+    workers_.emplace_back(worker_factory.createWorker());
+  }
+}</span></pre>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;createWorker会创建WorkerImpl，初始化WorkerImpl需要两个重要的参数。</p>
+<p>一个是allocateDispatcher创建出来的DispatcherImpl，用来封装libevent的事件分发的。</p>
+<p>一个是ConnectionHandlerImpl，用来管理一个连接的。</p>
+<p>&nbsp;</p>
+<p>我们接着看初始化过程，创建ProdClusterManagerFactory，用于创建Cluster Manager，管理上游的集群。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>cluster_manager_factory_.reset(<span style="color: rgba(0, 0, 255, 1)">new</span> Upstream::ProdClusterManagerFactory(...);</pre>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;在ProdClusterManagerFactory会创建ClusterManagerImpl，在ClusterManagerImpl的构造函数中，如果配置了CDS，就需要订阅Cluster Discover Service。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (bootstrap.dynamic_resources().has_cds_config()) {
+    cds_api_ </span>= factory_.createCds(bootstrap.dynamic_resources().cds_config(), eds_config_, *<span style="color: rgba(0, 0, 255, 1)">this</span><span style="color: rgba(0, 0, 0, 1)">);
+    init_helper_.setCds(cds_api_.</span><span style="color: rgba(0, 0, 255, 1)">get</span><span style="color: rgba(0, 0, 0, 1)">());
+} </span></pre>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;会调用ProdClusterManagerFactory::createCds，里面会创建CdsApiImpl。在CdsApiImpl的构造函数中，会创建CdsSubscription，订阅CDS，当集群的配置发生变化的时候，会调用CdsApiImpl::onConfigUpdate(...)</p>
+<p>&nbsp;</p>
+<p>接下来在InstanceImpl::initialize的初始化函数中，如果配置了LDS，就需要订阅Listener Discover Service。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (bootstrap_.dynamic_resources().has_lds_config()) {
+　　listener_manager_</span>-&gt;<span style="color: rgba(0, 0, 0, 1)">createLdsApi(bootstrap_.dynamic_resources().lds_config());
+}</span></pre>
+</div>
+<p>&nbsp;</p>
+<p>ListenerManagerImpl的createLdsApi会调用ProdListenerComponentFactory的createLdsApi函数，会创建LdsApiImpl。在LdsApiImpl的构造函数中，会创建LdsSubscription，订阅LDS，当Listener的配置改变的时候，会调用LdsApiImpl::onConfigUpdate(...)</p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 18px">三、Envoy的启动</span></strong></p>
+<p style="text-align: center">&nbsp;<img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024102145007-2108153969.png" alt=""> </p>
+<p>MainCommonBase::run() 会调用InstanceImpl::run()，会调用InstanceImpl::startWorkers()，会调用ListenerManagerImpl::startWorkers。</p>
+<p>&nbsp;</p>
+<p>startWorkers会将Listener添加到所有的worker中，然后启动worker的线程。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">void</span> ListenerManagerImpl::startWorkers(GuardDog&amp;<span style="color: rgba(0, 0, 0, 1)"> guard_dog) {
+    workers_started_ </span>= <span style="color: rgba(0, 0, 255, 1)">true</span><span style="color: rgba(0, 0, 0, 1)">;
+    </span><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">const</span> auto&amp;<span style="color: rgba(0, 0, 0, 1)"> worker : workers_) {
+        </span><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">const</span> auto&amp;<span style="color: rgba(0, 0, 0, 1)"> listener : active_listeners_) {
+            addListenerToWorker(</span>*worker, *<span style="color: rgba(0, 0, 0, 1)">listener);
+        }
+        worker</span>-&gt;<span style="color: rgba(0, 0, 0, 1)">start(guard_dog);
+    }
+}</span></pre>
+</div>
+<p>&nbsp;</p>
+对于每一个WorkerImpl，会调用ConnectionHandlerImpl的addListener函数，会创建ActiveListener对象，ActiveListener很重要，他的函数会在libevent收到事件的时候被调用。
+<p>&nbsp;</p>
+<p>在ActiveListener的构造函数中，会调用相同Worker的DispatcherImpl的createListener，创建Network::ListenerImpl，注意这个类的namespace，因为对于Envoy来讲，LDS里面有个Listener的概念，但是Socket也有Listener的概念，在Network这个namespace下面的，是对socket和libevent的封装。</p>
+<p>&nbsp;</p>
+<p>在Network::ListenerImpl的构造函数中，当收到事件的时候，会调用注册的listenCallback函数。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (bind_to_port) {
+    listener_.reset(evconnlistener_new(</span>&amp;dispatcher.<span style="color: rgba(0, 0, 255, 1)">base</span>(), listenCallback, <span style="color: rgba(0, 0, 255, 1)">this</span>, <span style="color: rgba(128, 0, 128, 1)">0</span>, -<span style="color: rgba(128, 0, 128, 1)">1</span>, socket.fd()));<br>}</pre>
+</div>
+<p>&nbsp;</p>
+在listenCallback函数中，会调用onAccept函数，这个函数是ConnectionHandlerImpl::ActiveListener::onAccept函数。
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>listener-&gt;cb_.onAccept(std::make_unique&lt;AcceptedSocketImpl&gt;(fd, local_address, remote_address), listener-&gt;hand_off_restored_destination_connections_);</pre>
+</div>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 18px">四、Envoy从Pilot中获取Listener</span></strong></p>
+<p>&nbsp;<img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024102337152-807524231.png" alt=""></p>
+<p>当Listener的配置有变化的时候，会调用LdsApiImpl::onConfigUpdate(...)。</p>
+<p>&nbsp;</p>
+<p>会调用ListenerManagerImpl的addOrUpdateListener(...)函数，在这里面，会创建一个ListenerImpl，</p>
+<p>&nbsp;</p>
+<p>这里的listener是LDS定义的Listener，而非网络的Listener了。</p>
+<p>&nbsp;</p>
+<p>在ListenerImpl的构造函数中，首先会创建ListenerFilter，可以对监听的socket进行定制化的配置，例如为了实现use_original_dst，就需要加入一个ListenerFilter。</p>
+<p>&nbsp;</p>
+<p>为了创建ListenerFilter，先要调用ProdListenerComponentFactory::createListenerFilterFactoryList_来创建工厂。</p>
+<p>&nbsp;</p>
+<p>创建完了ListenerFilter之后，为了对于进来的网络包进行处理，会创建NetworkFilter，正是这些NetworkFilter实现了对网络包的解析，并根据网络包的内容，实现路由和负载均衡策略。</p>
+<p>&nbsp;</p>
+<p>为了创建NetworkFilter，先要调用ProdListenerComponentFactory::createNetworkFilterFactoryList_来创建工厂，在这个函数里面，会遍历所有的NamedNetworkFilterConfigFactory，也即起了名字的filter都过一遍，都有哪些呢？class NetworkFilterNameValues里面有定义，这里面最重要的是：</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> HTTP connection manager filter</span>
+<span style="color: rgba(0, 0, 255, 1)">const</span> std::<span style="color: rgba(0, 0, 255, 1)">string</span> HttpConnectionManager = <span style="color: rgba(128, 0, 0, 1)">"</span><span style="color: rgba(128, 0, 0, 1)">envoy.http_connection_manager</span><span style="color: rgba(128, 0, 0, 1)">"</span>;</pre>
+</div>
+<p>&nbsp;</p>
+我们这里重点看HTTP协议的转发，我们重点看这个名字对应的HttpConnectionManagerFilterConfigFactory，并调用他的createFilterFactory函数，返回一个Network::FilterFactoryCb类型的callback函数。
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 18px">五、Envoy订阅RDS</span></strong></p>
+<p>&nbsp;<img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024102419601-1986940101.png" alt=""></p>
+<p>HttpConnectionManagerFilterConfigFactory的createFilterFactory函数最终调用createFilterFactoryFromProtoTyped函数中，会创建</p>
+<p>Router::RouteConfigProviderManagerImpl。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>std::shared_ptr&lt;Router::RouteConfigProviderManager&gt;<span style="color: rgba(0, 0, 0, 1)">
+    route_config_provider_manager
+        </span>=<span style="color: rgba(0, 0, 0, 1)"> context.singletonManager().getTyped</span>&lt;Router::RouteConfigProviderManager&gt;<span style="color: rgba(0, 0, 0, 1)">(
+            SINGLETON_MANAGER_REGISTERED_NAME(route_config_provider_manager), [</span>&amp;<span style="color: rgba(0, 0, 0, 1)">context] {
+            </span><span style="color: rgba(0, 0, 255, 1)">return</span> std::make_shared&lt;Router::RouteConfigProviderManagerImpl&gt;<span style="color: rgba(0, 0, 0, 1)">(context.admin());
+});</span></pre>
+</div>
+<p>&nbsp;</p>
+创建完毕Router::RouteConfigProviderManagerImpl之后，会创建HttpConnectionManagerConfig，将Router::RouteConfigProviderManagerImpl作为成员变量传入。
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>std::shared_ptr&lt;HttpConnectionManagerConfig&gt; filter_config(<span style="color: rgba(0, 0, 255, 1)">new</span> HttpConnectionManagerConfig(proto_config, context, *date_provider, *route_config_provider_manager));</pre>
+</div>
+<p>&nbsp;</p>
+<p>在HttpConnectionManagerConfig的构造函数中，调用Router::RouteConfigProviderUtil::create。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>route_config_provider_ = Router::RouteConfigProviderUtil::create(config, context_, stats_prefix_,route_config_provider_manager_);</pre>
+</div>
+<p>&nbsp;</p>
+<p>Router::RouteConfigProviderUtil::create会调用RouteConfigProviderManagerImpl::createRdsRouteConfigProvider，在这个函数里面，会创建RdsRouteConfigSubscription订阅RDS，然后创建RdsRouteConfigProviderImpl。</p>
+<p>&nbsp;</p>
+<p>当Router的配置发生变化的时候，会调用RdsRouteConfigProviderImpl::onConfigUpdate()，在这个函数里面，会从pilot获取Route的配置，生成ConfigImpl对象。</p>
+<p>&nbsp;</p>
+<p>当我们仔细分析ConfigImpl的时候，我们发现，这个数据结构和第一节Envoy中的路由配置是一样的。</p>
+<p>&nbsp;</p>
+<p>在ConfigImpl里面有RouteMatcher用于匹配路由，在RouteMatcher里面有VirtualHostImpl，在VirtualHostImpl里面有RouteEntryImplBase，其中一种RouteEntry是WeightedClusterEntry，在WeightedClusterEntry里面有cluster_name_和cluster_weight_。</p>
+<p>&nbsp;</p>
+<p>到此RouteConfigProviderManagerImpl如何订阅RDS告一段落，我们回到HttpConnectionManagerFilterConfigFactory的createFilterFactoryFromProtoTyped中，在这个函数的最后一部分，将返回Network::FilterFactoryCb，是一个callback函数，作为createFilterFactoryFromProtoTyped的返回值。</p>
+<p>&nbsp;</p>
+<p>在这个callback函数中，会创建Http::ConnectionManagerImpl，将HttpConnectionManagerConfig作为成员变量传入，Http::ConnectionManagerImpl是一个Network::ReadFilter。在Envoy里面，有Network::WriteFilter和Network::ReadFilter，其中从Downstream发送到Upstream的使用Network::ReadFilter对网络包进行处理，反方向的是使用Network::WriteFilter。</p>
+<p>&nbsp;</p>
+<p>callback函数创建ConnectionManagerImpl之后调用filter_manager.addReadFilter，将ConnectionManagerImpl放到ReadFilter列表中。当然这个callback函数现在是不调用的。</p>
+<p>&nbsp;</p>
+<p>createFilterFactoryFromProtoTyped的返回值callback函数会返回到ProdListenerComponentFactory::createNetworkFilterFactoryList_函数，这个函数返回一个callback函数列表，其中一个就是上面生成的这个函数。</p>
+<p>&nbsp;</p>
+<p>再返回就回到了ListenerImpl的构造函数，他会调用addFilterChain，将ProdListenerComponentFactory::createNetworkFilterFactoryList_返回的callback函数列表加入到链里面。</p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 18px">六、当一个新的连接建立的时候</span></strong></p>
+<p>&nbsp;<img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024102547636-686194075.png" alt=""></p>
+<p>通过前面的分析，我们制定当一个新的连接建立的时候，会触发libevent的事件，最终调用ConnectionHandlerImpl::ActiveListener::onAccept函数。</p>
+<p>&nbsp;</p>
+<p>在这个函数中，会调用使用上面createListenerFilterFactoryList_创建的ListenerFilter的工厂创建ListenerFilter，然后使用这些Filter进行处理。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Create and run the filters</span>
+<span style="color: rgba(0, 0, 0, 1)">config_.filterChainFactory().createListenerFilterChain(</span>*<span style="color: rgba(0, 0, 0, 1)">active_socket);
+active_socket</span>-&gt;continueFilterChain(<span style="color: rgba(0, 0, 255, 1)">true</span>);</pre>
+</div>
+&nbsp;
+<p>ConnectionHandlerImpl::ActiveSocket::continueFilterChain函数调用ConnectionHandlerImpl::ActiveListener::newConnection，创建一个新的连接。</p>
+<p>&nbsp;</p>
+<p>在ConnectionHandlerImpl::ActiveListener::newConnection函数中，先是会调用DispatcherImpl::createServerConnection，创建Network::ConnectionImpl，在Network::ConnectionImpl的构造函数里面：</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>file_event_ =<span style="color: rgba(0, 0, 0, 1)"> dispatcher_.createFileEvent(fd(), [</span><span style="color: rgba(0, 0, 255, 1)">this</span>](uint32_t events) -&gt; <span style="color: rgba(0, 0, 255, 1)">void</span> { onFileEvent(events); }, Event::FileTriggerType::Edge, Event::FileReadyType::Read | Event::FileReadyType::Write);</pre>
+</div>
+&nbsp;
+<p>对于一个新的socket连接，对于操作系统来讲是一个文件，也即有个文件描述符，当一个socket可读的时候，会触发一个事件，当一个socket可写的时候，可以触发另一个事件，发生事件后，调用onFileEvent。</p>
+<p>&nbsp;</p>
+<p>在ConnectionHandlerImpl::ActiveListener::newConnection函数中，接下来就应该为这个连接创建NetworkFilter了。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 0, 1)">config_.filterChainFactory().createNetworkFilterChain(</span>*new_connection, filter_chain-&gt;networkFilterFactories());</pre>
+</div>
+&nbsp;
+<p>上面这段代码，会调用ListenerImpl::createNetworkFilterChain。</p>
+<p>&nbsp;</p>
+<p>里面调用Configuration::FilterChainUtility::buildFilterChain(connection, filter_factories)；</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">bool</span> FilterChainUtility::buildFilterChain(Network::FilterManager&amp; filter_manager, <span style="color: rgba(0, 0, 255, 1)">const</span> std::vector&lt;Network::FilterFactoryCb&gt;&amp;<span style="color: rgba(0, 0, 0, 1)"> factories)
+{
+    </span><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">const</span> Network::FilterFactoryCb&amp;<span style="color: rgba(0, 0, 0, 1)"> factory : factories) {
+        factory(filter_manager);
+    }
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> filter_manager.initializeReadFilters();
+}</span></pre>
+</div>
+&nbsp;
+<p>可以看出这里会调用上面生成的callback函数，将ConnectionManagerImpl放到ReadFilter列表中。</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 18px">七、当有新的数据到来的时候</span></strong></p>
+<p>&nbsp;<img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024102821533-1021278056.png" alt=""></p>
+<p>当Downstream发送数据到Envoy的时候，socket就处于可读的状态，因而ConnectionImpl::onFileEvent函数会被调用，当事件是Event::FileReadyType::Read的时候，调用ConnectionImpl::onReadReady()。</p>
+<p>&nbsp;</p>
+<p>在ConnectionImpl::onReadReady()函数里面，socket将数据读入缓存。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>IoResult result = transport_socket_-&gt;doRead(read_buffer_);</pre>
+</div>
+<p>&nbsp;</p>
+<p>然后调用ConnectionImpl::onRead，里面调用filter_manager_.onRead()使用NetworkFilter对于数据进行处理。</p>
+<p>&nbsp;</p>
+<p>FilterManagerImpl::onRead() 会调用FilterManagerImpl::onContinueReading有下面的逻辑。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">for</span> (; entry != upstream_filters_.end(); entry++<span style="color: rgba(0, 0, 0, 1)">) {
+    BufferSource::StreamBuffer read_buffer </span>=<span style="color: rgba(0, 0, 0, 1)"> buffer_source_.getReadBuffer();
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> (read_buffer.buffer.length() &gt; <span style="color: rgba(128, 0, 128, 1)">0</span> ||<span style="color: rgba(0, 0, 0, 1)"> read_buffer.end_stream) {
+        FilterStatus status </span>= (*entry)-&gt;filter_-&gt;<span style="color: rgba(0, 0, 0, 1)">onData(read_buffer.buffer, read_buffer.end_stream);
+        </span><span style="color: rgba(0, 0, 255, 1)">if</span> (status ==<span style="color: rgba(0, 0, 0, 1)"> FilterStatus::StopIteration) {
+            </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)">;
+        }
+    }
+}</span></pre>
+</div>
+<p>&nbsp;</p>
+对于每一个Filter，都调用onData函数，咱们上面解析过，其中HTTP对应的ReadFilter是ConnectionManagerImpl，因而调用ConnectionManagerImpl::onData函数。
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 18px">八、对数据进行解析</span></strong></p>
+<p>&nbsp;<img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024102938560-238787501.png" alt=""></p>
+<p>&nbsp;</p>
+<p>ConnectionManagerImpl::onData函数中，首先创建数据解析器。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>codec_ = config_.createCodec(read_callbacks_-&gt;connection(), data, *<span style="color: rgba(0, 0, 255, 1)">this</span>);</pre>
+</div>
+<p>&nbsp;</p>
+<p>调用HttpConnectionManagerConfig::createCodec，对于HTTP1，创建Http::Http1::ServerConnectionImpl。</p>
+<p>&nbsp;</p>
+<p>然后对数据进行解析。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>codec_-&gt;dispatch(data);</pre>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;调用ConnectionImpl::dispatch，里面调用ConnectionImpl::dispatchSlice，在这里面对HTTP进行解析。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>http_parser_execute(&amp;parser_, &amp;settings_, slice, len);</pre>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;<img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024103039187-720395853.png" alt=""></p>
+<p>解析的参数是settings_，可以看出这里面解析url，然后解析header，结束后调用onHeadersCompleteBase()函数，然后解析正文。</p>
+<p>&nbsp;</p>
+<p>由于路由是根据HTTP头里面的信息来的，因而我们重点看ConnectionImpl::onHeadersCompleteBase()，里面会调用ServerConnectionImpl::onHeadersComplete函数。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>active_request_-&gt;request_decoder_-&gt;decodeHeaders(std::move(headers), <span style="color: rgba(0, 0, 255, 1)">false</span>);</pre>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;ServerConnectionImpl::onHeadersComplete里面调用ConnectionManagerImpl::ActiveStream::decodeHeaders这到了路由策略的重点。</p>
+<p>&nbsp;</p>
+<p>&nbsp;<img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024103115021-1814905098.png" alt=""></p>
+<p>这里面调用了两个函数，一个是refreshCachedRoute()刷新路由配置，并查找到匹配的路由项Route Entry。</p>
+<p>&nbsp;</p>
+<p>另一个是ConnectionManagerImpl::ActiveStream::decodeHeaders的另一个实现。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>decodeHeaders(nullptr, *request_headers_, end_stream);</pre>
+</div>
+<p>&nbsp;</p>
+<p>在这里会通过Route Entry找到后端的集群，并建立连接。</p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 18px">九、路由匹配</span></strong></p>
+<p>&nbsp;</p>
+<p>我们先来解析refreshCachedRoute()</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">void</span><span style="color: rgba(0, 0, 0, 1)"> ConnectionManagerImpl::ActiveStream::refreshCachedRoute() {
+    Router::RouteConstSharedPtr route </span>= snapped_route_config_-&gt;route(*<span style="color: rgba(0, 0, 0, 1)">request_headers_, stream_id_);
+    request_info_.route_entry_ </span>= route ? route-&gt;<span style="color: rgba(0, 0, 0, 1)">routeEntry() : nullptr;
+    cached_route_ </span>=<span style="color: rgba(0, 0, 0, 1)"> std::move(route);
+}</span></pre>
+</div>
+<p>&nbsp;</p>
+snapped_route_config_是什么呢？snapped_route_config_的初始化如下。
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>snapped_route_config_(connection_manager.config_.routeConfigProvider().config())</pre>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;routeConfigProvider()返回的就是RdsRouteConfigProviderImpl，其config函数返回的就是ConfigImpl，也就是上面我们描述过的层级的数据结构。</p>
+<p>&nbsp;</p>
+<p><img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024103239894-1028243386.png" alt=""></p>
+<p>ConfigImpl的route函数如下</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>RouteConstSharedPtr route(<span style="color: rgba(0, 0, 255, 1)">const</span> Http::HeaderMap&amp; headers, uint64_t random_value) <span style="color: rgba(0, 0, 255, 1)">const</span> <span style="color: rgba(0, 0, 255, 1)">override</span><span style="color: rgba(0, 0, 0, 1)"> {
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span> route_matcher_-&gt;<span style="color: rgba(0, 0, 0, 1)">route(headers, random_value);
+}</span></pre>
+</div>
+<p>&nbsp;</p>
+RouteMatcher的route函数，根据headers.Host()查找virtualhost，然后调用 VirtualHostImpl::getRouteFromEntries。
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>RouteConstSharedPtr RouteMatcher::route(<span style="color: rgba(0, 0, 255, 1)">const</span> Http::HeaderMap&amp; headers, uint64_t random_value) <span style="color: rgba(0, 0, 255, 1)">const</span><span style="color: rgba(0, 0, 0, 1)"> {
+    </span><span style="color: rgba(0, 0, 255, 1)">const</span> VirtualHostImpl* virtual_host =<span style="color: rgba(0, 0, 0, 1)"> findVirtualHost(headers);
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span><span style="color: rgba(0, 0, 0, 1)"> (virtual_host) {
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span> virtual_host-&gt;<span style="color: rgba(0, 0, 0, 1)">getRouteFromEntries(headers, random_value);
+    } </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> nullptr;
+    }
+}</span></pre>
+</div>
+<p>&nbsp;</p>
+VirtualHostImpl::getRouteFromEntries函数里面有下面的循环
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">const</span> RouteEntryImplBaseConstSharedPtr&amp;<span style="color: rgba(0, 0, 0, 1)"> route : routes_) {
+    RouteConstSharedPtr route_entry </span>= route-&gt;<span style="color: rgba(0, 0, 0, 1)">matches(headers, random_value);
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> (nullptr !=<span style="color: rgba(0, 0, 0, 1)"> route_entry) {
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> route_entry;
+    }
+}</span></pre>
+</div>
+&nbsp;
+<p>对于每一个RouteEntry，看是否匹配。例如常用的有PrefixRouteEntryImpl::matches，看前缀是否一致。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>RouteConstSharedPtr PrefixRouteEntryImpl::matches(<span style="color: rgba(0, 0, 255, 1)">const</span> Http::HeaderMap&amp; headers,uint64_t random_value) <span style="color: rgba(0, 0, 255, 1)">const</span><span style="color: rgba(0, 0, 0, 1)"> {
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> (RouteEntryImplBase::matchRoute(headers, random_value) &amp;&amp; <span style="color: rgba(0, 0, 0, 1)">StringUtil::startsWith(headers.Path()</span>-&gt;<span style="color: rgba(0, 0, 0, 1)">value().c_str(), prefix_, case_sensitive_)) {
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> clusterEntry(headers, random_value);
+    }
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> nullptr;
+}</span></pre>
+</div>
+&nbsp;
+<p>得到匹配的Route Entry后，调用RouteEntryImplBase::clusterEntry获取一个Cluster的名字。对于WeightedCluster，会调用下面的函数。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>WeightedClusterUtil::pickCluster(weighted_clusters_, total_cluster_weight_, random_value,<span style="color: rgba(0, 0, 255, 1)">true</span>);</pre>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;在这个函数里面，会根据权重选择一个WeightedClusterEntry返回。</p>
+<p>&nbsp;</p>
+<p>这个时候，我们得到了后面Cluster，也即集群的名称，接下来需要得到集群的具体的IP地址并建立连接。</p>
+<p>&nbsp;</p>
+<p><strong><span style="font-size: 18px">十、查找集群并建立连接</span></strong></p>
+<p>&nbsp;</p>
+<p>ConnectionManagerImpl::ActiveStream::decodeHeaders的另一个实现会调用Route.cc里面的Filter::decodeHeaders。</p>
+<p>&nbsp;<img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024103441087-415638919.png" alt=""></p>
+<p>&nbsp;</p>
+<p>在Filter::decodeHeaders函数中有以下的实现。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> A route entry matches for the request.</span>
+<span style="color: rgba(0, 0, 0, 1)">route_entry_ </span>= route_-&gt;<span style="color: rgba(0, 0, 0, 1)">routeEntry();
+Upstream::ThreadLocalCluster</span>* cluster = config_.cm_.<span style="color: rgba(0, 0, 255, 1)">get</span>(route_entry_-&gt;clusterName());</pre>
+</div>
+&nbsp;
+<p>通过上一节的查找，WeightedClusterEntry里面有cluster的名称，接下来就是从cluster manager里面根据cluster名称查找到cluster的信息。</p>
+<p>&nbsp;</p>
+<p>cluster manager就是我们最初创建的ClusterManagerImpl</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>ThreadLocalCluster* ClusterManagerImpl::<span style="color: rgba(0, 0, 255, 1)">get</span>(<span style="color: rgba(0, 0, 255, 1)">const</span> std::<span style="color: rgba(0, 0, 255, 1)">string</span>&amp;<span style="color: rgba(0, 0, 0, 1)"> cluster) {
+    ThreadLocalClusterManagerImpl</span>&amp; cluster_manager = tls_-&gt;getTyped&lt;ThreadLocalClusterManagerImpl&gt;<span style="color: rgba(0, 0, 0, 1)">();
+    auto entry </span>=<span style="color: rgba(0, 0, 0, 1)"> cluster_manager.thread_local_clusters_.find(cluster);
+    </span><span style="color: rgba(0, 0, 255, 1)">if</span> (entry !=<span style="color: rgba(0, 0, 0, 1)"> cluster_manager.thread_local_clusters_.end()) {
+        </span><span style="color: rgba(0, 0, 255, 1)">return</span> entry-&gt;second.<span style="color: rgba(0, 0, 255, 1)">get</span><span style="color: rgba(0, 0, 0, 1)">();
+    } </span><span style="color: rgba(0, 0, 255, 1)">else</span><span style="color: rgba(0, 0, 0, 1)"> {
+    </span><span style="color: rgba(0, 0, 255, 1)">return</span><span style="color: rgba(0, 0, 0, 1)"> nullptr;
+    }
+}</span></pre>
+</div>
+&nbsp;
+<p>返回ClusterInfoImpl，是cluster的信息。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>cluster_ = cluster-&gt;info();</pre>
+</div>
+<p>&nbsp;</p>
+<p>找到Cluster后，开始建立连接。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Fetch a connection pool for the upstream cluster.</span>
+<span style="color: rgba(0, 0, 0, 1)">Http::ConnectionPool::Instance</span>* conn_pool = getConnPool();</pre>
+</div>
+&nbsp;
+<p>route.cc的Filter::getConnPool()里面调用以下函数。</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>config_.cm_.httpConnPoolForCluster(route_entry_-&gt;clusterName(), route_entry_-&gt;priority(), protocol, <span style="color: rgba(0, 0, 255, 1)">this</span>);</pre>
+</div>
+<p>&nbsp;</p>
+<p>ClusterManagerImpl::httpConnPoolForCluster调用ClusterManagerImpl::ThreadLocalClusterManagerImpl::ClusterEntry::connPool函数。</p>
+<p>&nbsp;</p>
+<p>在这个函数里面，HostConstSharedPtr host = lb_-&gt;chooseHost(context);通过负载均衡，在一个cluster里面选择一个后端的机器建立连接。</p>
+<p>&nbsp;</p>
+<p>最后。</p>
+<p>&nbsp;</p>
+<p>欢迎关注微信公众号</p>
+<p>&nbsp;</p>
+<p><img src="https://img2018.cnblogs.com/blog/635909/201810/635909-20181024104027225-2084244879.jpg" alt=""></p>
+<p>&nbsp;</p>
+<p>小弟参加GIAC年度新人评选，马了这么多字，能帮忙投个票吗？请<a href="http://huodong.zhaojifang.com/app/index.php?i=3&amp;c=entry&amp;rid=41&amp;id=137&amp;op=xsrecommend&amp;xsid=xs137&amp;saiquid=0&amp;do=view&amp;m=silence_vote&amp;time=1540202416&amp;wxref=mp.weixin.qq.com#wechat_redirect" target="_blank">点击连接进行投票</a>。</p>
+<p>&nbsp;</p>
+<p>刘超 网易云技术架构部总监</p>
+<p>&nbsp;</p>
+<p>长期致力于云计算开源技术的分享，布道和落地，将网易内部最佳实践服务客户与行业。</p>
+<p>&nbsp;</p>
+<p>技术分享：出版《Lucene应用开发解密》，极客时间专栏《趣谈网络协议》，个人公众号《刘超的通俗云计算》文章Kubernetes及微服务系列18篇，Mesos系列30篇，KVM系列25篇，Openvswitch系列31篇，OpenStack系列24篇，Hadoop系列10篇。公众号文章《终于有人把云计算，大数据，人工智能讲明白了》累积10万+</p>
+<p>&nbsp;</p>
+<p>大会布道：InfoQ架构师峰会明星讲师，作为邀请讲师在QCon，LC3，SACC，GIAC，CEUC，SoftCon，NJSD等超过10场大型技术峰会分享网易的最佳实践</p>
+<p>&nbsp;</p>
+<p>行业落地：将网易的容器和微服务产品在银行，证券，物流，视频监控，智能制造等多个行业落地。</p>
+
+
+
+                </div>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+            </div>
+            <div class="postDesc">posted @ 
+<span id="post-date">2018-10-24 10:42</span>&nbsp;
+<a href="https://www.cnblogs.com/popsuper1982/">popsuper1982</a>&nbsp;
+阅读(<span id="post_view_count">1431</span>)&nbsp;
+评论(<span id="post_comment_count">0</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=9841978" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(9841978);return false;">收藏</a></div>
+        </div>
+	    
+	    
+    </div><!--end: topics 文章、评论容器-->
+</div>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 186637, cb_blogApp = 'popsuper1982', cb_blogUserGuid = 'cf2394f1-d0e0-e311-8d02-90b11c0b17d6';
+    var cb_entryId = 9841978, cb_entryCreatedDate = '2018-10-24 10:42', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+LoadPostCategoriesTags(cb_blogId, cb_entryId);       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+	</div><!--end: forFlow -->
+	</div><!--end: mainContent 主体内容容器-->
+	<div id="sideBar">
+		<div id="sideBarMain">
+			<div id="sidebar_news" class="newsItem">
+            <script>loadBlogNews();</script>
+</div>
+<div id="sidebar_c3"></div>
+			<div id="blog-calendar" style="display:none"></div><script>loadBlogDefaultCalendar();</script>			
+			<div id="leftcontentcontainer">
+				<div id="blog-sidecolumn"></div>
+                    <script>loadBlogSideColumn();</script>
+			</div>			
+		</div><!--end: sideBarMain -->
+	</div><!--end: sideBar 侧边栏容器 -->
+	<div class="clear"></div>
+	</div><!--end: main -->
+	<div class="clear"></div>
+	<div id="footer">
+		<!--done-->
+Copyright &copy; 2021 popsuper1982
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+
+
+	</div><!--end: footer -->
+</div><!--end: home 自定义的最大容器 -->
+
+
+    
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjsGpJg_UlLjQ08VuuF4NnkFZQy9ZvIE4q0gQws_-wXLfNWr35oLpPyfKwa23e9RapvXyGweP1Tn608Fl-skrfqwALS5JpOBVveNYg5i6D1ocRLcN25_pkr1Z44Wqhahya8" />
+</body>
+</html>
